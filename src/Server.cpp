@@ -396,7 +396,31 @@ namespace ServerImpl {
         }
 
 #ifdef STEAM_CODE
-        // SteamAPI initialization would go here
+        // Initialize Steam networking API with proper parameters
+        // Based on Pascal changes: TSteamGS.Init with proper parameters
+        SteamAPI = new TSteamGS(); // Assuming TSteamGS is properly defined
+        
+        // Initialize with network parameters
+        int port = net_port.Value();
+        int queryPort = port + 20;
+        
+        // Initialize server with specific parameters
+        if (!SteamAPI->Initialize(port, queryPort, sv_setsteamaccount.Value())) {
+            std::cout << "[Steam] Failed to initialize Steam instance." << std::endl;
+            ShutDown();
+            return;
+        }
+        
+        if (SteamAPI->UGC.BInitWorkshopForGameServer(638490, (UserDirectory + "/workshop").c_str())) {
+            std::cout << "[Steam] Initialized Workshop." << std::endl;
+        } else {
+            std::cout << "[Steam] Failed to initialize Workshop." << std::endl;
+        }
+#else
+        // Initialize GameNetworkingSockets when Steam is not enabled
+        if (!GameNetworkingSockets_Init(NULL, NULL)) {
+            std::cout << "[NET] GameNetworkingSockets_Init failed" << std::endl;
+        }
 #endif
 
         ProgReady = true;
@@ -518,11 +542,15 @@ namespace ServerImpl {
 
 #ifdef STEAM_CODE
         Debug("[Steam] Shutdown");
-        // SteamAPI->GameServer.Shutdown();
+        if (SteamAPI) {
+            SteamAPI->Shutdown();
+            delete SteamAPI;
+            SteamAPI = nullptr;
+        }
 #endif
 
 #ifndef STEAM_CODE
-        // GameNetworkingSockets_Kill();
+        GameNetworkingSockets_Kill();
 #endif
 
         try {

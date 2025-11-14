@@ -162,6 +162,21 @@ const int MSGTYPE_PUB = 1;
 const int MSGTYPE_TEAM = 2;
 const int MSGTYPE_RADIO = 3;
 
+// Forward declarations for Steam networking types
+struct SteamNetworkingIPAddr;
+struct HSteamNetConnection;
+struct HSteamListenSocket;
+struct HSteamNetPollGroup;
+struct SteamNetConnectionStatusChangedCallback_t;
+struct SteamNetConnectionRealTimeStatus_t;
+struct SteamNetworkingConfigValue_t;
+struct SteamNetworkingMessage_t;
+struct SteamNetworkingErrMsg;
+
+// Function pointer types for Steam networking API
+using PISteamNetworkingSockets = void*;  // Placeholder for actual interface pointer
+using PISteamNetworkingUtils = void*;    // Placeholder for actual interface pointer
+
 // Forward declarations
 struct TPlayer;
 
