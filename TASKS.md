@@ -29,6 +29,8 @@ The C++ conversion is **mostly ready**. Most of the original Pascal code has bee
 - [x] Updated related files that reference the removed functions
 - [x] Created proper directory structure for C++ codebase
 - [x] Committed all changes to git repository
+- [x] Created build.sh script based on old conversion
+- [x] Created run.sh script based on old conversion
 
 ## Next Steps
 The primary remaining task is systematic comparison of all Pascal files between the old and new versions, then updating the corresponding C++ files to match these changes. Most of the infrastructure for this process is already in place.
