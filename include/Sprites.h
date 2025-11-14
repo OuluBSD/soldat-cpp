@@ -1,0 +1,476 @@
+#ifndef SPRITES_H
+#define SPRITES_H
+
+//*******************************************************************************
+//
+//       Sprites Unit for SOLDAT
+//
+//       Copyright (c) 2002-03 Michal Marcinkowski
+//
+//*******************************************************************************
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <cstdint>
+
+#include "Vector.h"
+#include "Constants.h"
+#include "Weapons.h"
+#include "Game.h"
+
+// Forward declaration
+struct TSprite;
+
+// Global sprites array
+extern std::vector<std::unique_ptr<TSprite>> Sprite;
+
+// TSprite structure definition
+struct TSprite {
+    uint8_t Num;
+    bool Active;
+    TVector2 Pos;
+    TVector2 Velocity;
+    TVector2 OldPos;
+    TVector2 MouseAim;
+    uint8_t Team;
+    uint8_t Look;
+    float Health;
+    float Vest;
+    uint8_t AmmoCount[MAIN_WEAPONS + 1];  // 1-indexed like Pascal arrays
+    uint8_t GrenadeCount;
+    uint8_t Weapon;
+    uint8_t SecondaryWeapon;
+    uint8_t WeaponNum;
+    uint8_t SecondaryWeaponNum;
+    uint8_t Position;
+    uint16_t Keys16;
+    bool OnGround;
+    uint8_t State;
+    int16_t RespawnCounter;
+    int16_t IdleRandom;
+    uint8_t JumpJetState;
+    uint8_t JetState;
+    bool JetOn;
+    bool FlamerOn;
+    bool OnFire;
+    uint8_t FireTime;
+    uint8_t Bubbles;
+    TVector2 HookPos;
+    bool HookOn;
+    uint8_t HookState;
+    int16_t HookTime;
+    TVector2 HookVelocity;
+    bool HookObstructed;
+    uint8_t HookObstructedTime;
+    uint8_t HookPlayer;
+    bool HookPlayerActive;
+    bool HookPoly;
+    uint8_t HookPolyNum;
+    uint8_t HookType;
+    uint8_t Constraints;
+    uint8_t KillBullet;
+    uint8_t Killer;
+    uint8_t Where;
+    uint8_t ShotDistance;
+    uint8_t ShotLife;
+    int8_t ShotRicochet;
+    bool CanWade;
+    float Angle;
+    float Rot;
+    float OldRot;
+    uint8_t Anim;
+    uint8_t AnimType;
+    int8_t AnimDir;
+    uint8_t AnimFrame;
+    uint8_t AnimCounter;
+    uint8_t AnimSpeed;
+    uint8_t AnimStart;
+    uint8_t AnimStop;
+    uint8_t HairFrame;
+    uint8_t ChainFrame;
+    uint8_t HeadCapFrame;
+    bool WearHelmet;
+    uint8_t Parachute;
+    uint8_t ParachuteTime;
+    bool CanParachute;
+    uint8_t Jetpack;
+    uint8_t JetpackTime;
+    bool CanJetpack;
+    uint8_t Flamer;
+    uint8_t FlamerTime;
+    bool CanFlamer;
+    uint8_t Predator;
+    uint8_t PredatorTime;
+    bool CanPredator;
+    uint8_t Berserker;
+    uint8_t BerserkerTime;
+    bool CanBerserker;
+    bool HasVest;
+    bool HasHMG;
+    bool HasPredator;
+    bool HasFlamer;
+    bool HasBerserker;
+    bool HasLaser;
+    bool HasLauncher;
+    bool HasBlueFlag;
+    bool HasRedFlag;
+    bool HasYellowFlag;
+    bool HasGreenFlag;
+    uint8_t Flag;
+    uint8_t FlagTime;
+    uint8_t BlueFlagTime;
+    uint8_t RedFlagTime;
+    uint8_t GreenFlagTime;
+    uint8_t YellowFlagTime;
+    uint8_t FlagCounter;
+    uint8_t BlueFlagCounter;
+    uint8_t RedFlagCounter;
+    uint8_t GreenFlagCounter;
+    uint8_t YellowFlagCounter;
+    uint8_t FlagReturnTime;
+    uint8_t BlueFlagReturnTime;
+    uint8_t RedFlagReturnTime;
+    uint8_t GreenFlagReturnTime;
+    uint8_t YellowFlagReturnTime;
+    uint8_t Invisibility;
+    uint16_t InvisibilityTime;
+    uint8_t NightVision;
+    uint16_t NightVisionTime;
+    uint8_t BulletTime;
+    uint8_t GrenadeTime;
+    bool CanGrenade;
+    uint8_t GrenadeTimeOut;
+    uint8_t WeaponActive[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
+    bool WeaponInMenu[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
+    bool WeaponInGame[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
+    uint8_t SecondaryWeaponActive;
+    bool SecondaryWeaponInMenu;
+    bool SecondaryWeaponInGame;
+    uint8_t ControlMethod;
+    uint8_t Camera;
+    bool Muted;
+    uint8_t FreeCamOn;
+    TVector2 FreeCamPos;
+
+    // Control structure (nested in Pascal)
+    struct {
+        bool Up;
+        bool Down;
+        bool Left;
+        bool Right;
+        bool Jump;
+        bool ThrowGrenade;
+        bool Fire;
+        bool SecondaryFire;
+        bool Reload;
+        bool Change;
+        bool Crouch;
+        bool Walk;
+        bool ForceWeapon;
+        uint8_t ForceWeaponNum;
+        uint8_t ForceSecWeaponNum;
+        uint8_t RequestThing;
+        bool SwitchTeam;
+        bool SwitchSpectator;
+        bool Drop;
+        bool Chat;
+        bool TeamChat;
+        bool Radio;
+        uint8_t RadioNum;
+        bool Use;
+        bool Suicide;
+        bool Ready;
+        bool NextWeap;
+        bool PrevWeap;
+        bool Pause;
+        bool FreeLook;
+        bool FreeMove;
+        bool FreeCam;
+        bool Hook;
+        uint8_t NextWeapNum;
+        uint8_t PrevWeapNum;
+        bool NextSecWeap;
+        bool PrevSecWeap;
+        uint8_t NextSecWeapNum;
+        uint8_t PrevSecWeapNum;
+        bool NextItem;
+        bool PrevItem;
+        uint8_t NextItemNum;
+        uint8_t PrevItemNum;
+        bool DropGrenade;
+        bool DropWeapon;
+        bool DropSecondary;
+        bool DropFlag;
+        bool DropVest;
+        bool DropHelmet;
+        bool DropBackpack;
+        bool DropAll;
+        bool Weapon1;
+        bool Weapon2;
+        bool Weapon3;
+        bool Weapon4;
+        bool Weapon5;
+        bool Weapon6;
+        bool Weapon7;
+        bool Weapon8;
+        bool Weapon9;
+        bool Weapon0;
+        bool SecWeapon1;
+        bool SecWeapon2;
+        bool SecWeapon3;
+        bool SecWeapon4;
+        bool SecWeapon5;
+        bool SecWeapon6;
+        bool SecWeapon7;
+        bool SecWeapon8;
+        bool SecWeapon9;
+        bool SecWeapon0;
+        bool Item1;
+        bool Item2;
+        bool Item3;
+        bool Item4;
+        bool Item5;
+        bool Item6;
+        bool Item7;
+        bool Item8;
+        bool Item9;
+        bool Item0;
+        bool Team1;
+        bool Team2;
+        bool Team3;
+        bool Team4;
+        bool Spectator;
+        bool ForceTeam;
+        uint8_t ForceTeamNum;
+        bool ForceMap;
+        std::string ForceMapName;
+        bool ForceStart;
+        bool ForceEnd;
+        bool Kick;
+        std::string KickName;
+        bool Ban;
+        std::string BanName;
+        bool NextMap;
+        bool ChangeMap;
+        std::string ChangeMapName;
+        bool RestartMap;
+        bool ToggleConsole;
+        bool ToggleScores;
+        bool ToggleConsoleScores;
+        bool ToggleStats;
+        bool ToggleConsoleStats;
+        bool ToggleVote;
+        bool ToggleConsoleVote;
+        bool ToggleMute;
+        bool ToggleConsoleMute;
+        bool ToggleSettings;
+        bool ToggleConsoleSettings;
+        bool ToggleWeapons;
+        bool ToggleConsoleWeapons;
+        bool TogglePlayers;
+        bool ToggleConsolePlayers;
+        bool ToggleMaplist;
+        bool ToggleConsoleMaplist;
+        bool ToggleAdmin;
+        bool ToggleConsoleAdmin;
+        bool ToggleVoteMap;
+        bool ToggleConsoleVoteMap;
+        bool ToggleVoteKick;
+        bool ToggleConsoleVoteKick;
+        uint8_t VoteMapID;
+        uint8_t VoteKickNum;
+        bool VoteYes;
+        bool VoteNo;
+        bool VoteOff;
+        bool ToggleHelp;
+        bool ToggleConsoleHelp;
+        bool ToggleCommands;
+        bool ToggleConsoleCommands;
+        bool ToggleBots;
+        bool ToggleConsoleBots;
+        bool ToggleKickS;
+        std::string KickSName;
+        bool ToggleBanS;
+        std::string BanSName;
+        bool ToggleTempBan;
+        std::string TempBanName;
+        uint8_t TempBanTime;
+        bool ToggleUnban;
+        std::string UnbanName;
+        bool ToggleSpec;
+        std::string SpecName;
+        bool ToggleUnspec;
+        std::string UnspecName;
+        bool ToggleAdminPass;
+        std::string AdminPass;
+        bool ToggleServerPass;
+        std::string ServerPass;
+        bool ToggleVotePercent;
+        uint8_t VotePercentValue;
+        bool ToggleKillLimit;
+        uint16_t KillLimitValue;
+        bool ToggleTimeLimit;
+        uint16_t TimeLimitValue;
+        bool ToggleGrenadeLimit;
+        uint8_t GrenadeLimitValue;
+        bool ToggleGameMode;
+        uint8_t GameModeValue;
+        bool ToggleFriendlyFire;
+        bool FriendlyFireValue;
+        bool ToggleBulletTime;
+        bool BulletTimeValue;
+        bool ToggleSniperLine;
+        bool SniperLineValue;
+        bool ToggleBalanceTeams;
+        bool BalanceTeamsValue;
+        bool ToggleSurvivalMode;
+        bool SurvivalModeValue;
+        bool ToggleRealisticMode;
+        bool RealisticModeValue;
+        bool ToggleAdvanceMode;
+        bool AdvanceModeValue;
+        bool ToggleAdvanceModeAmount;
+        uint8_t AdvanceModeAmountValue;
+        bool ToggleGunsCollide;
+        bool GunsCollideValue;
+        bool ToggleKitsCollide;
+        bool KitsCollideValue;
+        bool ToggleMiniMap;
+        bool MiniMapValue;
+        bool ToggleAdvancedSpectator;
+        bool AdvancedSpectatorValue;
+        bool ToggleRadio;
+        bool RadioValue;
+        bool ToggleGravity;
+        float GravityValue;
+        bool ToggleHostName;
+        std::string HostNameValue;
+        bool ToggleMaxPlayers;
+        uint8_t MaxPlayersValue;
+        bool ToggleDownloadURL;
+        std::string DownloadURLValue;
+        bool TogglePure;
+        bool PureValue;
+        bool ToggleWebsite;
+        std::string WebsiteValue;
+        bool ToggleBotBalance;
+        bool BotBalanceValue;
+        bool ToggleEchoKills;
+        bool EchoKillsValue;
+        bool ToggleAntiMassFlag;
+        bool AntiMassFlagValue;
+        bool ToggleHealthCooldown;
+        uint8_t HealthCooldownValue;
+        bool ToggleTeamColors;
+        bool TeamColorsValue;
+        bool ToggleLobby;
+        bool LobbyValue;
+        bool ToggleLobbyURL;
+        std::string LobbyURLValue;
+        bool ToggleSteamOnly;
+        bool SteamOnlyValue;
+        bool ToggleVoiceChat;
+        bool VoiceChatValue;
+        bool ToggleVoiceChatAllTalk;
+        bool VoiceChatAllTalkValue;
+        bool ToggleSetSteamAccount;
+        std::string SetSteamAccountValue;
+        bool ToggleWarningsFlood;
+        uint8_t WarningsFloodValue;
+        bool ToggleWarningsPing;
+        uint8_t WarningsPingValue;
+        bool ToggleWarningsVoteCheat;
+        uint8_t WarningsVoteCheatValue;
+        bool ToggleWarningsKnifeCheat;
+        uint8_t WarningsKnifeCheatValue;
+        bool ToggleWarningsTK;
+        uint8_t WarningsTKValue;
+        bool ToggleAntiCheatKick;
+        bool AntiCheatKickValue;
+        bool TogglePunishTK;
+        bool PunishTKValue;
+        uint8_t PingTicks;
+        uint8_t PingTicksB;
+        uint16_t PingTime;
+        uint8_t RealPing;
+        uint8_t ConnectionQuality;
+        uint8_t TKWarnings;
+        uint8_t ChatWarnings;
+        uint8_t KnifeWarnings;
+        uint8_t ScoresPerSecond;
+        uint8_t GrabsPerSecond;
+        bool GrabbedInBase;
+        uint8_t StandingPolyType;
+        int16_t LastMapVote;
+        bool VotedMap;
+        bool VotedYes;
+        bool VotedNo;
+        bool VotedForKick;
+        uint8_t VoteKickNum;
+        bool VotedToKick;
+        uint8_t VotedToKickNum;
+        int8_t KickVoteResult;
+        uint8_t KickVoteReason;
+        bool VoteActive;
+        bool VoteYesActive;
+        bool VoteNoActive;
+        bool VoteOffActive;
+        uint8_t VoteType;
+        uint8_t VoteTimer;
+        uint8_t VoteWho;
+        std::string VoteTargetName;
+        std::string VoteReason;
+    } Control;
+
+    // Player object that's associated with this sprite
+    class TPlayer* Player;
+    
+    // Constructor
+    TSprite();
+    
+    // Methods
+    void Reset();
+    void SetPosition(TVector2 NewPos);
+    void SetVelocity(TVector2 NewVelocity);
+    void ApplyDamage(float Damage, uint8_t Bullet, uint8_t Where);
+    void Kill(uint8_t Bullet, uint8_t Killer, uint8_t Where);
+    void Respawn();
+    void Update();
+    void UpdatePhysics();
+    void UpdateAnimations();
+    void SendSnapshot();
+};
+
+// Global variables
+extern uint8_t LastPlayer;
+extern uint8_t AlivePlayersRed;
+extern uint8_t AlivePlayersBlue;
+extern uint8_t AlivePlayersGreen;
+extern uint8_t AlivePlayersYellow;
+extern uint8_t TotalPlayersRed;
+extern uint8_t TotalPlayersBlue;
+extern uint8_t TotalPlayersGreen;
+extern uint8_t TotalPlayersYellow;
+extern uint8_t TotalAlivePlayers;
+extern uint8_t TotalPlayers;
+extern bool TeamScoresChanged;
+
+// Function declarations
+void InitializeSprites();
+void UpdateSprites();
+void DrawSprites();
+void ResetAllSprites();
+void CreateSprite(uint8_t Num, uint8_t Team, TVector2 Pos, TPlayer* Player);
+void DeleteSprite(uint8_t Num);
+void SetSpriteTeam(uint8_t Num, uint8_t Team);
+void SetSpritePosition(uint8_t Num, TVector2 Pos);
+void SetSpriteVelocity(uint8_t Num, TVector2 Vel);
+void ApplySpriteDamage(uint8_t Num, float Damage, uint8_t Bullet, uint8_t Where);
+void KillSprite(uint8_t Num, uint8_t Bullet, uint8_t Killer, uint8_t Where);
+void RespawnSprite(uint8_t Num);
+bool IsSpriteActive(uint8_t Num);
+uint8_t GetNextFreeSpriteNum();
+void AssignPlayerToSprite(uint8_t SpriteNum, TPlayer* Player);
+
+#endif // SPRITES_H
