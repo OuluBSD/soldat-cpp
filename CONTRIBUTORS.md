@@ -22,4 +22,6 @@ Maciek "Mighty" Miłowski
 Ryan "FliesLikeABrick" Rawdon  
 Jason "thestoreybook" Storey  
 Reko "reko_t" Tiira  
-Seppo "sblo" Pakonen
+Seppo "poko" Pakonen
+Qwen-Coder "qwen" <qwen-coder@alibabacloud.com>
+
