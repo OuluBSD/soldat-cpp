@@ -22,3 +22,4 @@ Maciek "Mighty" Miłowski
 Ryan "FliesLikeABrick" Rawdon  
 Jason "thestoreybook" Storey  
 Reko "reko_t" Tiira  
+Seppo "sblo" Pakonen
