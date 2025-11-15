@@ -34,11 +34,7 @@ extern std::string KillLogFileName;
 #endif
 extern std::mutex LogLock;
 
-// Function declarations
-void NewLogFile(TStringList*& F, const std::string& Name);
-void WriteLogFile(TStringList*& F, const std::string& Name);
-void AddLineToLogFile(TStringList*& F, const std::string& S, const std::string& Name, bool WithDate = true);
-void NewLogFiles();
+
 
 namespace LogFileImpl {
     inline void NewLogFile(TStringList*& F, const std::string& Name) {
@@ -86,7 +82,7 @@ namespace LogFileImpl {
         }
         
         // if (log_level.Value() > 1)
-        WriteLogFile(F, Name);
+        LogFileImpl::WriteLogFile(F, Name);
     }
 
     inline void WriteLogFile(TStringList*& F, const std::string& Name) {
@@ -141,8 +137,8 @@ namespace LogFileImpl {
             ConsoleLogFileName = oss2.str();
         }
         
-        NewLogFile(GameLog, ConsoleLogFileName);
-        AddLineToLogFile(GameLog, "   Console Log Started", ConsoleLogFileName);
+        LogFileImpl::NewLogFile(GameLog, ConsoleLogFileName);
+        LogFileImpl::AddLineToLogFile(GameLog, "   Console Log Started", ConsoleLogFileName);
         
 #ifdef SERVER_CODE
         // Create kill log file name
@@ -159,24 +155,23 @@ namespace LogFileImpl {
             KillLogFileName = oss4.str();
         }
         
-        NewLogFile(KillLog, KillLogFileName);
-        AddLineToLogFile(KillLog, "   Kill Log Started", KillLogFileName);
+        LogFileImpl::NewLogFile(KillLog, KillLogFileName);
+        LogFileImpl::AddLineToLogFile(KillLog, "   Kill Log Started", KillLogFileName);
 #endif
     }
 }
 
-// Using declarations to bring into global namespace
-using LogFileImpl::TStringList;
+// Using declarations to bring the functions into the global scope
 using LogFileImpl::NewLogFile;
 using LogFileImpl::WriteLogFile;
 using LogFileImpl::AddLineToLogFile;
 using LogFileImpl::NewLogFiles;
 
 // Global variables
-extern TStringList* GameLog = nullptr;
+extern TStringList* GameLog;
 extern std::string ConsoleLogFileName;
 #ifdef SERVER_CODE
-extern TStringList* KillLog = nullptr;
+extern TStringList* KillLog;
 extern std::string KillLogFileName;
 #endif
 extern std::mutex LogLock;

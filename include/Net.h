@@ -460,6 +460,15 @@ struct TMsg_ClientBulletSnapshot {
     int32_t ClientTicks;
 };
 
+// Bullet snapshot message type for storing previous bullet state
+struct TBulletSnapshotMsg {
+    TVector2 Pos, Velocity;
+    uint8_t Owner, WeaponNum;
+    uint16_t Seed;
+    bool Forced; // CreateBullet() forced bullet?
+    bool Active; // Whether this snapshot is active
+};
+
 // SERVERSKELETONSNAPSHOT TYPE
 // - info on the sprites skeleton - used when sprite is DeadMeat
 struct TMsg_ServerSkeletonSnapshot {

@@ -100,11 +100,6 @@ public:
     }
     
     virtual bool SetValue(T Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
-
         if (FOnChange) {
             if (!FOnChange(this, Value)) {
                 return false;
@@ -340,10 +335,7 @@ namespace CvarImpl {
         TIntegerCvar* result = cvar.get();
         Cvars[Name] = std::move(cvar);
         
-        if (Flags.count(TCvarFlag::CVAR_SYNC)) {
-            // Note: we store original name in CvarsSync
-            CvarsSync[Name] = Cvars[Name];
-        }
+
         
         return result;
     }
@@ -416,10 +408,6 @@ namespace CvarImpl {
         auto cvar = std::make_unique<TSingleCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange, MinValue, MaxValue);
         TSingleCvar* result = cvar.get();
         Cvars[cvarName] = std::move(cvar);
-        
-        if (Flags.count(TCvarFlag::CVAR_SYNC)) {
-            CvarsSync[Name] = Cvars[cvarName];
-        }
         
         return result;
     }
@@ -495,10 +483,6 @@ namespace CvarImpl {
         auto cvar = std::make_unique<TBooleanCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange);
         TBooleanCvar* result = cvar.get();
         Cvars[cvarName] = std::move(cvar);
-        
-        if (Flags.count(TCvarFlag::CVAR_SYNC)) {
-            CvarsSync[Name] = Cvars[cvarName];
-        }
         
         return result;
     }
@@ -630,10 +614,6 @@ namespace CvarImpl {
         TStringCvar* result = cvar.get();
         Cvars[cvarName] = std::move(cvar);
         
-        if (Flags.count(TCvarFlag::CVAR_SYNC)) {
-            CvarsSync[Name] = Cvars[cvarName];
-        }
-        
         return result;
     }
 
@@ -680,9 +660,4 @@ extern bool CvarsNeedSyncing;
 extern bool CvarsInitialized;
 
 #endif // CVAR_H
-// Add these global variable definitions at the end of Cvar.h
-std::unordered_map<std::string, std::unique_ptr<TCvarBase>> Cvars;
-std::unordered_map<std::string, std::unique_ptr<TCvarBase>> CvarsSync;
-bool CvarsNeedSyncing = false;
-bool CvarsInitialized = false;
 

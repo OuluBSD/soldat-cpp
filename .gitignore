@@ -34,6 +34,7 @@ backup
 build
 build.*
 release
+external_assets
 
 # stb.dll stuff
 .vs

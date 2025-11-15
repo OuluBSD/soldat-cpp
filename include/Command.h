@@ -11,9 +11,9 @@
 #include <algorithm>
 #include <cctype>
 #include "Constants.h"
+#include "Cvar.h"
 
 // Forward declarations for dependencies
-struct TCvarBase;
 struct TCommand;
 
 // Command flags

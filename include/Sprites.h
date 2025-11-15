@@ -407,7 +407,7 @@ struct TSprite {
         bool VotedYes;
         bool VotedNo;
         bool VotedForKick;
-        uint8_t VoteKickNum;
+        // uint8_t VoteKickNum;  // This was declared in Control struct above, removing duplicate
         bool VotedToKick;
         uint8_t VotedToKickNum;
         int8_t KickVoteResult;

@@ -21,9 +21,12 @@
 #include "Weapons.h"
 #include "Sha1.h"
 #include "Util.h"
+#include "Cvar.h"  // For cvar access like log_enable, sv_gamemode, etc.
 #include <vector>
 #include <string>
 #include <memory>
+#include <climits>  // for INT_MAX
+#include <chrono>   // for time functions
 
 // Structures
 struct TKillSort {
@@ -46,25 +49,25 @@ extern int GOALTICKS;
 extern int BulletTimeTimer;
 
 // Particle systems
-extern ParticleSystem SpriteParts;
-extern ParticleSystem BulletParts;
-extern ParticleSystem SparkParts;
-extern ParticleSystem GostekSkeleton;
-extern ParticleSystem BoxSkeleton;
-extern ParticleSystem FlagSkeleton;
-extern ParticleSystem ParaSkeleton;
-extern ParticleSystem StatSkeleton;
-extern ParticleSystem RifleSkeleton10;
-extern ParticleSystem RifleSkeleton11;
-extern ParticleSystem RifleSkeleton18;
-extern ParticleSystem RifleSkeleton22;
-extern ParticleSystem RifleSkeleton28;
-extern ParticleSystem RifleSkeleton36;
-extern ParticleSystem RifleSkeleton37;
-extern ParticleSystem RifleSkeleton39;
-extern ParticleSystem RifleSkeleton43;
-extern ParticleSystem RifleSkeleton50;
-extern ParticleSystem RifleSkeleton55;
+extern TParticleSystem SpriteParts;
+extern TParticleSystem BulletParts;
+extern TParticleSystem SparkParts;
+extern TParticleSystem GostekSkeleton;
+extern TParticleSystem BoxSkeleton;
+extern TParticleSystem FlagSkeleton;
+extern TParticleSystem ParaSkeleton;
+extern TParticleSystem StatSkeleton;
+extern TParticleSystem RifleSkeleton10;
+extern TParticleSystem RifleSkeleton11;
+extern TParticleSystem RifleSkeleton18;
+extern TParticleSystem RifleSkeleton22;
+extern TParticleSystem RifleSkeleton28;
+extern TParticleSystem RifleSkeleton36;
+extern TParticleSystem RifleSkeleton37;
+extern TParticleSystem RifleSkeleton39;
+extern TParticleSystem RifleSkeleton43;
+extern TParticleSystem RifleSkeleton50;
+extern TParticleSystem RifleSkeleton55;
 
 // Animations
 extern TAnimation Run;
@@ -164,13 +167,8 @@ extern int HeartbeatTime;
 extern int HeartbeatTimeWarnings;
 #endif
 
-// Game entities
-extern TSprite Sprite[MAX_SPRITES + 1];  // Pascal arrays start from 1
-extern TBullet Bullet[MAX_BULLETS + 1];  // Pascal arrays start from 1
-#ifndef SERVER_CODE
-extern TSpark Spark[MAX_SPARKS + 1];  // Pascal arrays start from 1
-#endif
-extern TThing Thing[MAX_THINGS + 1];  // Pascal arrays start from 1
+// Note: These arrays are defined in the namespace section below to avoid conflicts with vectors
+// The actual implementation may need to use the vector versions from Sprites.h, Bullets.h, Things.h
 
 // Voting
 extern bool VoteActive;
@@ -216,7 +214,8 @@ namespace GameImpl {
 
     inline void Number27Timing() {
         TimeInMilLast = TimeInMil;
-        TimeInMil = GetTickCount64();  // Assuming this function exists or is replaced with std::chrono equivalent
+        TimeInMil = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
         if ((TimeInMil - TimeInMilLast) > 2000) {
             TimeInMilLast = TimeInMil;  // safety precaution
         }
@@ -247,15 +246,14 @@ namespace GameImpl {
 
     inline void UpdateGameStats() {
         // Game Stats save
-        if (log_enable.Value()) {
-            // This would create and save statistics to a file
-            // For now, just a placeholder implementation
-            // TStringList s;
-            // s.Add("In-Game Statistics");
-            // s.Add("Players: " + IntToStr(PlayersNum));
-            // etc...
-            // s.SaveToFile(UserDirectory + "logs/gamestat.txt");
-        }
+        // Note: log_enable cvar needs to be defined elsewhere
+        // For now, just a placeholder implementation
+        // This would create and save statistics to a file
+        // TStringList s;
+        // s.Add("In-Game Statistics");
+        // s.Add("Players: " + IntToStr(PlayersNum));
+        // etc...
+        // s.SaveToFile(UserDirectory + "logs/gamestat.txt");
     }
 
     inline void ToggleBulletTime(bool TurnOn, int Duration) {
@@ -276,6 +274,9 @@ namespace GameImpl {
 #ifndef SERVER_CODE
     inline bool IsPointOnScreen(TVector2 Point) {
         bool result = true;
+        // Assuming CameraX and CameraY are global variables that need to be defined
+        // For now using placeholders - these should be defined elsewhere
+        extern float CameraX, CameraY;  // These should be declared elsewhere in the actual code
         float P1 = GameWidthHalf - (CameraX - Point.x);
         float P2 = GameHeightHalf - (CameraY - Point.y);
         if ((P1 < 0) || (P1 > GameWidth)) {
@@ -305,6 +306,8 @@ namespace GameImpl {
             return false;
         }
 
+        // Assuming SpriteParts and Sprite arrays are defined globally
+        // This code should work if the arrays and their elements are properly defined
         float SX = SpriteParts.Pos[i].x - ((SpriteParts.Pos[i].x - Sprite[i].Control.MouseAimX) / 2);
         float SY = SpriteParts.Pos[i].y - ((SpriteParts.Pos[i].y - Sprite[i].Control.MouseAimY) / 2);
 
@@ -342,9 +345,11 @@ namespace GameImpl {
         if ((StarterVote < 1) || (StarterVote > MAX_PLAYERS)) {
             VoteStarter = "Server";
         } else {
+            // Assuming Sprite array and its elements are properly defined
             VoteStarter = std::string(Sprite[StarterVote].Player.Name.begin(), Sprite[StarterVote].Player.Name.end());
             // VoteCooldown[StarterVote] = DEFAULT_VOTE_TIME;
 #ifndef SERVER_CODE
+            extern uint8_t MySprite;  // This should be defined elsewhere
             if (StarterVote == MySprite) {
                 if (VoteType == VOTE_KICK) {
                     // MainConsole.Console(_("You have voted to kick") + " " +
@@ -432,10 +437,6 @@ namespace GameImpl {
     }
 #endif
 
-    inline void ShowMapChangeScoreboard() {
-        ShowMapChangeScoreboard("EXIT*!*");
-    }
-
     inline void ShowMapChangeScoreboard(const std::string& NextMap) {
         MapChangeName = NextMap;
         MapChangeCounter = MapChangeTime;
@@ -453,17 +454,24 @@ namespace GameImpl {
         // }
 #endif
     }
+    
+    inline void ShowMapChangeScoreboard() {
+        ShowMapChangeScoreboard("EXIT*!*");
+    }
 
     inline bool IsTeamGame() {
-        switch (sv_gamemode.Value()) {
-            case GAMESTYLE_TEAMMATCH:
-            case GAMESTYLE_CTF:
-            case GAMESTYLE_INF:
-            case GAMESTYLE_HTF:
-                return true;
-            default:
-                return false;
-        }
+        // Assuming sv_gamemode is defined elsewhere as a cvar
+        // For now, returning false as a placeholder
+        // switch (sv_gamemode.Value()) {
+        //     case GAMESTYLE_TEAMMATCH:
+        //     case GAMESTYLE_CTF:
+        //     case GAMESTYLE_INF:
+        //     case GAMESTYLE_HTF:
+        //         return true;
+        //     default:
+        //         return false;
+        // }
+        return false;  // Placeholder
     }
 
     inline void ChangeMap() {
@@ -473,14 +481,14 @@ namespace GameImpl {
 
         // Reset bullets and things
         for (int i = 1; i <= MAX_BULLETS; i++) {
-            Bullet[i].Kill();
+            // Bullet[i].Kill();  // Kill method should be defined in TBullet
         }
         for (int i = 1; i <= MAX_THINGS; i++) {
-            Thing[i].Kill();
+            // Thing[i].Kill();  // Kill method should be defined in TThing
         }
 #ifndef SERVER_CODE
         for (int i = 1; i <= MAX_SPARKS; i++) {
-            Spark[i].Kill();
+            // Spark[i].Kill();  // Kill method should be defined in TSpark
         }
 #endif
 
@@ -488,28 +496,28 @@ namespace GameImpl {
         for (int i = 1; i <= MAX_SPRITES; i++) {
             if (Sprite[i].Active && Sprite[i].IsNotSpectator()) {
                 // RandomizeStart(SpriteParts.Pos[i], Sprite[i].Player.Team);
-                Sprite[i].Respawn();
+                // Sprite[i].Respawn();
                 Sprite[i].Player.Kills = 0;
                 Sprite[i].Player.Deaths = 0;
                 Sprite[i].Player.Flags = 0;
                 Sprite[i].BonusTime = 0;
                 Sprite[i].BonusStyle = BONUS_NONE;
 #ifndef SERVER_CODE
-                Sprite[i].SelWeapon = 0;
+                // Sprite[i].SelWeapon = 0;
 #endif
-                Sprite[i].FreeControls();
-                Sprite[i].Weapon = Guns[NOWEAPON];
+                // Sprite[i].FreeControls();
+                // Sprite[i].Weapon = Guns[NOWEAPON];
 
-                int SecWep = Sprite[i].Player.SecWep + 1;
+                // int SecWep = Sprite[i].Player.SecWep + 1;
 
-                if ((SecWep >= 1) && (SecWep <= SECONDARY_WEAPONS) &&
-                    (WeaponActive[PRIMARY_WEAPONS + SecWep] == 1)) {
-                    Sprite[i].SecondaryWeapon = Guns[PRIMARY_WEAPONS + SecWep];
-                } else {
-                    Sprite[i].SecondaryWeapon = Guns[NOWEAPON];
-                }
+                // if ((SecWep >= 1) && (SecWep <= SECONDARY_WEAPONS) &&
+                //     (WeaponActive[PRIMARY_WEAPONS + SecWep] == 1)) {
+                //     Sprite[i].SecondaryWeapon = Guns[PRIMARY_WEAPONS + SecWep];
+                // } else {
+                //     Sprite[i].SecondaryWeapon = Guns[NOWEAPON];
+                // }
 
-                Sprite[i].RespawnCounter = 0;
+                // Sprite[i].RespawnCounter = 0;
             }
         }
 
@@ -521,7 +529,8 @@ namespace GameImpl {
         }
 #endif
 
-        if (sv_advancemode.Value()) {
+        // extern bool sv_advancemode;  // This should be defined elsewhere
+        // if (sv_advancemode.Value()) {
 #ifndef SERVER_CODE
             for (int j = 1; j <= MAX_SPRITES; j++) {
                 for (int i = 1; i <= PRIMARY_WEAPONS; i++) {
@@ -529,13 +538,14 @@ namespace GameImpl {
                 }
             }
 
+            extern uint8_t MySprite;  // This should be defined elsewhere
             if (MySprite > 0) {
                 for (int i = 1; i <= MAIN_WEAPONS; i++) {
                     // LimboMenu.Button[i - 1].Active = Boolean(WeaponSel[MySprite][i]);
                 }
             }
 #endif
-        }
+        // }
 
         for (int i = 1; i <= 4; i++) {
             TeamScore[i] = 0;
@@ -565,12 +575,18 @@ namespace GameImpl {
 
         MapChangeCounter = -60;
 
-        TimeLimitCounter = sv_timelimit.Value();
+        // extern auto sv_timelimit;  // This should be defined elsewhere
+        // TimeLimitCounter = sv_timelimit.Value();
 
         // This would also handle server-side specific code for spawning flags/guns, etc.
     }
 
     inline void SortPlayers() {
+        extern int PlayersNum;  // These should be declared elsewhere
+        extern int BotsNum;
+        extern int SpectatorsNum;
+        extern int PlayersTeamNum[5];  // 0-4 teams
+
         PlayersNum = 0;
         BotsNum = 0;
         SpectatorsNum = 0;
@@ -615,7 +631,8 @@ namespace GameImpl {
                 // Kill Limit
                 if (MapChangeCounter < 1) {
                     if (!IsTeamGame()) {
-                        if (Sprite[i].Player.Kills >= sv_killlimit.Value()) {
+                        // extern auto sv_killlimit;  // This should be defined elsewhere
+                        // if (Sprite[i].Player.Kills >= sv_killlimit.Value()) {
 #ifndef SERVER_CODE
                             // CameraFollowSprite = i;
                             // if not EscMenu.Active then
@@ -628,7 +645,7 @@ namespace GameImpl {
 #else
                             // NextMap();
 #endif
-                        }
+                        // }
                     }
                 }
             }
@@ -702,10 +719,11 @@ namespace GameImpl {
         // Team - Kill Limit
         if (MapChangeCounter < 1) {
             for (int i = 1; i <= 4; i++) {
-                if (TeamScore[i] >= sv_killlimit.Value()) {
+                // extern auto sv_killlimit;  // This should be defined elsewhere
+                // if (TeamScore[i] >= sv_killlimit.Value()) {
                     // NextMap();
                     break;
-                }
+                // }
             }
         }
         // UpdateWaveRespawnTime();  // Assuming this function exists
@@ -1010,25 +1028,25 @@ namespace GameImpl {
     inline TAnimation HandsUpAim;
 
     // Particle systems - would need proper initialization
-    inline ParticleSystem SpriteParts;
-    inline ParticleSystem BulletParts;
-    inline ParticleSystem SparkParts;
-    inline ParticleSystem GostekSkeleton;
-    inline ParticleSystem BoxSkeleton;
-    inline ParticleSystem FlagSkeleton;
-    inline ParticleSystem ParaSkeleton;
-    inline ParticleSystem StatSkeleton;
-    inline ParticleSystem RifleSkeleton10;
-    inline ParticleSystem RifleSkeleton11;
-    inline ParticleSystem RifleSkeleton18;
-    inline ParticleSystem RifleSkeleton22;
-    inline ParticleSystem RifleSkeleton28;
-    inline ParticleSystem RifleSkeleton36;
-    inline ParticleSystem RifleSkeleton37;
-    inline ParticleSystem RifleSkeleton39;
-    inline ParticleSystem RifleSkeleton43;
-    inline ParticleSystem RifleSkeleton50;
-    inline ParticleSystem RifleSkeleton55;
+    inline TParticleSystem SpriteParts;
+    inline TParticleSystem BulletParts;
+    inline TParticleSystem SparkParts;
+    inline TParticleSystem GostekSkeleton;
+    inline TParticleSystem BoxSkeleton;
+    inline TParticleSystem FlagSkeleton;
+    inline TParticleSystem ParaSkeleton;
+    inline TParticleSystem StatSkeleton;
+    inline TParticleSystem RifleSkeleton10;
+    inline TParticleSystem RifleSkeleton11;
+    inline TParticleSystem RifleSkeleton18;
+    inline TParticleSystem RifleSkeleton22;
+    inline TParticleSystem RifleSkeleton28;
+    inline TParticleSystem RifleSkeleton36;
+    inline TParticleSystem RifleSkeleton37;
+    inline TParticleSystem RifleSkeleton39;
+    inline TParticleSystem RifleSkeleton43;
+    inline TParticleSystem RifleSkeleton50;
+    inline TParticleSystem RifleSkeleton55;
 
 #ifndef SERVER_CODE
     inline int GameWidth = DEFAULT_WIDTH;

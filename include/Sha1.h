@@ -37,6 +37,7 @@ TSHA1Digest EmptySHA1Digest();
 
 // Utility function for hashing strings
 inline TSHA1Digest SHA1String(const std::string& Str) {
+    (void)Str; // Suppress unused parameter warning
     // Placeholder: In a real implementation, this would calculate the proper SHA1
     // For now, returning a zero-filled array to allow compilation
     TSHA1Digest result = {};
@@ -45,6 +46,7 @@ inline TSHA1Digest SHA1String(const std::string& Str) {
 
 // Utility function for hashing files
 inline TSHA1Digest SHA1File(const std::string& FileName) {
+    (void)FileName; // Suppress unused parameter warning
     // Placeholder: In a real implementation, this would calculate SHA1 of a file
     TSHA1Digest result = {};
     return result;
@@ -56,9 +58,9 @@ inline std::string SHA1DigestToString(const TSHA1Digest& Digest) {
     std::string result;
     result.reserve(40); // 20 bytes * 2 chars per byte
     
-    for (uint8_t byte : Digest) {
+    for (int i = 0; i < 20; i++) {
         char buf[3];
-        sprintf(buf, "%02x", byte);
+        sprintf(buf, "%02x", Digest.data[i]);
         result += buf;
     }
     

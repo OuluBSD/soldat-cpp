@@ -214,19 +214,42 @@ namespace PartsImpl {
         ConstraintCount = Other.ConstraintCount;
         PartCount = Other.PartCount;
 
-        std::memcpy(Active.data() + 1, Other.Active.data() + 1, PartCount * sizeof(bool));
-        std::memcpy(Pos.data() + 1, Other.Pos.data() + 1, PartCount * sizeof(TVector2));
-        std::memcpy(Velocity.data() + 1, Other.Velocity.data() + 1, PartCount * sizeof(TVector2));
-        std::memcpy(OldPos.data() + 1, Other.OldPos.data() + 1, PartCount * sizeof(TVector2));
-        std::memcpy(OneOverMass.data() + 1, Other.OneOverMass.data() + 1, PartCount * sizeof(float));
+        // Copy Active vector elements (skip index 0, start from 1)
+        for (int i = 1; i <= PartCount; i++) {
+            if (i < Other.Active.size()) {
+                Active[i] = Other.Active[i];
+            }
+        }
+        for (int i = 1; i <= PartCount; i++) {
+            if (i < Other.Pos.size()) {
+                Pos[i] = Other.Pos[i];
+            }
+        }
+        for (int i = 1; i <= PartCount; i++) {
+            if (i < Other.Velocity.size()) {
+                Velocity[i] = Other.Velocity[i];
+            }
+        }
+        for (int i = 1; i <= PartCount; i++) {
+            if (i < Other.OldPos.size()) {
+                OldPos[i] = Other.OldPos[i];
+            }
+        }
+        for (int i = 1; i <= PartCount; i++) {
+            if (i < Other.OneOverMass.size()) {
+                OneOverMass[i] = Other.OneOverMass[i];
+            }
+        }
 
         for (int i = 1; i <= ConstraintCount; i++) {
-            const TConstraint& otherConstraint = Other.Constraints[i];
-            TConstraint& constraint = Constraints[i];
-            constraint.Active = otherConstraint.Active;
-            constraint.PartA = otherConstraint.PartA;
-            constraint.PartB = otherConstraint.PartB;
-            constraint.Restlength = otherConstraint.Restlength;
+            if (i < Other.Constraints.size()) {
+                const TConstraint& otherConstraint = Other.Constraints[i];
+                TConstraint& constraint = Constraints[i];
+                constraint.Active = otherConstraint.Active;
+                constraint.PartA = otherConstraint.PartA;
+                constraint.PartB = otherConstraint.PartB;
+                constraint.Restlength = otherConstraint.Restlength;
+            }
         }
     }
 

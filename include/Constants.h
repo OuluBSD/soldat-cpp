@@ -230,6 +230,11 @@ const int MAX_PUSHTICK = 0;
 #else
 const int MAX_PUSHTICK = 125;
 #endif
+const int MAX_CVARS = 1024;
+const int MAX_SPRITES = 32;
+const int MAX_BULLETS = 512;
+const int MAX_THINGS = 255;
+const int MAX_SPARKS = 500;
 const double MAX_INACCURACY = 0.5;
 
 const int THING_PUSH_MULTIPLIER    = 9;

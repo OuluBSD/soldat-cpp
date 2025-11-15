@@ -314,20 +314,3 @@ namespace BanSystemImpl {
     }
 }
 
-// Using declarations to bring into global namespace
-using BanSystemImpl::TBanIP;
-using BanSystemImpl::TBanHW;
-using BanSystemImpl::AddBannedIP;
-using BanSystemImpl::DelBannedIP;
-using BanSystemImpl::CheckBannedIP;
-using BanSystemImpl::FindBan;
-using BanSystemImpl::LoadBannedList;
-using BanSystemImpl::SaveBannedList;
-using BanSystemImpl::AddBannedHW;
-using BanSystemImpl::DelBannedHW;
-using BanSystemImpl::CheckBannedHW;
-using BanSystemImpl::FindBanHW;
-using BanSystemImpl::LoadBannedListHW;
-using BanSystemImpl::SaveBannedListHW;
-using BanSystemImpl::UpdateIPBanList;
-using BanSystemImpl::UpdateHWBanList;

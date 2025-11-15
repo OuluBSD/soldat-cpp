@@ -17,16 +17,9 @@
 #include <iomanip>
 #include <algorithm>
 
-// Forward declarations - will be defined in other files
-struct TSHA1Digest {  // Define as struct instead of forward declaration
-    // Placeholder implementation
-    char data[20]; // SHA1 digest is 160 bits = 20 bytes
-    TSHA1Digest() { 
-        for(int i = 0; i < 20; i++) {
-            data[i] = 0; 
-        }
-    }
-};
+// Forward declarations
+#include "Sha1.h"  // Include Sha1.h to get TSHA1Digest definition
+
 class TMapInfo;    // defined below
 
 // Type definitions
@@ -132,6 +125,7 @@ namespace UtilImpl {
     // Note: CheckFileSize requires file system operations that would be implemented based on platform
     // This is a simplified version
     inline int CheckFileSize(const std::string& filename) {
+        (void)filename; // Suppress unused parameter warning
         // Implementation would require file system access
         return 0; // Placeholder
     }
@@ -152,16 +146,19 @@ namespace UtilImpl {
 
     // Placeholder for MD5 functionality - implementation would depend on MD5 library
     inline std::string Md5StringHelper(std::string Text) {
+        (void)Text; // Suppress unused parameter warning
         return ""; // Placeholder
     }
 
     // Placeholder for directory creation - would use platform-specific APIs
     inline bool CreateDirIfMissing(const std::string& Dir) {
+        (void)Dir; // Suppress unused parameter warning
         return true; // Placeholder
     }
 
     // Placeholder for file creation - would use platform-specific APIs
     inline bool CreateFileIfMissing(const std::string& Filename) {
+        (void)Filename; // Suppress unused parameter warning
         return true; // Placeholder
     }
 
@@ -185,15 +182,21 @@ namespace UtilImpl {
 
     // Placeholder implementations for map functions
     inline bool VerifyMapChecksum(TMapInfo Map, TSHA1Digest Checksum) {
+        (void)Map;        // Suppress unused parameter warning
+        (void)Checksum;   // Suppress unused parameter warning
         return false; // Placeholder
     }
 
     inline TSHA1Digest GetMapChecksum(TMapInfo Map) {
+        (void)Map; // Suppress unused parameter warning
         // Placeholder - would return a default SHA1 digest
         return TSHA1Digest(); // Assuming default constructor exists
     }
 
     inline bool GetMapInfo(std::string MapName, std::string Directory, TMapInfo& MapInfo) {
+        (void)MapName;    // Suppress unused parameter warning
+        (void)Directory;  // Suppress unused parameter warning
+        (void)MapInfo;    // Suppress unused parameter warning
         // Placeholder implementation
         return false;
     }
