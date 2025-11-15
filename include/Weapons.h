@@ -170,14 +170,7 @@ void BuildWeapons();
 uint32_t CreateWMChecksum();
 int16_t WeaponNumToIndex(uint8_t Num);
 int WeaponNameToNum(const std::string& Name);
-std::string WeaponNumToName(int Num);
-std::string WeaponNameByNum(int Num);
-bool IsMainWeaponIndex(int16_t WeaponIndex);
-bool IsSecondaryWeaponIndex(int16_t WeaponIndex);
-bool IsExtendedWeaponIndex(int16_t WeaponIndex);
-uint16_t CalculateBink(uint16_t Accumulated, uint16_t Bink);
-uint8_t WeaponNumInternalToExternal(uint8_t Num);
-uint8_t WeaponNumExternalToInternal(uint8_t Num);
+
 
 namespace WeaponsImpl {
     inline void CreateWeapons(bool RealisticMode) {

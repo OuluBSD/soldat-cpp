@@ -134,7 +134,5 @@ const int MAX_SECTOR = 25;
 const int MAX_PROPS = 500;
 const int MAX_COLLIDERS = 128;
 const int MAX_SPAWNPOINTS = 255;
-const int MAX_WAYPOINTS = 5000;
-const int MAX_CONNECTIONS = 8;
 
 #endif // MAPFILE_H

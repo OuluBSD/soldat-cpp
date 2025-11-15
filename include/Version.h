@@ -14,8 +14,8 @@
 
 // Note: In Pascal version, these were loaded from external files (Version.txt and %BUILD_ID%)
 // For C++ implementation, we'll define them directly or through build system
-const std::string SOLDAT_VERSION = "2.9.0";  // This would typically come from Version.txt
-const size_t SOLDAT_VERSION_CHARS = SOLDAT_VERSION.length();
+constexpr const char* SOLDAT_VERSION = "2.9.0";  // This would typically come from Version.txt
+constexpr size_t SOLDAT_VERSION_CHARS = 5;  // Length of "2.9.0"
 const int SOLDAT_VERSION_LONG = 0x290;       // This would typically come from %BUILD_ID%
 
 #ifdef SERVER_CODE

@@ -14,11 +14,14 @@ fi
 # Change to build directory
 cd build
 
-# Run cmake and make
-echo "Running cmake..."
-cmake ..
+# Check if we need to run cmake for the first time
+if [ ! -f "Makefile" ] && [ ! -f "build.ninja" ]; then
+    echo "Configuring with CMake..."
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+fi
 
-echo "Running make..."
-make
+echo "Compiling..."
+make -j$(nproc)
 
 echo "Build completed successfully!"
+echo "You can now run the game with ./run.sh"

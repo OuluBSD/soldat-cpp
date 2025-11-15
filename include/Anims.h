@@ -40,16 +40,7 @@ struct TAnimation {
     
     TAnimation() : ID(0), NumFrames(0), Speed(1), Count(0), CurrFrame(1), Loop(false) {}
     
-    void DoAnimation();
-    void LoadFromFile(const std::string& Filename);
-    int CheckSum();
-};
-
-// Function declarations
-void LoadAnimObjects(const std::string& ModDir);
-
-namespace AnimsImpl {
-    inline void TAnimation::DoAnimation() {
+    void DoAnimation() {
         Count++;
         if (Count == Speed) {
             Count = 0;
@@ -63,28 +54,28 @@ namespace AnimsImpl {
             }
         }
     }
-
-    inline void TAnimation::LoadFromFile(const std::string& Filename) {
+    
+    void LoadFromFile(const std::string& Filename) {
         // This function requires PHYSFS which isn't available in the current context
         // This is a simplified version that would need to be expanded with actual PHYSFS implementation
-        
+
         // Reset defaults
         NumFrames = 1;
         Loop = false;
         Speed = 1;
         Count = 0;
-        
+
         // Placeholder implementation - would need to read from PHYSFS in actual implementation
         // The real implementation would need to:
         // 1. Check if file exists using PHYSFS_exists
         // 2. Open file using PHYSFS_openRead
         // 3. Parse the file content line by line
         // 4. Fill the Frames data
-        
+
         CurrFrame = 1;
     }
-
-    inline int TAnimation::CheckSum() {
+    
+    int CheckSum() {
         float chk = 0.5f;
 
         for (int i = 1; i <= NumFrames; ++i) {
@@ -97,36 +88,33 @@ namespace AnimsImpl {
 
         return static_cast<int>(std::floor(chk));
     }
+};
 
-    inline void LoadAnimObjects(const std::string& ModDir) {
-        // AddLineToLogFile(GameLog, 'Loading Animations. ' + ModDir, ConsoleLogFileName);
-        
-        // In a real implementation, this would load each animation from files
-        // using code similar to:
-        // Stand.LoadFromFile(ModDir + "anims/stoi.poa");
-        // Stand.ID = 0;
-        // Stand.Loop = true;
-        // etc.
-        
-        // The following would be implemented as actual assignments to global variables
-        // that are declared elsewhere (like Stand, Run, Jump, etc.)
-        
-        // Stand.LoadFromFile(ModDir + "anims/stoi.poa");
-        // Stand.ID = 0;
-        // Stand.Loop = true;
-        // Stand.Speed = 3;
-        
-        // Similar assignments for all the other animations...
-        
-        // SpriteParts and other objects initialization would go here
-        
-        // AddLineToLogFile(GameLog, "Loading objects.", ConsoleLogFileName);
-    }
+// Function implementation
+void LoadAnimObjects(const std::string& ModDir) {
+    // AddLineToLogFile(GameLog, 'Loading Animations. ' + ModDir, ConsoleLogFileName);
+
+    // In a real implementation, this would load each animation from files
+    // using code similar to:
+    // Stand.LoadFromFile(ModDir + "anims/stoi.poa");
+    // Stand.ID = 0;
+    // Stand.Loop = true;
+    // etc.
+
+    // The following would be implemented as actual assignments to global variables
+    // that are declared elsewhere (like Stand, Run, Jump, etc.)
+
+    // Stand.LoadFromFile(ModDir + "anims/stoi.poa");
+    // Stand.ID = 0;
+    // Stand.Loop = true;
+    // Stand.Speed = 3;
+
+    // Similar assignments for all the other animations...
+
+    // SpriteParts and other objects initialization would go here
+
+    // AddLineToLogFile(GameLog, "Loading objects.", ConsoleLogFileName);
 }
 
-// Using declarations to bring into global namespace
-using AnimsImpl::TFrame;
-using AnimsImpl::TAnimation;
-using AnimsImpl::LoadAnimObjects;
-
 #endif // ANIMS_H
+

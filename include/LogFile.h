@@ -82,7 +82,7 @@ namespace LogFileImpl {
         }
         
         // if (log_level.Value() > 1)
-        LogFileImpl::WriteLogFile(F, Name);
+        WriteLogFile(F, Name);
     }
 
     inline void WriteLogFile(TStringList*& F, const std::string& Name) {

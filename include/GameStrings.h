@@ -13,8 +13,22 @@
 #include <memory>
 #include "GetText.h"  // Assuming GetText library functionality
 
-// Forward declarations
-class TMOFile;
+// Basic TMOFile class definition to avoid incomplete type issues
+class TMOFile {
+public:
+    TMOFile() = default;
+    virtual ~TMOFile() = default;
+    
+    // Prevent copying
+    TMOFile(const TMOFile&) = delete;
+    TMOFile& operator=(const TMOFile&) = delete;
+    
+    // Allow moving
+    TMOFile(TMOFile&&) = default;
+    TMOFile& operator=(TMOFile&&) = default;
+    
+    // Add any required methods here as needed
+};
 
 // Global variables
 extern std::unique_ptr<TMOFile> TranslationFile;

@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
-#include <variant>
 #include <set>
 #include <cctype>
 #include <algorithm>
@@ -59,19 +58,33 @@ protected:
 
 public:
     virtual ~TCvarBase() = default;
-    
+
     virtual bool ParseAndSetValue(const std::string& Value) = 0;
     virtual std::string ValueAsString() = 0;
     virtual std::string GetErrorMessage() = 0;
     virtual void Reset() = 0;
-    
-    void SyncUpdate(bool ToSync);
-    static TCvarBase* Find(const std::string& Name);
-    
+
+    void SyncUpdate(bool ToSync) {
+        if (ToSync) {
+            FFlags.insert(TCvarFlag::CVAR_TOSYNC);
+            CvarsNeedSyncing = true;
+        } else {
+            FFlags.erase(TCvarFlag::CVAR_TOSYNC);
+        }
+    }
+
+    static TCvarBase* Find(const std::string& Name) {
+        auto it = Cvars.find(Name);
+        if (it != Cvars.end()) {
+            return it->second.get();
+        }
+        return nullptr;
+    }
+
     const std::string& GetName() const { return FName; }
     const TCvarFlags& GetFlags() const { return FFlags; }
     const std::string& GetDescription() const { return FDescription; }
-    
+
     // Added setter methods to allow derived classes to modify protected members
     void SetName(const std::string& name) { FName = name; }
     void SetFlags(const TCvarFlags& flags) { FFlags = flags; }
@@ -87,18 +100,25 @@ private:
     TCallback<T> FOnChange;
 
 public:
-    TCvar(const std::string& Name, const std::string& Description, T Value, T DefaultValue, 
+    TCvar(const std::string& Name, const std::string& Description, T Value, T DefaultValue,
           const TCvarFlags& Flags, const TCallback<T>& OnChange)
         : FValue(Value), FDefaultValue(DefaultValue), FOnChange(OnChange) {
         SetName(Name);
         SetDescription(Description);
         SetFlags(Flags);
     }
-    
+
+    // Constructor for default initialization (used by global variables)
+    TCvar() : FValue{}, FDefaultValue{}, FOnChange(nullptr) {
+        SetName("");
+        SetDescription("");
+        SetFlags({});
+    }
+
     void Reset() override {
         SetValue(FDefaultValue);
     }
-    
+
     virtual bool SetValue(T Value) {
         if (FOnChange) {
             if (!FOnChange(this, Value)) {
@@ -123,193 +143,34 @@ public:
         FValue = Value;
         return true;
     }
-    
+
     static TCvar<T>* Find(const std::string& Name) {
         TCvarBase* base = TCvarBase::Find(Name);
         if (!base) return nullptr;
         // In a real implementation, we'd need type checking here
         return static_cast<TCvar<T>*>(base);
     }
-    
+
     const T& GetValue() const { return FValue; }
     const T& GetDefaultValue() const { return FDefaultValue; }
     void SetOnChange(const TCallback<T>& callback) { FOnChange = callback; }
-    
+
     // Public getter for accessing the value
     T Value() const { return FValue; }
+    
+    // Public access for the callback
+    TCallback<T> GetCallback() const { return FOnChange; }
 };
 
-struct TIntegerCvar : public TCvar<int> {
-private:
-    int FMinValue;
-    int FMaxValue;
-
-public:
-    TIntegerCvar(const std::string& Name, const std::string& Description, int Value, int DefaultValue,
-                 const TCvarFlags& Flags, const TCallback<int>& OnChange, int MinValue, int MaxValue)
-        : TCvar<int>(Name, Description, Value, DefaultValue, Flags, OnChange), 
-          FMinValue(MinValue), FMaxValue(MaxValue) {}
-
-    bool SetValue(int Value) override;
-    std::string GetErrorMessage() override;
-    bool ParseAndSetValue(const std::string& Value) override;
-    std::string ValueAsString() override;
+// Specific Cvar type implementations
+struct TIntCvar : public TCvar<int> {
+    TIntCvar() : TCvar<int>() {} // Default constructor for global variables
     
-    static TIntegerCvar* Add(const std::string& Name, const std::string& Description, int Value, int DefaultValue,
-                            const TCvarFlags& Flags, const TCallback<int>& OnChange, int MinValue, int MaxValue);
-    
-    int GetMinValue() const { return FMinValue; }
-    int GetMaxValue() const { return FMaxValue; }
-};
+    TIntCvar(const std::string& Name, const std::string& Description, int Value, int DefaultValue,
+             const TCvarFlags& Flags, const TCallback<int>& OnChange)
+        : TCvar<int>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
 
-struct TSingleCvar : public TCvar<float> {
-private:
-    float FMinValue;
-    float FMaxValue;
-
-public:
-    TSingleCvar(const std::string& Name, const std::string& Description, float Value, float DefaultValue,
-                const TCvarFlags& Flags, const TCallback<float>& OnChange, float MinValue, float MaxValue)
-        : TCvar<float>(Name, Description, Value, DefaultValue, Flags, OnChange),
-          FMinValue(MinValue), FMaxValue(MaxValue) {}
-
-    bool SetValue(float Value) override;
-    std::string GetErrorMessage() override;
-    bool ParseAndSetValue(const std::string& Value) override;
-    std::string ValueAsString() override;
-    
-    static TSingleCvar* Add(const std::string& Name, const std::string& Description, float Value, float DefaultValue,
-                           const TCvarFlags& Flags, const TCallback<float>& OnChange, float MinValue, float MaxValue);
-    
-    float GetMinValue() const { return FMinValue; }
-    float GetMaxValue() const { return FMaxValue; }
-};
-
-struct TBooleanCvar : public TCvar<bool> {
-public:
-    TBooleanCvar(const std::string& Name, const std::string& Description, bool Value, bool DefaultValue,
-                 const TCvarFlags& Flags, const TCallback<bool>& OnChange)
-        : TCvar<bool>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
-
-    bool SetValue(bool Value) override;
-    std::string GetErrorMessage() override;
-    bool ParseAndSetValue(const std::string& Value) override;
-    std::string ValueAsString() override;
-    
-    static TBooleanCvar* Add(const std::string& Name, const std::string& Description, bool Value, bool DefaultValue,
-                            const TCvarFlags& Flags, const TCallback<bool>& OnChange);
-};
-
-struct TColorCvar : public TCvar<TColor> {
-public:
-    TColorCvar(const std::string& Name, const std::string& Description, TColor Value, TColor DefaultValue,
-               const TCvarFlags& Flags, const TCallback<TColor>& OnChange)
-        : TCvar<TColor>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
-
-    bool SetValue(TColor Value) override;
-    std::string GetErrorMessage() override;
-    bool ParseAndSetValue(const std::string& Value) override;
-    std::string ValueAsString() override;
-    
-    static TColorCvar* Add(const std::string& Name, const std::string& Description, TColor Value, TColor DefaultValue,
-                          const TCvarFlags& Flags, const TCallback<TColor>& OnChange);
-};
-
-struct TStringCvar : public TCvar<std::string> {
-private:
-    int FMinLength;
-    int FMaxLength;
-
-public:
-    TStringCvar(const std::string& Name, const std::string& Description, const std::string& Value, 
-                const std::string& DefaultValue, const TCvarFlags& Flags, const TCallback<std::string>& OnChange, 
-                int MinLength, int MaxLength)
-        : TCvar<std::string>(Name, Description, Value, DefaultValue, Flags, OnChange),
-          FMinLength(MinLength), FMaxLength(MaxLength) {}
-
-    bool SetValue(const std::string& Value) override;
-    std::string GetErrorMessage() override;
-    bool ParseAndSetValue(const std::string& Value) override;
-    std::string ValueAsString() override;
-    
-    static TStringCvar* Add(const std::string& Name, const std::string& Description, const std::string& Value, 
-                           const std::string& DefaultValue, const TCvarFlags& Flags, 
-                           const TCallback<std::string>& OnChange, int MinLength, int MaxLength);
-    
-    int GetMinLength() const { return FMinLength; }
-    int GetMaxLength() const { return FMaxLength; }
-};
-
-void CvarInit();
-std::string DumpFlags(TCvarBase* Cvar);
-void ResetSyncCvars();
-
-// Global variables
-extern std::unordered_map<std::string, std::unique_ptr<TCvarBase>> Cvars;
-extern std::unordered_map<std::string, std::unique_ptr<TCvarBase>> CvarsSync;
-extern bool CvarsNeedSyncing;
-extern bool CvarsInitialized;
-
-namespace CvarImpl {
-    inline void TCvarBase::SyncUpdate(bool ToSync) {
-        if (ToSync) {
-            FFlags.insert(TCvarFlag::CVAR_TOSYNC);
-            CvarsNeedSyncing = true;
-        } else {
-            FFlags.erase(TCvarFlag::CVAR_TOSYNC);
-        }
-    }
-    
-    inline TCvarBase* TCvarBase::Find(const std::string& Name) {
-        auto it = Cvars.find(Name);
-        if (it != Cvars.end()) {
-            return it->second.get();
-        }
-        return nullptr;
-    }
-
-    inline bool TIntegerCvar::SetValue(int Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
-
-        if (Value >= FMinValue && Value <= FMaxValue) {
-            if (FOnChange) {
-                if (!FOnChange(this, Value)) {
-                    return false;
-                }
-            }
-
-            if (Value != FDefaultValue) {
-                FFlags.insert(TCvarFlag::CVAR_MODIFIED);
-            } else {
-                FFlags.erase(TCvarFlag::CVAR_MODIFIED);
-            }
-
-#ifdef SERVER_CODE
-            // Sync update if value changed
-            if (Value != GetValue()) {
-                SyncUpdate(true);
-            }
-#endif
-
-            // For this example, we assume SetValue modifies the internal value
-            // This would need proper implementation in a real scenario
-            return true;
-        } else {
-            FErrorMessage = "Value must be between " + std::to_string(FMinValue) + " and " + std::to_string(FMaxValue);
-            return false;
-        }
-    }
-
-    inline std::string TIntegerCvar::GetErrorMessage() {
-        std::string result = FErrorMessage;
-        FErrorMessage.clear();
-        return result;
-    }
-
-    inline bool TIntegerCvar::ParseAndSetValue(const std::string& Value) {
+    bool ParseAndSetValue(const std::string& Value) override {
         try {
             int val = std::stoi(Value);
             return SetValue(val);
@@ -318,70 +179,25 @@ namespace CvarImpl {
         }
     }
 
-    inline std::string TIntegerCvar::ValueAsString() {
+    std::string ValueAsString() override {
         return std::to_string(GetValue());
     }
 
-    inline TIntegerCvar* TIntegerCvar::Add(const std::string& Name, const std::string& Description, 
-                                           int Value, int DefaultValue, const TCvarFlags& Flags,
-                                           const TCallback<int>& OnChange, int MinValue, int MaxValue) {
-        auto it = Cvars.find(Name);
-        if (it != Cvars.end()) {
-            // Already exists, return nullptr
-            return nullptr;
-        }
-
-        auto cvar = std::make_unique<TIntegerCvar>(Name, Description, Value, DefaultValue, Flags, OnChange, MinValue, MaxValue);
-        TIntegerCvar* result = cvar.get();
-        Cvars[Name] = std::move(cvar);
-        
-
-        
+    std::string GetErrorMessage() override {
+        std::string result = this->FErrorMessage;
+        this->FErrorMessage.clear();
         return result;
     }
+};
 
-    inline bool TSingleCvar::SetValue(float Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
+struct TFloatCvar : public TCvar<float> {
+    TFloatCvar() : TCvar<float>() {} // Default constructor for global variables
+    
+    TFloatCvar(const std::string& Name, const std::string& Description, float Value, float DefaultValue,
+               const TCvarFlags& Flags, const TCallback<float>& OnChange)
+        : TCvar<float>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
 
-        if (Value >= FMinValue && Value <= FMaxValue) {
-            if (FOnChange) {
-                if (!FOnChange(this, Value)) {
-                    return false;
-                }
-            }
-
-            if (Value != FDefaultValue) {
-                FFlags.insert(TCvarFlag::CVAR_MODIFIED);
-            } else {
-                FFlags.erase(TCvarFlag::CVAR_MODIFIED);
-            }
-
-#ifdef SERVER_CODE
-            // Sync update if value changed
-            if (Value != GetValue()) {
-                SyncUpdate(true);
-            }
-#endif
-
-            return true;
-        } else {
-            std::ostringstream oss;
-            oss << "Value must be between " << FMinValue << " and " << FMaxValue;
-            FErrorMessage = oss.str();
-            return false;
-        }
-    }
-
-    inline std::string TSingleCvar::GetErrorMessage() {
-        std::string result = FErrorMessage;
-        FErrorMessage.clear();
-        return result;
-    }
-
-    inline bool TSingleCvar::ParseAndSetValue(const std::string& Value) {
+    bool ParseAndSetValue(const std::string& Value) override {
         try {
             float val = std::stof(Value);
             return SetValue(val);
@@ -390,65 +206,28 @@ namespace CvarImpl {
         }
     }
 
-    inline std::string TSingleCvar::ValueAsString() {
+    std::string ValueAsString() override {
         return std::to_string(GetValue());
     }
 
-    inline TSingleCvar* TSingleCvar::Add(const std::string& Name, const std::string& Description, 
-                                         float Value, float DefaultValue, const TCvarFlags& Flags,
-                                         const TCallback<float>& OnChange, float MinValue, float MaxValue) {
-        std::string cvarName = Name;
-        std::transform(cvarName.begin(), cvarName.end(), cvarName.begin(), ::tolower);
-        
-        auto it = Cvars.find(cvarName);
-        if (it != Cvars.end()) {
-            return nullptr;
-        }
-
-        auto cvar = std::make_unique<TSingleCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange, MinValue, MaxValue);
-        TSingleCvar* result = cvar.get();
-        Cvars[cvarName] = std::move(cvar);
-        
+    std::string GetErrorMessage() override {
+        std::string result = this->FErrorMessage;
+        this->FErrorMessage.clear();
         return result;
     }
+};
 
-    inline bool TBooleanCvar::SetValue(bool Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
+struct TBooleanCvar : public TCvar<bool> {
+    TBooleanCvar() : TCvar<bool>() {} // Default constructor for global variables
+    
+    TBooleanCvar(const std::string& Name, const std::string& Description, bool Value, bool DefaultValue,
+                 const TCvarFlags& Flags, const TCallback<bool>& OnChange)
+        : TCvar<bool>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
 
-        if (FOnChange) {
-            if (!FOnChange(this, Value)) {
-                return false;
-            }
-        }
-
-        if (Value != FDefaultValue) {
-            FFlags.insert(TCvarFlag::CVAR_MODIFIED);
-        } else {
-            FFlags.erase(TCvarFlag::CVAR_MODIFIED);
-        }
-
-#ifdef SERVER_CODE
-        if (Value != GetValue()) {
-            SyncUpdate(true);
-        }
-#endif
-
-        return true;
-    }
-
-    inline std::string TBooleanCvar::GetErrorMessage() {
-        std::string result = FErrorMessage;
-        FErrorMessage.clear();
-        return result;
-    }
-
-    inline bool TBooleanCvar::ParseAndSetValue(const std::string& Value) {
+    bool ParseAndSetValue(const std::string& Value) override {
         std::string lowerValue = Value;
         std::transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-        
+
         bool val = false;
         if (lowerValue == "1" || lowerValue == "true" || lowerValue == "yes" || lowerValue == "on") {
             val = true;
@@ -461,60 +240,29 @@ namespace CvarImpl {
                 return false;
             }
         }
-        
+
         return SetValue(val);
     }
 
-    inline std::string TBooleanCvar::ValueAsString() {
+    std::string ValueAsString() override {
         return GetValue() ? "1" : "0";
     }
 
-    inline TBooleanCvar* TBooleanCvar::Add(const std::string& Name, const std::string& Description, 
-                                           bool Value, bool DefaultValue, const TCvarFlags& Flags,
-                                           const TCallback<bool>& OnChange) {
-        std::string cvarName = Name;
-        std::transform(cvarName.begin(), cvarName.end(), cvarName.begin(), ::tolower);
-        
-        auto it = Cvars.find(cvarName);
-        if (it != Cvars.end()) {
-            return nullptr;
-        }
-
-        auto cvar = std::make_unique<TBooleanCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange);
-        TBooleanCvar* result = cvar.get();
-        Cvars[cvarName] = std::move(cvar);
-        
+    std::string GetErrorMessage() override {
+        std::string result = this->FErrorMessage;
+        this->FErrorMessage.clear();
         return result;
     }
+};
 
-    inline bool TColorCvar::SetValue(TColor Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
+struct TColorCvar : public TCvar<TColor> {
+    TColorCvar() : TCvar<TColor>() {} // Default constructor for global variables
+    
+    TColorCvar(const std::string& Name, const std::string& Description, TColor Value, TColor DefaultValue,
+               const TCvarFlags& Flags, const TCallback<TColor>& OnChange)
+        : TCvar<TColor>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
 
-        if (FOnChange) {
-            if (!FOnChange(this, Value)) {
-                return false;
-            }
-        }
-
-        if (Value != FDefaultValue) {
-            FFlags.insert(TCvarFlag::CVAR_MODIFIED);
-        } else {
-            FFlags.erase(TCvarFlag::CVAR_MODIFIED);
-        }
-
-        return true;
-    }
-
-    inline std::string TColorCvar::GetErrorMessage() {
-        std::string result = FErrorMessage;
-        FErrorMessage.clear();
-        return result;
-    }
-
-    inline bool TColorCvar::ParseAndSetValue(const std::string& Value) {
+    bool ParseAndSetValue(const std::string& Value) override {
         try {
             unsigned int val;
             std::stringstream ss;
@@ -526,138 +274,49 @@ namespace CvarImpl {
         }
     }
 
-    inline std::string TColorCvar::ValueAsString() {
+    std::string ValueAsString() override {
         std::stringstream ss;
         ss << std::hex << GetValue();
         return ss.str();
     }
 
-    inline TColorCvar* TColorCvar::Add(const std::string& Name, const std::string& Description, 
-                                       TColor Value, TColor DefaultValue, const TCvarFlags& Flags,
-                                       const TCallback<TColor>& OnChange) {
-        std::string cvarName = Name;
-        std::transform(cvarName.begin(), cvarName.end(), cvarName.begin(), ::tolower);
-        
-        auto it = Cvars.find(cvarName);
-        if (it != Cvars.end()) {
-            return nullptr;
-        }
-
-        auto cvar = std::make_unique<TColorCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange);
-        TColorCvar* result = cvar.get();
-        Cvars[cvarName] = std::move(cvar);
-        
+    std::string GetErrorMessage() override {
+        std::string result = this->FErrorMessage;
+        this->FErrorMessage.clear();
         return result;
     }
+};
 
-    inline bool TStringCvar::SetValue(const std::string& Value) {
-        if (FFlags.count(TCvarFlag::CVAR_INITONLY) && CvarsInitialized) {
-            FErrorMessage = "Can be set only at startup";
-            return false;
-        }
+struct TStringCvar : public TCvar<std::string> {
+    TStringCvar() : TCvar<std::string>() {} // Default constructor for global variables
+    
+    TStringCvar(const std::string& Name, const std::string& Description, const std::string& Value,
+                const std::string& DefaultValue, const TCvarFlags& Flags, const TCallback<std::string>& OnChange)
+        : TCvar<std::string>(Name, Description, Value, DefaultValue, Flags, OnChange) {}
 
-        size_t len = Value.length();
-        if (len >= FMinLength && len <= FMaxLength) {
-            if (FOnChange) {
-                if (!FOnChange(this, Value)) {
-                    return false;
-                }
-            }
-
-            if (Value != FDefaultValue) {
-                FFlags.insert(TCvarFlag::CVAR_MODIFIED);
-            } else {
-                FFlags.erase(TCvarFlag::CVAR_MODIFIED);
-            }
-
-#ifdef SERVER_CODE
-            if (Value != GetValue()) {
-                SyncUpdate(true);
-            }
-#endif
-
-            return true;
-        } else {
-            FErrorMessage = "Value must be longer than " + std::to_string(FMinLength) + 
-                           " and shorter than " + std::to_string(FMaxLength) + " characters";
-            return false;
-        }
-    }
-
-    inline std::string TStringCvar::GetErrorMessage() {
-        std::string result = FErrorMessage;
-        FErrorMessage.clear();
-        return result;
-    }
-
-    inline bool TStringCvar::ParseAndSetValue(const std::string& Value) {
+    bool ParseAndSetValue(const std::string& Value) override {
         return SetValue(Value);
     }
 
-    inline std::string TStringCvar::ValueAsString() {
+    std::string ValueAsString() override {
         return GetValue();
     }
 
-    inline TStringCvar* TStringCvar::Add(const std::string& Name, const std::string& Description, 
-                                         const std::string& Value, const std::string& DefaultValue, 
-                                         const TCvarFlags& Flags, const TCallback<std::string>& OnChange, 
-                                         int MinLength, int MaxLength) {
-        std::string cvarName = Name;
-        std::transform(cvarName.begin(), cvarName.end(), cvarName.begin(), ::tolower);
-        
-        auto it = Cvars.find(cvarName);
-        if (it != Cvars.end()) {
-            return nullptr;
-        }
-
-        auto cvar = std::make_unique<TStringCvar>(cvarName, Description, Value, DefaultValue, Flags, OnChange, MinLength, MaxLength);
-        TStringCvar* result = cvar.get();
-        Cvars[cvarName] = std::move(cvar);
-        
+    std::string GetErrorMessage() override {
+        std::string result = this->FErrorMessage;
+        this->FErrorMessage.clear();
         return result;
     }
+};
 
-    inline std::string DumpFlags(TCvarBase* Cvar) {
-        std::string CvarFlags = "";
-        
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_IMMUTABLE)) CvarFlags += " I";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_ARCHIVE)) CvarFlags += " A";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_SPONLY)) CvarFlags += " SP";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_NOTIFY)) CvarFlags += " N";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_MODIFIED)) CvarFlags += " M";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_CLIENT)) CvarFlags += " CL";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_SERVER)) CvarFlags += " SV";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_SYNC)) CvarFlags += " SYNC";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_SCRIPT)) CvarFlags += " SC";
-        if (Cvar->GetFlags().count(TCvarFlag::CVAR_INITONLY)) CvarFlags += " INITONLY";
+void CvarInit();
+std::string DumpFlags(TCvarBase* Cvar);
+void ResetSyncCvars();
 
-        return CvarFlags;
-    }
-
-    inline void ResetSyncCvars() {
-        for (auto& pair : CvarsSync) {
-            pair.second->Reset();
-        }
-    }
-}
-
-// Using declarations to bring into global namespace
-using CvarImpl::TCvarBase;
-using CvarImpl::TCvar;
-using CvarImpl::TIntegerCvar;
-using CvarImpl::TSingleCvar;
-using CvarImpl::TBooleanCvar;
-using CvarImpl::TColorCvar;
-using CvarImpl::TStringCvar;
-using CvarImpl::TCallback;
-using CvarImpl::DumpFlags;
-using CvarImpl::ResetSyncCvars;
-
-// Global variables - they would need to be defined in a source file or with 'extern' in other headers
+// Global variables
 extern std::unordered_map<std::string, std::unique_ptr<TCvarBase>> Cvars;
 extern std::unordered_map<std::string, std::unique_ptr<TCvarBase>> CvarsSync;
 extern bool CvarsNeedSyncing;
 extern bool CvarsInitialized;
 
 #endif // CVAR_H
-

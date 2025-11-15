@@ -1,6 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <cstdint>  // For uint8_t
 //*******************************************************
 //                                                      
 //       Constants Unit                                 
@@ -230,7 +231,11 @@ const int MAX_PUSHTICK = 0;
 #else
 const int MAX_PUSHTICK = 125;
 #endif
-const int MAX_CVARS = 1024;
+
+// Connection types
+const uint8_t CONNECTION_INTERNET = 0;
+const uint8_t CONNECTION_LAN      = 1;
+
 const int MAX_SPRITES = 32;
 const int MAX_BULLETS = 512;
 const int MAX_THINGS = 255;
