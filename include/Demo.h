@@ -67,7 +67,6 @@ private:
     int CreateDemoPlayer();
 #ifndef SERVER_CODE
     void SaveCamera();
-    void SavePosition();
 #endif
 
 public:
@@ -77,6 +76,9 @@ public:
     void StopRecord();
     void SaveRecord(const void* R, int Size);
     void SaveNextFrame();
+#ifndef SERVER_CODE
+    void SavePosition();
+#endif
     
     int GetTicksNum() const { return FTicksNum; }
 };
@@ -109,8 +111,8 @@ extern uint8_t NoTexts;
 
 namespace DemoImpl {
     inline int TDemoRecorder::CreateDemoPlayer() {
-        if (Sprite[MAX_SPRITES].Active) {
-            MainConsole.Console("Failed to create Demo Recorder player. Demos can be recorded with up to 31 players", INFO_MESSAGE_COLOR);
+        if (Sprite[MAX_SPRITES] && Sprite[MAX_SPRITES]->Active) {
+            MainConsole.Console(L"Failed to create Demo Recorder player. Demos can be recorded with up to 31 players", INFO_MESSAGE_COLOR);
             StopRecord();
             return -1;
         }

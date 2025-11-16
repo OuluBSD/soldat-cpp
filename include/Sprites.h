@@ -141,6 +141,7 @@ struct TSprite {
     uint8_t GrenadeTime;
     bool CanGrenade;
     uint8_t GrenadeTimeOut;
+    bool DeadMeat;
     uint8_t WeaponActive[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
     bool WeaponInMenu[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
     bool WeaponInGame[MAIN_WEAPONS + 1];  // 1-indexed Pascal arrays
@@ -462,6 +463,11 @@ struct TSprite {
     // Check if sprite is not playing solo (not spectator or none team)
     bool IsNotSolo() const {
         return Player && Player->Team != TEAM_SPECTATOR && Player->Team != TEAM_NONE;
+    }
+    
+    // Check if another sprite is not in the same team
+    bool IsNotInSameTeam(const TSprite* other) const {
+        return other && Player && other->Player && Player->Team != other->Player->Team && Player->Team != TEAM_NONE && other->Player->Team != TEAM_NONE;
     }
 };
 

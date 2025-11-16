@@ -65,6 +65,10 @@ namespace ClientImpl {
     void RestartGraph();
     void ShowMessage(const std::string& MessageText); // overload
     void ShowMessage(const std::wstring& MessageText); // overload
+    void ClientDisconnect();
+    void ClientSpriteSnapshot();
+    void ClientSpriteSnapshotMov();
+    void ClientSpriteSnapshotDead();
 
     // Function implementations
     inline void RestartGraph() {
@@ -107,6 +111,10 @@ using ClientImpl::Shutdown;
 using ClientImpl::ExitToMenu;
 using ClientImpl::RestartGraph;
 using ClientImpl::ShowMessage;
+using ClientImpl::ClientDisconnect;
+using ClientImpl::ClientSpriteSnapshot;
+using ClientImpl::ClientSpriteSnapshotMov;
+using ClientImpl::ClientSpriteSnapshotDead;
 
 // CVar declarations (would be defined elsewhere)
 extern TBooleanCvar log_enable;

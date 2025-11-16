@@ -169,8 +169,8 @@ uint32_t CreateWMChecksum();
 int16_t WeaponNumToIndex(uint8_t Num);
 int WeaponNameToNum(const std::string& Name);
 
-
 namespace WeaponsImpl {
+
     inline void CreateWeapons(bool RealisticMode) {
         CreateWeaponsBase();
         CreateDefaultWeapons(RealisticMode);
@@ -1482,7 +1482,7 @@ namespace WeaponsImpl {
         }
         return "";
     }
-}
+} // namespace WeaponsImpl
 
 // Using declarations to bring into global namespace
 using WeaponsImpl::TGun;
@@ -1507,11 +1507,5 @@ using WeaponsImpl::CalculateBink;
 using WeaponsImpl::WeaponNumInternalToExternal;
 using WeaponsImpl::WeaponNumExternalToInternal;
 using WeaponsImpl::WeaponNameByNum;
-
-// Global variables
-extern TGun Guns[TOTAL_WEAPONS + 1];  // Pascal arrays start from 1
-extern TGun DefaultGuns[TOTAL_WEAPONS + 1];  // Pascal arrays start from 1
-extern uint32_t DefaultWMChecksum;
-extern uint32_t LoadedWMChecksum;
 
 #endif // WEAPONS_H

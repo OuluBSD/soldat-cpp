@@ -718,6 +718,63 @@ namespace ClientImpl {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", 
                                  utf8Str.c_str(), nullptr);
     }
+
+    inline void ClientDisconnect() {
+        if (UDP && UDP->GetActive()) {
+            // Send disconnect message to the server
+            TMsg_PlayerDisconnect msg;
+            msg.Header.ID = MsgID_PlayerDisconnect;
+            msg.Num = MySprite;
+            msg.Why = KICK_LEFTGAME;
+            UDP->SendData(&msg, sizeof(msg), 0);  // Send to server
+
+            UDP->Disconnect(true);
+        }
+    }
+
+    inline void ClientSpriteSnapshot() {
+        if (MySprite > 0 && Sprite[MySprite] && Sprite[MySprite]->Active) {
+            TMsg_ClientSpriteSnapshot msg;
+            msg.Header.ID = MsgID_ClientSpriteSnapshot;
+            msg.AmmoCount = Sprite[MySprite]->AmmoCount[Sprite[MySprite]->Weapon];
+            msg.SecondaryAmmoCount = Sprite[MySprite]->AmmoCount[Sprite[MySprite]->SecondaryWeapon];
+            msg.WeaponNum = Sprite[MySprite]->WeaponNum;
+            msg.SecondaryWeaponNum = Sprite[MySprite]->SecondaryWeaponNum;
+            msg.Position = Sprite[MySprite]->Position;
+
+            if (UDP) {
+                UDP->SendData(&msg, sizeof(msg), 0);  // Send to server
+            }
+        }
+    }
+
+    inline void ClientSpriteSnapshotMov() {
+        if (MySprite > 0 && Sprite[MySprite] && Sprite[MySprite]->Active) {
+            TMsg_ClientSpriteSnapshot_Mov msg;
+            msg.Header.ID = MsgID_ClientSpriteSnapshot_Mov;
+            msg.Pos = Sprite[MySprite]->Pos;
+            msg.Velocity = Sprite[MySprite]->Velocity;
+            msg.Keys16 = Sprite[MySprite]->Keys16;
+            msg.MouseAimX = static_cast<int16_t>(Sprite[MySprite]->MouseAim.x);
+            msg.MouseAimY = static_cast<int16_t>(Sprite[MySprite]->MouseAim.y);
+
+            if (UDP) {
+                UDP->SendData(&msg, sizeof(msg), 0);  // Send to server
+            }
+        }
+    }
+
+    inline void ClientSpriteSnapshotDead() {
+        if (MySprite > 0 && Sprite[MySprite] && Sprite[MySprite]->Active) {
+            TMsg_ClientSpriteSnapshot_Dead msg;
+            msg.Header.ID = MsgID_ClientSpriteSnapshot_Dead;
+            msg.CameraFocus = Sprite[MySprite]->Camera;  // or some other appropriate field
+
+            if (UDP) {
+                UDP->SendData(&msg, sizeof(msg), 0);  // Send to server
+            }
+        }
+    }
 }
 
 // Global variable definitions

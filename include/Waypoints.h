@@ -19,35 +19,35 @@
 const int MAX_WAYPOINTS = 5000;
 const int MAX_CONNECTIONS = 20;
 
-struct TWaypoint {
-    bool Active;
-    int id;
-    int X, Y;
-    bool Left, Right, Up, Down, M2;
-    uint8_t PathNum;
-    uint8_t C1, C2, C3;
-    int ConnectionsNum;
-    int Connections[MAX_CONNECTIONS + 1];  // Pascal arrays start from 1
-
-    TWaypoint() : Active(false), id(0), X(0), Y(0), Left(false), Right(false), 
-                  Up(false), Down(false), M2(false), PathNum(0), C1(0), C2(0), C3(0),
-                  ConnectionsNum(0) {
-        std::fill(Connections, Connections + MAX_CONNECTIONS + 1, 0);
-    }
-};
-
-// For file use
-struct TPathRec {
-    TWaypoint Waypoint[501];  // Pascal array starting from 1
-
-    TPathRec() {
-        for (int i = 0; i < 501; i++) {
-            Waypoint[i] = TWaypoint();
-        }
-    }
-};
-
 namespace WaypointsImpl {
+    struct TWaypoint {
+        bool Active;
+        int id;
+        int X, Y;
+        bool Left, Right, Up, Down, M2;
+        uint8_t PathNum;
+        uint8_t C1, C2, C3;
+        int ConnectionsNum;
+        int Connections[MAX_CONNECTIONS + 1];  // Pascal arrays start from 1
+
+        TWaypoint() : Active(false), id(0), X(0), Y(0), Left(false), Right(false), 
+                      Up(false), Down(false), M2(false), PathNum(0), C1(0), C2(0), C3(0),
+                      ConnectionsNum(0) {
+            std::fill(Connections, Connections + MAX_CONNECTIONS + 1, 0);
+        }
+    };
+
+    // For file use
+    struct TPathRec {
+        TWaypoint Waypoint[501];  // Pascal array starting from 1
+
+        TPathRec() {
+            for (int i = 0; i < 501; i++) {
+                Waypoint[i] = TWaypoint();
+            }
+        }
+    };
+
     struct TWaypoints {
         TWaypoint Waypoint[MAX_WAYPOINTS + 1];  // Pascal arrays start from 1
 

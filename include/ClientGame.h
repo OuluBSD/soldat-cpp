@@ -23,37 +23,9 @@
 // Forward declarations (these would be defined in other headers)
 struct TFrameTiming;
 
-// Global variables
-extern TVector2 MousePrev;
-extern float mx, my;
-extern bool MapChanged;
-extern bool ChatChanged;  // used for blinking chat input
-extern bool ShouldRenderFrames;  // false during game request phase
 
-// used for action snap
-extern uint8_t ActionSnap;
-extern bool ActionSnapTaken;
-extern int CapScreen;
-extern bool ShowScreen;
-extern uint8_t ScreenCounter;
 
-// resolution
-extern bool IsFullscreen;
-extern int ScreenWidth;
-extern int ScreenHeight;
-extern int RenderWidth;
-extern int RenderHeight;
-extern int WindowWidth;
-extern int WindowHeight;
 
-// chat stuff
-extern std::wstring ChatText;
-extern std::wstring LastChatText;
-extern std::wstring FireChatText;
-extern uint8_t ChatType;
-extern std::string CompletionBase;
-extern int CompletionBaseSeparator;
-extern uint8_t CurrentTabCompletePlayer;
 extern uint8_t CursorPosition;
 extern bool TabCompletePressed;
 extern int ChatTimeCounter;
@@ -84,6 +56,49 @@ namespace ClientGameImpl {
     // FrameTiming variable declaration
     extern TFrameTiming FrameTiming;
     
+    // Global variables
+    inline TVector2 MousePrev = {0.0f, 0.0f};
+    inline float mx = 0.0f;
+    inline float my = 0.0f;
+    inline bool MapChanged = false;
+    inline bool ChatChanged = true;  // used for blinking chat input
+    inline bool ShouldRenderFrames = true;  // false during game request phase
+
+    // used for action snap
+    inline uint8_t ActionSnap = 1;
+    inline bool ActionSnapTaken = false;
+    inline int CapScreen = 255;
+    inline bool ShowScreen = false;
+    inline uint8_t ScreenCounter = 255;
+    
+    // Additional variables that were missing
+    inline bool IsFullscreen = false;
+    inline int ScreenWidth = 800;
+    inline int ScreenHeight = 600;
+    inline int RenderWidth = 800;
+    inline int RenderHeight = 600;
+    inline int WindowWidth = 800;
+    inline int WindowHeight = 600;
+    inline std::wstring ChatText = L"";
+    inline std::wstring LastChatText = L"";
+    inline std::wstring FireChatText = L"";
+    inline uint8_t ChatType = 0;
+    inline std::string CompletionBase = "";
+    inline int CompletionBaseSeparator = 0;
+    inline uint8_t CurrentTabCompletePlayer = 0;
+    inline uint8_t CursorPosition = 0;  // For chat cursor position
+    inline bool TabCompletePressed = false;  // For tab completion
+    inline uint8_t ChatTimeCounter = 0;  // For chat blinking
+    inline int ClientStopMovingCounter = 0;  // For connection issues
+    inline bool ForceClientSpriteSnapshotMov = false;
+    inline int LastForceClientSpriteSnapshotMovTick = 0;
+    inline int MenuTimer = 0;
+    
+    inline double GetCurrentTime() {
+        int64_t x = SDL_GetPerformanceCounter();
+        return static_cast<double>(x - FrameTiming.StartTime) / FrameTiming.Frequency;
+    }
+    
     inline void ResetFrameTiming() {
         FrameTiming.Frequency = SDL_GetPerformanceFrequency();
         FrameTiming.StartTime = SDL_GetPerformanceCounter();
@@ -104,11 +119,6 @@ namespace ClientGameImpl {
 
         TickTime = 0;
         TickTimeLast = 0;
-    }
-
-    inline double GetCurrentTime() {
-        int64_t x = SDL_GetPerformanceCounter();
-        return static_cast<double>(x - FrameTiming.StartTime) / FrameTiming.Frequency;
     }
 
     inline void BigMessage(const std::wstring& Text, int Delay, uint32_t Col) {
@@ -263,16 +273,16 @@ namespace ClientGameImpl {
             // General game updating
             Update_Frame();
 
-            if (DemoRecorder && DemoRecorder->Active && (MainTickCounter % demo_rate.Value() == 0)) {
+            if (DemoRecorder && DemoRecorder->Active() && (MainTickCounter % demo_rate.Value() == 0)) {
                 DemoRecorder->SavePosition();
             }
 
-            if ((MapChangeCounter < 0) && (!EscMenu.Active)) {
+            if ((MapChangeCounter < 0) && (!EscMenu->Active)) {
                 // DEMO
-                if (DemoRecorder && DemoRecorder->Active) {
+                if (DemoRecorder && DemoRecorder->Active()) {
                     DemoRecorder->SaveNextFrame();
                 }
-                if (DemoPlayer && DemoPlayer->Active) {
+                if (DemoPlayer && DemoPlayer->Active()) {
                     DemoPlayer->ProcessDemo();
                 }
             }
@@ -297,18 +307,18 @@ namespace ClientGameImpl {
                 }
             }
 
-            if ((MySprite > 0) && (!DemoPlayer.Active)) {
+            if ((MySprite > 0) && (!DemoPlayer->Active())) {
                 // connection problems
-                if ((MapChangeCounter < 0) && !EscMenu.Active) {
+                if ((MapChangeCounter < 0) && !EscMenu->Active) {
                     NoHeartbeatTime++;
                 }
 
                 if (NoHeartbeatTime > CONNECTIONPROBLEM_TIME) {
                     if (MainTickCounter % 120 == 0) {
                         if (NoHeartbeatTime > DISCONNECTION_TIME) {
-                            MainConsole.Console(L"Connection timeout", WARNING_MESSAGE_COLOR);
+                            MainConsole.Console(static_cast<WideString>(L"Connection timeout"), static_cast<uint32_t>(WARNING_MESSAGE_COLOR));
                         } else {
-                            MainConsole.Console(L"Connection problem", WARNING_MESSAGE_COLOR);
+                            MainConsole.Console(static_cast<WideString>(L"Connection problem"), static_cast<uint32_t>(WARNING_MESSAGE_COLOR));
                         }
                     }
 
@@ -320,7 +330,7 @@ namespace ClientGameImpl {
 
                     GameMenuShow(TeamMenu, false);
 
-                    MainConsole.Console(L"Connection timeout", WARNING_MESSAGE_COLOR);
+                    MainConsole.Console(static_cast<WideString>(L"Connection timeout"), static_cast<uint32_t>(WARNING_MESSAGE_COLOR));
 
                     ClientDisconnect();
                 }
@@ -332,8 +342,8 @@ namespace ClientGameImpl {
                 ClientStopMovingCounter--;
 
                 if (Connection == INTERNET) {
-                    if (Sprite[MySprite].Active) {
-                        if (!Sprite[MySprite].DeadMeat) {
+                    if (Sprite[MySprite]->Active) {
+                        if (!Sprite[MySprite]->DeadMeat) {
                             if ((MainTickCounter % static_cast<int>(std::round(7 * Adjust)) == 1) &&
                                (MainTickCounter % static_cast<int>(std::round(5 * Adjust)) != 0)) {
                                 ClientSpriteSnapshot();
@@ -350,7 +360,7 @@ namespace ClientGameImpl {
                     }
                 }
                 else if (Connection == LAN) {
-                    if (!Sprite[MySprite].DeadMeat) {
+                    if (!Sprite[MySprite]->DeadMeat) {
                         if (MainTickCounter % static_cast<int>(std::round(4 * Adjust)) == 0) {
                             ClientSpriteSnapshot();
                         }
@@ -465,7 +475,7 @@ namespace ClientGameImpl {
                 }  // Let spectator view all players
             }
 
-            if (Sprite[NewCam] && Sprite[MySprite] && Sprite[NewCam]->IsNotInSameTeam(*Sprite[MySprite])) {
+            if (Sprite[NewCam] && Sprite[MySprite] && Sprite[NewCam]->IsNotInSameTeam(Sprite[MySprite].get())) {
                 continue;  // Don't swap camera to a player not on my team
             }
 
@@ -494,7 +504,9 @@ namespace ClientGameImpl {
         // }
     }
 #endif
-}
+}  // closes namespace ClientGameImpl
+    
+    
 
 // Using declarations to bring into global namespace
 using ClientGameImpl::MousePrev;
@@ -539,38 +551,9 @@ using ClientGameImpl::BigMessage;
 using ClientGameImpl::GetCameraTarget;
 using ClientGameImpl::GetMicData;
 
-// Global variables
-extern TVector2 MousePrev = {0.0f, 0.0f};
-extern float mx = 0.0f;
-extern float my = 0.0f;
-extern bool MapChanged = false;
-extern bool ChatChanged = true;  // used for blinking chat input
-extern bool ShouldRenderFrames = true;  // false during game request phase
 
-// used for action snap
-extern uint8_t ActionSnap = 1;
-extern bool ActionSnapTaken = false;
-extern int CapScreen = 255;
-extern bool ShowScreen = false;
-extern uint8_t ScreenCounter = 255;
 
-// resolution
-extern bool IsFullscreen = false;
-extern int ScreenWidth = DEFAULT_WIDTH;
-extern int ScreenHeight = DEFAULT_HEIGHT;
-extern int RenderWidth = 0;
-extern int RenderHeight = 0;
-extern int WindowWidth = 0;
-extern int WindowHeight = 0;
 
-// chat stuff
-extern std::wstring ChatText = L"";
-extern std::wstring LastChatText = L"";
-extern std::wstring FireChatText = L"";
-extern uint8_t ChatType = 0;
-extern std::string CompletionBase = "";
-extern int CompletionBaseSeparator = 0;
-extern uint8_t CurrentTabCompletePlayer = 0;
 extern uint8_t CursorPosition = 0;
 extern bool TabCompletePressed = false;
 extern int ChatTimeCounter = 0;
