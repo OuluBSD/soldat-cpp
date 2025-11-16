@@ -110,20 +110,20 @@ namespace MapGraphicsImpl {
     inline void SetTextureFilter(TGfxTexture* Texture, bool AllowMipmaps) {
         if (Texture == nullptr) return;
 
-        int i = std::max(1, std::min(2, r_texturefilter.Value));
+        int i = std::max(1, std::min(2, r_texturefilter.Value()));
 
         TGfxTextureFilter Filters[2];
         Filters[0] = GFX_NEAREST;  // "point"
         Filters[1] = GFX_LINEAR;   // "linear"
 
-        if (AllowMipmaps && r_mipmapping.Value) {
+        if (AllowMipmaps && r_mipmapping.Value()) {
             Filters[0] = GFX_MIPMAP_NEAREST;
             Filters[1] = GFX_MIPMAP_LINEAR;
         }
 
         GfxTextureFilter(Texture, Filters[i-1], Filters[i-1]);
 
-        if (AllowMipmaps && r_mipmapping.Value) {
+        if (AllowMipmaps && r_mipmapping.Value()) {
             GfxGenerateMipmap(Texture);
         }
     }

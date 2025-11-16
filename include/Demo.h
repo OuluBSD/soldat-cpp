@@ -55,6 +55,7 @@ public:
 
     bool GetActive() const { return FActive; }
     void SetActive(bool value) { FActive = value; }
+    bool Active() const { return FActive; }  // Convenience method to match Pascal interface
     const std::string& GetName() const { return FName; }
     const TDemoHeader& GetHeader() const { return FDemoHeader; }
 };

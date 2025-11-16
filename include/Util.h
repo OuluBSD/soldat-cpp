@@ -16,6 +16,8 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <fstream>
+#include <cctype>
 
 // Forward declarations
 #include "Sha1.h"  // Include Sha1.h to get TSHA1Digest definition
@@ -199,6 +201,97 @@ namespace UtilImpl {
         (void)MapInfo;    // Suppress unused parameter warning
         // Placeholder implementation
         return false;
+    }
+    
+    // Additional utility functions needed by the codebase
+    inline const char* PChar(const std::string& str) {
+        return str.c_str();
+    }
+    
+    inline std::string toLower(const std::string& str) {
+        std::string result = str;
+        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+        return result;
+    }
+    
+    enum class TReplaceFlags {
+        rfReplaceAll
+    };
+    
+    inline std::string StringReplace(std::string Text, const std::string& Search, 
+                                     const std::string& Replace, TReplaceFlags Flags) {
+        if (Flags == TReplaceFlags::rfReplaceAll) {
+            size_t pos = 0;
+            while ((pos = Text.find(Search, pos)) != std::string::npos) {
+                Text.replace(pos, Search.length(), Replace);
+                pos += Replace.length();
+            }
+        } else {
+            size_t pos = Text.find(Search);
+            if (pos != std::string::npos) {
+                Text.replace(pos, Search.length(), Replace);
+            }
+        }
+        return Text;
+    }
+    
+    inline std::string LowerCase(const std::string& str) {
+        return toLower(str);
+    }
+}
+
+// More utility functions
+namespace Util {
+    inline const char* PChar(const std::string& str) {
+        return str.c_str();
+    }
+    
+    inline std::string toLower(const std::string& str) {
+        std::string result = str;
+        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+        return result;
+    }
+    
+    enum class TReplaceFlags {
+        rfReplaceAll
+    };
+    
+    inline std::string StringReplace(std::string Text, const std::string& Search, 
+                                     const std::string& Replace, TReplaceFlags Flags) {
+        if (Flags == TReplaceFlags::rfReplaceAll) {
+            size_t pos = 0;
+            while ((pos = Text.find(Search, pos)) != std::string::npos) {
+                Text.replace(pos, Search.length(), Replace);
+                pos += Replace.length();
+            }
+        } else {
+            size_t pos = Text.find(Search);
+            if (pos != std::string::npos) {
+                Text.replace(pos, Search.length(), Replace);
+            }
+        }
+        return Text;
+    }
+    
+    inline std::string LowerCase(const std::string& str) {
+        return toLower(str);
+    }
+    
+    // FileExists function using PHYSFS
+    inline bool FileExists(const std::string& filename) {
+        // This would typically use PHYSFS_exists if PHYSFS is available
+        // For now, using a basic check
+        #ifdef HAVE_PHYSFS
+        return PHYSFS_exists(filename.c_str()) != 0;
+        #else
+        std::ifstream file(filename);
+        return file.good();
+        #endif
+    }
+    
+    // Convert degrees to radians
+    inline float DegToRad(float degrees) {
+        return degrees * 3.14159265358979323846f / 180.0f;
     }
 }
 

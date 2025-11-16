@@ -2,11 +2,11 @@
 #define CLIENT_H
 
 //*******************************************************************************
-//                                                                              
-//       Client Unit for SOLDAT                                                   
-//                                                                              
-//       Copyright (c) 2003 Michal Marcinkowski            
-//                                                                              
+//
+//       Client Unit for SOLDAT
+//
+//       Copyright (c) 2003 Michal Marcinkowski
+//
 //*******************************************************************************
 
 #include <string>
@@ -28,60 +28,61 @@
 struct TClientNetwork;
 struct TSteam;
 
-// Type definitions
-struct TWeaponStat {
-    std::string Name;
-    uint32_t TextureID;
-    uint32_t Shots, Hits, Kills, Headshots;
-    uint8_t Accuracy;
-    
-    TWeaponStat() : TextureID(0), Shots(0), Hits(0), Kills(0), Headshots(0), Accuracy(0) {}
-};
-
-// Global variables
-extern bool GameLoopRun;
-extern bool ProgReady;
-
-extern std::string JoinPassword;  // server password
-extern std::string JoinPort;      // join port to server
-extern std::string JoinIP;        // join ip to server
-
-extern bool WindowReady;
-extern uint8_t Initing;
-extern bool GraphicsInitialized;
-
-extern std::string BaseDirectory;
-extern std::string UserDirectory;
-
-extern std::string ModDir;
-extern bool UsesServerMod;
-
-// Function declarations
-void JoinServer();
-void StartGame();
-void Shutdown();
-void ExitToMenu();
-void RestartGraph();
-void ShowMessage(const std::string& MessageText); // overload
-void ShowMessage(const std::wstring& MessageText); // overload
-
 namespace ClientImpl {
+    // Type definitions
+    struct TWeaponStat {
+        std::string Name;
+        uint32_t TextureID;
+        uint32_t Shots, Hits, Kills, Headshots;
+        uint8_t Accuracy;
+
+        TWeaponStat() : TextureID(0), Shots(0), Hits(0), Kills(0), Headshots(0), Accuracy(0) {}
+    };
+
+    // Global variables
+    extern bool GameLoopRun;
+    extern bool ProgReady;
+
+    extern std::string JoinPassword;  // server password
+    extern std::string JoinPort;      // join port to server
+    extern std::string JoinIP;        // join ip to server
+
+    extern bool WindowReady;
+    extern uint8_t Initing;
+    extern bool GraphicsInitialized;
+
+    extern std::string BaseDirectory;
+    extern std::string UserDirectory;
+
+    extern std::string ModDir;
+    extern bool UsesServerMod;
+
+    // Function declarations
+    void JoinServer();
+    void StartGame();
+    void Shutdown();
+    void ExitToMenu();
+    void RestartGraph();
+    void ShowMessage(const std::string& MessageText); // overload
+    void ShowMessage(const std::wstring& MessageText); // overload
+
+    // Function implementations
     inline void RestartGraph() {
         // WindowReady = false;
         // DoTextureLoading(true);
-        // 
+        //
         // // Load Map
         // Map.LoadMap(MapChange, r_forcebg.Value, r_forcebg_color1.Value, r_forcebg_color2.Value);
-        // 
+        //
         // WindowReady = true;
-        // 
+        //
         // if (!EscMenu.Active()) {
         //     mx = GameWidthHalf;
         //     my = GameHeightHalf;
         //     MousePrev.x = mx;
         //     MousePrev.y = my;
         // }
-        // 
+        //
         // MainConsole.Console(_("Graphics restart"), DEBUG_MESSAGE_COLOR);
     }
 }
@@ -106,24 +107,6 @@ using ClientImpl::Shutdown;
 using ClientImpl::ExitToMenu;
 using ClientImpl::RestartGraph;
 using ClientImpl::ShowMessage;
-
-// Global variable definitions
-extern bool GameLoopRun = false;
-extern bool ProgReady = false;
-
-extern std::string JoinPassword = "";
-extern std::string JoinPort = "23073";
-extern std::string JoinIP = "127.0.0.1";
-
-extern bool WindowReady = false;
-extern uint8_t Initing = 0;
-extern bool GraphicsInitialized = false;
-
-extern std::string BaseDirectory = "";
-extern std::string UserDirectory = "";
-
-extern std::string ModDir = "";
-extern bool UsesServerMod = false;
 
 // CVar declarations (would be defined elsewhere)
 extern TBooleanCvar log_enable;

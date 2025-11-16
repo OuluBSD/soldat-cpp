@@ -193,8 +193,8 @@ namespace GameRenderingImpl {
 
     inline void LoadFonts() {
         std::string FontFile[3]; // 1-indexed
-        FontFile[1] = font_1_filename.Value;
-        FontFile[2] = font_2_filename.Value;
+        FontFile[1] = font_1_filename.Value();
+        FontFile[2] = font_2_filename.Value();
 
         std::string FontPath[3];
         FontPath[1] = GetFontPath(DEFAULT_FONT, FontFile[1]);
@@ -208,7 +208,7 @@ namespace GameRenderingImpl {
 
         int w = RenderWidth;
         int h = RenderHeight;
-        float s = r_scaleinterface.Value ? (float)RenderHeight / GameHeight : 1.0f;
+        float s = r_scaleinterface.Value() ? (float)RenderHeight / GameHeight : 1.0f;
 
         // Create fonts
         Fonts[1] = GfxCreateFont(FontPath[1].c_str(), Npot(w / 2), Npot(h / 2));
@@ -216,39 +216,39 @@ namespace GameRenderingImpl {
 
         // Set up font styles
         FontStyles[FONT_SMALL].Font = Fonts[2];
-        FontStyles[FONT_SMALL].Size = s * font_consolesize.Value;
-        FontStyles[FONT_SMALL].Stretch = font_2_scale.Value / 100;
+        FontStyles[FONT_SMALL].Size = s * font_consolesize.Value();
+        FontStyles[FONT_SMALL].Stretch = font_2_scale.Value() / 100;
         FontStyles[FONT_SMALL].Flags = 0;
 
         // bold not supported for now so same as FONT_SMALL
         FontStyles[FONT_SMALL_BOLD].Font = Fonts[2];
-        FontStyles[FONT_SMALL_BOLD].Size = s * font_consolesize.Value;
-        FontStyles[FONT_SMALL_BOLD].Stretch = font_2_scale.Value / 100;
+        FontStyles[FONT_SMALL_BOLD].Size = s * font_consolesize.Value();
+        FontStyles[FONT_SMALL_BOLD].Stretch = font_2_scale.Value() / 100;
         FontStyles[FONT_SMALL_BOLD].Flags = 0;
 
         FontStyles[FONT_SMALLEST].Font = Fonts[2];
-        FontStyles[FONT_SMALLEST].Size = s * font_consolesmallsize.Value;
-        FontStyles[FONT_SMALLEST].Stretch = font_2_scale.Value / 100;
+        FontStyles[FONT_SMALLEST].Size = s * font_consolesmallsize.Value();
+        FontStyles[FONT_SMALLEST].Stretch = font_2_scale.Value() / 100;
         FontStyles[FONT_SMALLEST].Flags = 0;
 
         FontStyles[FONT_BIG].Font = Fonts[1];
-        FontStyles[FONT_BIG].Size = font_bigsize.Value;
-        FontStyles[FONT_BIG].Stretch = font_1_scale.Value / 100;
+        FontStyles[FONT_BIG].Size = font_bigsize.Value();
+        FontStyles[FONT_BIG].Stretch = font_1_scale.Value() / 100;
         FontStyles[FONT_BIG].Flags = 0;
 
         FontStyles[FONT_MENU].Font = Fonts[1];
-        FontStyles[FONT_MENU].Size = s * font_menusize.Value;
-        FontStyles[FONT_MENU].Stretch = font_1_scale.Value / 100;
+        FontStyles[FONT_MENU].Size = s * font_menusize.Value();
+        FontStyles[FONT_MENU].Stretch = font_1_scale.Value() / 100;
         FontStyles[FONT_MENU].Flags = 0;
 
         FontStyles[FONT_WEAPONS_MENU].Font = Fonts[2];
-        FontStyles[FONT_WEAPONS_MENU].Size = s * font_weaponmenusize.Value;
-        FontStyles[FONT_WEAPONS_MENU].Stretch = font_2_scale.Value / 100;
+        FontStyles[FONT_WEAPONS_MENU].Size = s * font_weaponmenusize.Value();
+        FontStyles[FONT_WEAPONS_MENU].Stretch = font_2_scale.Value() / 100;
         FontStyles[FONT_WEAPONS_MENU].Flags = 0;
 
         FontStyles[FONT_WORLD].Font = Fonts[1];
         FontStyles[FONT_WORLD].Size = 128 * ((float)RenderHeight / GameHeight);
-        FontStyles[FONT_WORLD].Stretch = font_1_scale.Value / 100;
+        FontStyles[FONT_WORLD].Stretch = font_1_scale.Value() / 100;
         FontStyles[FONT_WORLD].Flags = 0;
 
         for (int i = 0; i <= FONT_LAST; i++) {
@@ -278,16 +278,16 @@ namespace GameRenderingImpl {
 
         uint32_t WindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 
-        if (r_fullscreen.Value == 2) {
+        if (r_fullscreen.Value() == 2) {
             WindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-        } else if (r_fullscreen.Value == 1) {
+        } else if (r_fullscreen.Value() == 1) {
             WindowFlags |= SDL_WINDOW_FULLSCREEN;
         }
 
         // Set OpenGL attributes for MSAA if enabled
-        if (r_msaa.Value > 0) {
+        if (r_msaa.Value() > 0) {
             SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, r_msaa.Value);
+            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, r_msaa.Value());
         }
 
         GameWindow = SDL_CreateWindow("Soldat",
@@ -303,13 +303,13 @@ namespace GameRenderingImpl {
             return false;
         }
 
-        if (!GfxInitContext(GameWindow, r_dithering.Value, r_compatibility.Value)) {
+        if (!GfxInitContext(GameWindow, r_dithering.Value(), r_compatibility.Value())) {
             return false;
         }
 
         StartInput();
 
-        if (SDL_GL_SetSwapInterval(r_swapeffect.Value) == -1) {
+        if (SDL_GL_SetSwapInterval(r_swapeffect.Value()) == -1) {
             GfxLog("Error while setting SDL_GL_SetSwapInterval: " + std::string(SDL_GetError()));
         }
 
@@ -326,7 +326,7 @@ namespace GameRenderingImpl {
             cl_actionsnap.SetValue(false);
         }
 
-        if (cl_actionsnap.Value) {
+        if (cl_actionsnap.Value()) {
             ActionSnapTexture = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, true);
         }
 
@@ -334,16 +334,16 @@ namespace GameRenderingImpl {
             if ((WindowWidth != RenderWidth) || (WindowHeight != RenderHeight)) {
                 RenderTarget = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, true);
 
-                if (RenderTarget.Samples > 0) {
+                if (RenderTarget.GetSamples() > 0) {
                     RenderTargetAA = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, false);
 
-                    if (r_resizefilter.Value >= 2) {
+                    if (r_resizefilter.Value() >= 2) {
                         GfxTextureFilter(RenderTargetAA, GFX_LINEAR, GFX_LINEAR);
                     } else {
                         GfxTextureFilter(RenderTargetAA, GFX_NEAREST, GFX_NEAREST);
                     }
                 } else {
-                    if (r_resizefilter.Value >= 2) {
+                    if (r_resizefilter.Value() >= 2) {
                         GfxTextureFilter(RenderTarget, GFX_LINEAR, GFX_LINEAR);
                     } else {
                         GfxTextureFilter(RenderTarget, GFX_NEAREST, GFX_NEAREST);

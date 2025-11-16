@@ -46,3 +46,7 @@ Release
 *.swo
 *.swp
 *.swu
+
+# build temp files
+errors.txt
+

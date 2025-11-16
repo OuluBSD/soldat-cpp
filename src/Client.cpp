@@ -20,6 +20,7 @@
 #include "ControlGame.h"
 #include "InterfaceGraphics.h"
 #include "Input.h"
+#include <physfs.h>
 
 namespace ClientImpl {
     // Initialize global variables
@@ -132,7 +133,7 @@ namespace ClientImpl {
 
         WindowReady = true;
 
-        if (!EscMenu.Active()) {
+        if (!EscMenu->Active) {
             mx = GameWidthHalf;
             my = GameHeightHalf;
             MousePrev.x = mx;
@@ -202,12 +203,12 @@ namespace ClientImpl {
         //NetEncActive := False;
         ResetSyncCvars();
 
-        if (DemoRecorder.Active()) {
-            DemoRecorder.StopRecord();
+        if (DemoRecorder && DemoRecorder->Active()) {
+            DemoRecorder->StopRecord();
         }
 
-        if (DemoPlayer.Active()) {
-            DemoPlayer.StopDemo();
+        if (DemoPlayer && DemoPlayer->Active()) {
+            DemoPlayer->StopDemo();
         }
 
         if (MySprite > 0) {
@@ -231,18 +232,24 @@ namespace ClientImpl {
         //WindowReady := False;
 
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            if (Sprite[i].Active) {
-                Sprite[i].Kill();
+            if (Sprite[i] && Sprite[i]->Active) {
+                Sprite[i]->Kill();
             }
         }
         for (int i = 1; i <= MAX_BULLETS; i++) {
-            Bullet[i].Kill();
+            if (Bullet[i]) {
+                Bullet[i]->Kill();
+            }
         }
         for (int i = 1; i <= MAX_SPARKS; i++) {
-            Spark[i].Kill();
+            if (Spark[i]) {
+                Spark[i]->Kill();
+            }
         }
         for (int i = 1; i <= MAX_THINGS; i++) {
-            Thing[i].Kill();
+            if (Thing[i]) {
+                Thing[i]->Kill();
+            }
         }
 
         // Reset World and Big Texts

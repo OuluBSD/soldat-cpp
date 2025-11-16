@@ -2,11 +2,11 @@
 #define GAME_H
 
 //*******************************************************************************
-//                                                                              
-//       Game Unit for SOLDAT                                                   
-//                                                                              
-//       Copyright (c) 2012 Gregor A. Cieslak          
-//                                                                              
+//
+//       Game Unit for SOLDAT
+//
+//       Copyright (c) 2012 Gregor A. Cieslak
+//
 //*******************************************************************************
 
 #include "Vector.h"
@@ -36,6 +36,27 @@ struct TKillSort {
     int PlayerNum;
     uint32_t Color;
 };
+
+// Function declarations
+void Number27Timing();
+void ToggleBulletTime(bool TurnOn, int Duration = 30);
+void UpdateGameStats();
+bool PointVisible(float X, float Y, int i);
+bool PointVisible2(float X, float Y, int i);
+void StartVote(uint8_t StarterVote, uint8_t TypeVote, const std::string& TargetVote, const std::string& ReasonVote);
+void StopVote();
+void TimerVote();
+#ifdef SERVER_CODE
+void CountVote(uint8_t Voter);
+#endif
+void ShowMapChangeScoreboard(); // overload
+void ShowMapChangeScoreboard(const std::string& NextMap); // overload
+bool IsTeamGame();
+#ifndef SERVER_CODE
+bool IsPointOnScreen(TVector2 Point);
+#endif
+void ChangeMap();
+void SortPlayers();
 
 // Global variables
 extern int Ticks;
@@ -167,9 +188,6 @@ extern int HeartbeatTime;
 extern int HeartbeatTimeWarnings;
 #endif
 
-// Note: These arrays are defined in the namespace section below to avoid conflicts with vectors
-// The actual implementation may need to use the vector versions from Sprites.h, Bullets.h, Things.h
-
 // Voting
 extern bool VoteActive;
 extern uint8_t VoteType;
@@ -183,36 +201,89 @@ extern bool VoteHasVoted[MAX_SPRITES + 1];  // Pascal arrays start from 1
 extern int VoteCooldown[MAX_SPRITES + 1];  // Pascal arrays start from 1
 extern bool VoteKickReasonType;
 
-// Function declarations
-void Number27Timing();
-void ToggleBulletTime(bool TurnOn, int Duration = 30);
-void UpdateGameStats();
-bool PointVisible(float X, float Y, int i);
-bool PointVisible2(float X, float Y, int i);
-void StartVote(uint8_t StarterVote, uint8_t TypeVote, const std::string& TargetVote, const std::string& ReasonVote);
-void StopVote();
-void TimerVote();
-#ifdef SERVER_CODE
-void CountVote(uint8_t Voter);
-#endif
-void ShowMapChangeScoreboard(); // overload
-void ShowMapChangeScoreboard(const std::string& NextMap); // overload
-bool IsTeamGame();
-#ifndef SERVER_CODE
-bool IsPointOnScreen(TVector2 Point);
-#endif
-void ChangeMap();
-void SortPlayers();
-
 namespace GameImpl {
-    // Timing variables
-    inline uint64_t TimeInMilLast = 0;
-    inline uint64_t TimeInMil = 0;
-    inline uint32_t TimePassed = 0;
-    inline int Seconds = 0;
-    inline int SecondsLast = 0;
+    using ::Sprite;  // Make global Sprite vector accessible in this namespace
+    using ::SpriteParts;  // Make global SpriteParts accessible in this namespace
+    using ::sv_votepercent;  // Make cvar accessible
+    using ::sv_killlimit;  // Make cvar accessible
+    using ::sv_timelimit;  // Make cvar accessible
+    using ::sv_advancemode;  // Make cvar accessible
+    using ::sv_gamemode;  // Make cvar accessible
+    using ::PlayersNum;  // Make global variable accessible
+    using ::BotsNum;  // Make global variable accessible
+    using ::SpectatorsNum;  // Make global variable accessible
+    using ::PlayersTeamNum;  // Make global array accessible
+    using ::MySprite;  // Make global variable accessible
+    using ::TeamScore;  // Make global array accessible
+    using ::WeaponSel;  // Make global 2D array accessible
+    using ::MapChangeName;  // Make global variable accessible
+    using ::MapChangeCounter;  // Make global variable accessible
+    using ::MapChangeTime;  // Make global variable accessible
+    using ::TimeLimitCounter;  // Make global variable accessible
+    using ::TeamAliveNum;  // Make global array accessible
+    using ::TeamPlayersNum;  // Make global array accessible
+    using ::VoteActive;  // Make global variable accessible
+    using ::VoteType;  // Make global variable accessible
+    using ::VoteTarget;  // Make global variable accessible
+    using ::VoteStarter;  // Make global variable accessible
+    using ::VoteReason;  // Make global variable accessible
+    using ::VoteTimeRemaining;  // Make global variable accessible
+    using ::VoteNumVotes;  // Make global variable accessible
+    using ::VoteMaxVotes;  // Make global variable accessible
+    using ::VoteHasVoted;  // Make global array accessible
+    using ::Map;  // Make global variable accessible
+    using ::SortedPlayers;  // Make global array accessible
+    using ::SortedTeamScore;  // Make global array accessible
+    using ::GameWidth;  // Make global variable accessible
+    using ::GameHeight;  // Make global variable accessible
+    using ::GameWidthHalf;  // Make global variable accessible
+    using ::GameHeightHalf;  // Make global variable accessible
+    using ::DEFAULT_VOTING_TIME;  // Make constant accessible
+    using ::DEFAULT_GOALTICKS;  // Make constant accessible
+    using ::MAX_PLAYERS;  // Make constant accessible
+    using ::MAX_SPRITES;  // Make constant accessible
+    using ::MAX_BULLETS;  // Make constant accessible
+    using ::MAX_THINGS;  // Make constant accessible
+    using ::MAX_SPARKS;  // Make constant accessible
+    using ::DEFAULT_CEASEFIRE_TIME;  // Make constant accessible
+    using ::DEFAULT_MAPCHANGE_TIME;  // Make constant accessible
+    using ::MAIN_WEAPONS;  // Make constant accessible
+    using ::PRIMARY_WEAPONS;  // Make constant accessible
+    using ::SECONDARY_WEAPONS;  // Make constant accessible
+    using ::DEFAULT_WIDTH;  // Make constant accessible
+    using ::DEFAULT_HEIGHT;  // Make constant accessible
+    using ::MAX_GAME_WIDTH;  // Make constant accessible
+    using ::TEAM_ALPHA;  // Make constant accessible
+    using ::TEAM_BRAVO;  // Make constant accessible
+    using ::TEAM_CHARLIE;  // Make constant accessible
+    using ::TEAM_DELTA;  // Make constant accessible
+    using ::TEAM_NONE;  // Make constant accessible
+    using ::HUMAN;  // Make constant accessible
+    using ::BOT;  // Make constant accessible
+    using ::VOTE_KICK;  // Make constant accessible
+    using ::VOTE_MAP;  // Make constant accessible
+    using ::BONUS_NONE;  // Make constant accessible
+    using ::NOWEAPON;  // Make constant accessible
+    using ::DEFAULT_VOTE_TIME;  // Make constant accessible
+    using ::GAMESTYLE_TEAMMATCH;  // Make constant accessible
+    using ::GAMESTYLE_CTF;  // Make constant accessible
+    using ::GAMESTYLE_INF;  // Make constant accessible
+    using ::GAMESTYLE_HTF;  // Make constant accessible
+    using ::TICKS;  // Make constant accessible
+    using ::SECOND;  // Make constant accessible
+    using ::DEFAULT_VOTE_TIME;  // Make constant accessible
+    using ::HOUR;  // Make constant accessible
+    using ::DAY;  // Make constant accessible
+    using ::INT_MAX;  // Make constant accessible
 
+    // Timing variables
     inline void Number27Timing() {
+        static uint64_t TimeInMilLast = 0;
+        static uint64_t TimeInMil = 0;
+        static uint32_t TimePassed = 0;
+        static int Seconds = 0;
+        static int SecondsLast = 0;
+
         TimeInMilLast = TimeInMil;
         TimeInMil = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -275,7 +346,7 @@ namespace GameImpl {
     inline bool IsPointOnScreen(TVector2 Point) {
         bool result = true;
         // Assuming CameraX and CameraY are global variables that need to be defined
-        // For now using placeholders - these should be defined elsewhere
+        // For now using placeholders - these should be defined elsewhere in the actual code
         extern float CameraX, CameraY;  // These should be declared elsewhere in the actual code
         float P1 = GameWidthHalf - (CameraX - Point.x);
         float P2 = GameHeightHalf - (CameraY - Point.y);
@@ -306,10 +377,8 @@ namespace GameImpl {
             return false;
         }
 
-        // Assuming SpriteParts and Sprite arrays are defined globally
-        // This code should work if the arrays and their elements are properly defined
-        float SX = SpriteParts.Pos[i].x - ((SpriteParts.Pos[i].x - Sprite[i].Control.MouseAimX) / 2);
-        float SY = SpriteParts.Pos[i].y - ((SpriteParts.Pos[i].y - Sprite[i].Control.MouseAimY) / 2);
+        float SX = SpriteParts.Pos[i].x - ((SpriteParts.Pos[i].x - Sprite[i]->Control.MouseAimX) / 2);
+        float SY = SpriteParts.Pos[i].y - ((SpriteParts.Pos[i].y - Sprite[i]->Control.MouseAimY) / 2);
 
         if ((X > (SX - GAME_WIDTH)) && (X < (SX + GAME_WIDTH)) &&
             (Y > (SY - GAME_HEIGHT)) && (Y < (SY + GAME_HEIGHT))) {
@@ -345,8 +414,7 @@ namespace GameImpl {
         if ((StarterVote < 1) || (StarterVote > MAX_PLAYERS)) {
             VoteStarter = "Server";
         } else {
-            // Assuming Sprite array and its elements are properly defined
-            VoteStarter = std::string(Sprite[StarterVote].Player.Name.begin(), Sprite[StarterVote].Player.Name.end());
+            VoteStarter = std::string(Sprite[StarterVote]->Player->Name.begin(), Sprite[StarterVote]->Player->Name.end());
             // VoteCooldown[StarterVote] = DEFAULT_VOTE_TIME;
 #ifndef SERVER_CODE
             extern uint8_t MySprite;  // This should be defined elsewhere
@@ -368,8 +436,8 @@ namespace GameImpl {
         VoteNumVotes = 0;
         VoteMaxVotes = 0;
         for (int i = 1; i <= MAX_PLAYERS; i++) {
-            if (Sprite[i].Active) {
-                if (Sprite[i].Player.ControlMethod == HUMAN) {
+            if (Sprite[i] && Sprite[i]->Active) {
+                if (Sprite[i]->Player->ControlMethod == HUMAN) {
                     VoteMaxVotes++;
                 }
             }
@@ -454,7 +522,7 @@ namespace GameImpl {
         // }
 #endif
     }
-    
+
     inline void ShowMapChangeScoreboard() {
         ShowMapChangeScoreboard("EXIT*!*");
     }
@@ -494,14 +562,14 @@ namespace GameImpl {
 
         // Reset sprites
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            if (Sprite[i].Active && Sprite[i].IsNotSpectator()) {
+            if (Sprite[i] && Sprite[i]->Active && Sprite[i]->IsNotSpectator()) {
                 // RandomizeStart(SpriteParts.Pos[i], Sprite[i].Player.Team);
                 // Sprite[i].Respawn();
-                Sprite[i].Player.Kills = 0;
-                Sprite[i].Player.Deaths = 0;
-                Sprite[i].Player.Flags = 0;
-                Sprite[i].BonusTime = 0;
-                Sprite[i].BonusStyle = BONUS_NONE;
+                Sprite[i]->Player->Kills = 0;
+                Sprite[i]->Player->Deaths = 0;
+                Sprite[i]->Player->Flags = 0;
+                Sprite[i]->BonusTime = 0;
+                Sprite[i]->BonusStyle = BONUS_NONE;
 #ifndef SERVER_CODE
                 // Sprite[i].SelWeapon = 0;
 #endif
@@ -602,24 +670,24 @@ namespace GameImpl {
         }
 
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            if (Sprite[i].Active && (!Sprite[i].Player.DemoPlayer)) {
+            if (Sprite[i] && Sprite[i]->Active && (!Sprite[i]->Player->DemoPlayer)) {
                 PlayersNum++;
-                if (Sprite[i].Player.ControlMethod == BOT) {
+                if (Sprite[i]->Player->ControlMethod == BOT) {
                     BotsNum++;
                 }
 
-                if (Sprite[i].IsSpectator()) {
+                if (Sprite[i]->IsSpectator()) {
                     SpectatorsNum++;
                 }
 
-                if (Sprite[i].IsNotSolo() && Sprite[i].IsNotSpectator()) {
-                    PlayersTeamNum[Sprite[i].Player.Team]++;
+                if (Sprite[i]->IsNotSolo() && Sprite[i]->IsNotSpectator()) {
+                    PlayersTeamNum[Sprite[i]->Player->Team]++;
                 }
 
-                if (Sprite[i].IsNotSpectator()) {
-                    SortedPlayers[PlayersNum].Kills = Sprite[i].Player.Kills;
-                    SortedPlayers[PlayersNum].Deaths = Sprite[i].Player.Deaths;
-                    SortedPlayers[PlayersNum].Flags = Sprite[i].Player.Flags;
+                if (Sprite[i]->IsNotSpectator()) {
+                    SortedPlayers[PlayersNum].Kills = Sprite[i]->Player->Kills;
+                    SortedPlayers[PlayersNum].Deaths = Sprite[i]->Player->Deaths;
+                    SortedPlayers[PlayersNum].Flags = Sprite[i]->Player->Flags;
                     SortedPlayers[PlayersNum].PlayerNum = i;
                 } else {
                     SortedPlayers[PlayersNum].Kills = 0;
@@ -730,34 +798,34 @@ namespace GameImpl {
 #endif
 
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            if (Sprite[i].Active) {
+            if (Sprite[i] && Sprite[i]->Active) {
 #ifdef SERVER_CODE
-                if (Sprite[i].Active && (Sprite[i].Player.Team == TEAM_ALPHA)) {
+                if (Sprite[i]->Active && (Sprite[i]->Player->Team == TEAM_ALPHA)) {
                     TeamAliveNum[TEAM_ALPHA]++;
                 }
-                if (Sprite[i].Active && (Sprite[i].Player.Team == TEAM_BRAVO)) {
+                if (Sprite[i]->Active && (Sprite[i]->Player->Team == TEAM_BRAVO)) {
                     TeamAliveNum[TEAM_BRAVO]++;
                 }
-                if (Sprite[i].Active && (Sprite[i].Player.Team == TEAM_CHARLIE)) {
+                if (Sprite[i]->Active && (Sprite[i]->Player->Team == TEAM_CHARLIE)) {
                     TeamAliveNum[TEAM_CHARLIE]++;
                 }
-                if (Sprite[i].Active && (Sprite[i].Player.Team == TEAM_DELTA)) {
+                if (Sprite[i]->Active && (Sprite[i]->Player->Team == TEAM_DELTA)) {
                     TeamAliveNum[TEAM_DELTA]++;
                 }
 #else
-                if (Sprite[i].Player.Team == TEAM_NONE) {
+                if (Sprite[i]->Player->Team == TEAM_NONE) {
                     TeamPlayersNum[TEAM_NONE]++;
                 }
-                if (Sprite[i].Player.Team == TEAM_ALPHA) {
+                if (Sprite[i]->Player->Team == TEAM_ALPHA) {
                     TeamPlayersNum[TEAM_ALPHA]++;
                 }
-                if (Sprite[i].Player.Team == TEAM_BRAVO) {
+                if (Sprite[i]->Player->Team == TEAM_BRAVO) {
                     TeamPlayersNum[TEAM_BRAVO]++;
                 }
-                if (Sprite[i].Player.Team == TEAM_CHARLIE) {
+                if (Sprite[i]->Player->Team == TEAM_CHARLIE) {
                     TeamPlayersNum[TEAM_CHARLIE]++;
                 }
-                if (Sprite[i].Player.Team == TEAM_DELTA) {
+                if (Sprite[i]->Player->Team == TEAM_DELTA) {
                     TeamPlayersNum[TEAM_DELTA]++;
                 }
 #endif
@@ -766,297 +834,6 @@ namespace GameImpl {
     }
 }
 
-// Using declarations to bring into global namespace
-using GameImpl::TKillSort;
-using GameImpl::Ticks;
-using GameImpl::TicksPerSecond;
-using GameImpl::Frames;
-using GameImpl::FramesPerSecond;
-using GameImpl::TickTime;
-using GameImpl::TickTimeLast;
-using GameImpl::GOALTICKS;
-using GameImpl::BulletTimeTimer;
-using GameImpl::SpriteParts;
-using GameImpl::BulletParts;
-using GameImpl::SparkParts;
-using GameImpl::GostekSkeleton;
-using GameImpl::BoxSkeleton;
-using GameImpl::FlagSkeleton;
-using GameImpl::ParaSkeleton;
-using GameImpl::StatSkeleton;
-using GameImpl::RifleSkeleton10;
-using GameImpl::RifleSkeleton11;
-using GameImpl::RifleSkeleton18;
-using GameImpl::RifleSkeleton22;
-using GameImpl::RifleSkeleton28;
-using GameImpl::RifleSkeleton36;
-using GameImpl::RifleSkeleton37;
-using GameImpl::RifleSkeleton39;
-using GameImpl::RifleSkeleton43;
-using GameImpl::RifleSkeleton50;
-using GameImpl::RifleSkeleton55;
-using GameImpl::Run;
-using GameImpl::Stand;
-using GameImpl::RunBack;
-using GameImpl::Jump;
-using GameImpl::JumpSide;
-using GameImpl::Roll;
-using GameImpl::RollBack;
-using GameImpl::Fall;
-using GameImpl::Crouch;
-using GameImpl::CrouchRun;
-using GameImpl::CrouchRunBack;
-using GameImpl::Reload;
-using GameImpl::Throw;
-using GameImpl::Recoil;
-using GameImpl::Shotgun;
-using GameImpl::Barret;
-using GameImpl::SmallRecoil;
-using GameImpl::AimRecoil;
-using GameImpl::HandsUpRecoil;
-using GameImpl::ClipIn;
-using GameImpl::ClipOut;
-using GameImpl::SlideBack;
-using GameImpl::Change;
-using GameImpl::ThrowWeapon;
-using GameImpl::WeaponNone;
-using GameImpl::Punch;
-using GameImpl::ReloadBow;
-using GameImpl::Melee;
-using GameImpl::Cigar;
-using GameImpl::Match;
-using GameImpl::Smoke;
-using GameImpl::Wipe;
-using GameImpl::Groin;
-using GameImpl::TakeOff;
-using GameImpl::Victory;
-using GameImpl::Piss;
-using GameImpl::Mercy;
-using GameImpl::Mercy2;
-using GameImpl::Own;
-using GameImpl::Prone;
-using GameImpl::GetUp;
-using GameImpl::ProneMove;
-using GameImpl::Aim;
-using GameImpl::HandsUpAim;
-using GameImpl::GameWidth;
-using GameImpl::GameHeight;
-using GameImpl::GameWidthHalf;
-using GameImpl::GameHeightHalf;
-using GameImpl::OldSpritePos;
-using GameImpl::AliveNum;
-using GameImpl::TeamAliveNum;
-using GameImpl::TeamPlayersNum;
-using GameImpl::SurvivalEndRound;
-using GameImpl::WeaponsCleaned;
-using GameImpl::CeaseFireTime;
-using GameImpl::MapChangeTime;
-using GameImpl::MapChangeCounter;
-using GameImpl::MapChangeName;
-using GameImpl::MapChange;
-using GameImpl::MapChangeItemID;
-using GameImpl::MapChangeChecksum;
-using GameImpl::TimeLimitCounter;
-using GameImpl::StartHealth;
-using GameImpl::TimeLeftSec;
-using GameImpl::TimeLeftMin;
-using GameImpl::WeaponSel;
-using GameImpl::TeamScore;
-using GameImpl::TeamFlag;
-using GameImpl::SinusCounter;
-using GameImpl::Map;
-using GameImpl::GameModChecksum;
-using GameImpl::CustomModChecksum;
-using GameImpl::MapCheckSum;
-using GameImpl::MapIndex;
-using GameImpl::BotPath;
-using GameImpl::SortedPlayers;
-using GameImpl::SortedTeamScore;
-using GameImpl::HeartbeatTime;
-using GameImpl::HeartbeatTimeWarnings;
-using GameImpl::Sprite;
-using GameImpl::Bullet;
-using GameImpl::Spark;
-using GameImpl::Thing;
-using GameImpl::VoteActive;
-using GameImpl::VoteType;
-using GameImpl::VoteTarget;
-using GameImpl::VoteStarter;
-using GameImpl::VoteReason;
-using GameImpl::VoteTimeRemaining;
-using GameImpl::VoteNumVotes;
-using GameImpl::VoteMaxVotes;
-using GameImpl::VoteHasVoted;
-using GameImpl::VoteCooldown;
-using GameImpl::VoteKickReasonType;
-using GameImpl::Number27Timing;
-using GameImpl::ToggleBulletTime;
-using GameImpl::UpdateGameStats;
-using GameImpl::PointVisible;
-using GameImpl::PointVisible2;
-using GameImpl::StartVote;
-using GameImpl::StopVote;
-using GameImpl::TimerVote;
-using GameImpl::CountVote;
-using GameImpl::ShowMapChangeScoreboard;
-using GameImpl::IsTeamGame;
-using GameImpl::IsPointOnScreen;
-using GameImpl::ChangeMap;
-using GameImpl::SortPlayers;
 
-// Initialize global variables
-namespace GameImpl {
-    inline int Ticks = 0;
-    inline int TicksPerSecond = 0;
-    inline int Frames = 0;
-    inline int FramesPerSecond = 0;
-    inline int TickTime = 0;
-    inline int TickTimeLast = 0;
-    inline int GOALTICKS = DEFAULT_GOALTICKS;
-
-    inline int BulletTimeTimer = 0;
-
-    // Initialize arrays and structures
-    inline uint8_t AliveNum = 0;
-    inline uint8_t TeamAliveNum[6] = {0};
-    inline uint8_t TeamPlayersNum[5] = {0};  // Team 0-4
-    inline bool SurvivalEndRound = false;
-    inline bool WeaponsCleaned = false;
-
-    inline int CeaseFireTime = DEFAULT_CEASEFIRE_TIME;
-    inline int MapChangeTime = DEFAULT_MAPCHANGE_TIME;
-    inline int MapChangeCounter = 0;
-    inline std::string MapChangeName = "";
-    inline TMapInfo MapChange = {};  // Default initialization
-    inline uint64_t MapChangeItemID = 0;
-    inline TSHA1Digest MapChangeChecksum = {};  // Default initialization
-    inline int TimeLimitCounter = 3600;
-    inline int StartHealth = 150;
-    inline int TimeLeftSec = 0;
-    inline int TimeLeftMin = 0;
-    inline uint8_t WeaponSel[MAX_SPRITES + 1][MAIN_WEAPONS + 1] = {{0}};  // Init to 0
-
-    inline int TeamScore[6] = {0};  // Teams 0-5
-    inline int TeamFlag[5] = {0};   // Teams 0-4
-
-    inline float SinusCounter = 0.0f;
-
-    // Initialize game objects
-    inline TPolyMap Map;  // Assuming default constructor
-
-    inline TSHA1Digest GameModChecksum = {};      // Default initialization
-    inline TSHA1Digest CustomModChecksum = {};    // Default initialization
-    inline TSHA1Digest MapCheckSum = {};          // Default initialization
-
-    inline int MapIndex = 0;
-
-    inline TWaypoints BotPath;  // Assuming default constructor
-
-    inline TKillSort SortedPlayers[MAX_SPRITES + 1] = {};  // Init to 0
-
-#ifndef SERVER_CODE
-    inline TKillSort SortedTeamScore[MAX_SPRITES + 1] = {};  // Init to 0
-    inline int HeartbeatTime = 0;
-    inline int HeartbeatTimeWarnings = 0;
-#endif
-
-    // Initialize game entities
-    inline TSprite Sprite[MAX_SPRITES + 1] = {};  // Init to default values
-    inline TBullet Bullet[MAX_BULLETS + 1] = {};  // Init to default values
-#ifndef SERVER_CODE
-    inline TSpark Spark[MAX_SPARKS + 1] = {};     // Init to default values
-#endif
-    inline TThing Thing[MAX_THINGS + 1] = {};    // Init to default values
-
-    // Voting system
-    inline bool VoteActive = false;
-    inline uint8_t VoteType = 0;  // VOTE_MAP or VOTE_KICK
-    inline std::string VoteTarget = "";
-    inline std::string VoteStarter = "";
-    inline std::string VoteReason = "";
-    inline int VoteTimeRemaining = -1;
-    inline uint8_t VoteNumVotes = 0;
-    inline uint8_t VoteMaxVotes = 0;
-    inline bool VoteHasVoted[MAX_SPRITES + 1] = {false};  // Init to false
-    inline int VoteCooldown[MAX_SPRITES + 1] = {0};       // Init to 0
-    inline bool VoteKickReasonType = false;
-
-    // Animation objects - would need proper initialization
-    inline TAnimation Run;
-    inline TAnimation Stand;
-    inline TAnimation RunBack;
-    inline TAnimation Jump;
-    inline TAnimation JumpSide;
-    inline TAnimation Roll;
-    inline TAnimation RollBack;
-    inline TAnimation Fall;
-    inline TAnimation Crouch;
-    inline TAnimation CrouchRun;
-    inline TAnimation CrouchRunBack;
-    inline TAnimation Reload;
-    inline TAnimation Throw;
-    inline TAnimation Recoil;
-    inline TAnimation Shotgun;
-    inline TAnimation Barret;
-    inline TAnimation SmallRecoil;
-    inline TAnimation AimRecoil;
-    inline TAnimation HandsUpRecoil;
-    inline TAnimation ClipIn;
-    inline TAnimation ClipOut;
-    inline TAnimation SlideBack;
-    inline TAnimation Change;
-    inline TAnimation ThrowWeapon;
-    inline TAnimation WeaponNone;
-    inline TAnimation Punch;
-    inline TAnimation ReloadBow;
-    inline TAnimation Melee;
-    inline TAnimation Cigar;
-    inline TAnimation Match;
-    inline TAnimation Smoke;
-    inline TAnimation Wipe;
-    inline TAnimation Groin;
-    inline TAnimation TakeOff;
-    inline TAnimation Victory;
-    inline TAnimation Piss;
-    inline TAnimation Mercy;
-    inline TAnimation Mercy2;
-    inline TAnimation Own;
-    inline TAnimation Prone;
-    inline TAnimation GetUp;
-    inline TAnimation ProneMove;
-    inline TAnimation Aim;
-    inline TAnimation HandsUpAim;
-
-    // Particle systems - would need proper initialization
-    inline TParticleSystem SpriteParts;
-    inline TParticleSystem BulletParts;
-    inline TParticleSystem SparkParts;
-    inline TParticleSystem GostekSkeleton;
-    inline TParticleSystem BoxSkeleton;
-    inline TParticleSystem FlagSkeleton;
-    inline TParticleSystem ParaSkeleton;
-    inline TParticleSystem StatSkeleton;
-    inline TParticleSystem RifleSkeleton10;
-    inline TParticleSystem RifleSkeleton11;
-    inline TParticleSystem RifleSkeleton18;
-    inline TParticleSystem RifleSkeleton22;
-    inline TParticleSystem RifleSkeleton28;
-    inline TParticleSystem RifleSkeleton36;
-    inline TParticleSystem RifleSkeleton37;
-    inline TParticleSystem RifleSkeleton39;
-    inline TParticleSystem RifleSkeleton43;
-    inline TParticleSystem RifleSkeleton50;
-    inline TParticleSystem RifleSkeleton55;
-
-#ifndef SERVER_CODE
-    inline int GameWidth = DEFAULT_WIDTH;
-    inline int GameHeight = DEFAULT_HEIGHT;
-    inline float GameWidthHalf = DEFAULT_WIDTH / 2.0f;
-    inline float GameHeightHalf = DEFAULT_WIDTH / 2.0f;
-#endif
-
-    // Initialize the old sprite position array
-    inline TVector2 OldSpritePos[MAX_SPRITES + 1][MAX_OLDPOS + 1] = {{{0, 0}}};  // Init to 0
-}
 
 #endif // GAME_H

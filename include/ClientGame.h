@@ -11,13 +11,16 @@
 
 #include "Constants.h"
 #include "Vector.h"
+#include "Sprites.h"
+#include "Net.h"
+#include "UpdateFrame.h"
+#include "Demo.h"
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
 #include <cmath>
 
 // Forward declarations (these would be defined in other headers)
-struct TSprite;
 struct TFrameTiming;
 
 // Global variables
@@ -78,6 +81,9 @@ struct TFrameTiming {
 };
 
 namespace ClientGameImpl {
+    // FrameTiming variable declaration
+    extern TFrameTiming FrameTiming;
+    
     inline void ResetFrameTiming() {
         FrameTiming.Frequency = SDL_GetPerformanceFrequency();
         FrameTiming.StartTime = SDL_GetPerformanceCounter();
@@ -128,6 +134,18 @@ namespace ClientGameImpl {
         // This is a simplified version that would need to be integrated with the game rendering system
     }
 
+    // Helper function to check if a string contains a substring (case-insensitive)
+    inline bool ContainsText(const std::string& str, const std::string& substr) {
+        auto it = std::search(
+            str.begin(), str.end(),
+            substr.begin(), substr.end(),
+            [](char c1, char c2) {
+                return std::tolower(c1) == std::tolower(c2);
+            }
+        );
+        return (it != str.end());
+    }
+
     // In-game nickname tab completion
     inline void TabComplete() {
         int ChatTextLen = ChatText.length();
@@ -162,12 +180,12 @@ namespace ClientGameImpl {
         if (ChatTextLen > Offset) {  // Don't complete if chat is empty
             for (int i = ContinuedTabCompletePlayer; i < (ContinuedTabCompletePlayer + MAX_PLAYERS); i++) {
                 int Next = ((i - 1) % MAX_PLAYERS) + 1;
-                if (Sprite[Next].Active && (!Sprite[Next].Player.DemoPlayer) && (Next != MySprite)) {
-                    std::string playerName(Sprite[Next].Player.Name.begin(), Sprite[Next].Player.Name.end());
+                if (Sprite[Next] && Sprite[Next]->Active && (!Sprite[Next]->Player->DemoPlayer) && (Next != MySprite)) {
+                    std::string playerName(Sprite[Next]->Player->Name.begin(), Sprite[Next]->Player->Name.end());
                     std::string completionBase(CompletionBase.begin(), CompletionBase.end());
                     if ((CompletionBase.empty()) || ContainsText(playerName, completionBase)) {
                         int AvailableChatSpace = MAXCHATTEXT - CompletionBaseSeparator;
-                        std::wstring SpaceFittedName = std::wstring(Sprite[Next].Player.Name.begin(), Sprite[Next].Player.Name.end());
+                        std::wstring SpaceFittedName = std::wstring(Sprite[Next]->Player->Name.begin(), Sprite[Next]->Player->Name.end());
                         if (SpaceFittedName.length() > AvailableChatSpace) {
                             SpaceFittedName = SpaceFittedName.substr(0, AvailableChatSpace);
                         }
@@ -223,7 +241,7 @@ namespace ClientGameImpl {
         FrameTiming.Accumulator = FrameTiming.Accumulator - SimTime;
         double FramePercent = std::min(1.0, std::max(0.0, FrameTiming.Accumulator / dt));
 
-        for (int MainControl = 1; MainControl <= (Ticktime - ticktimeLast); MainControl++) {
+        for (int MainControl = 1; MainControl <= (TickTime - TickTimeLast); MainControl++) {
             // frame rate independent code
             if (!GamePaused) {
                 FrameTiming.Elapsed = FrameTiming.Elapsed + (1.0 / DEFAULT_GOALTICKS);
@@ -245,17 +263,17 @@ namespace ClientGameImpl {
             // General game updating
             Update_Frame();
 
-            if (DemoRecorder.Active && (MainTickCounter % demo_rate.Value() == 0)) {
-                DemoRecorder.SavePosition();
+            if (DemoRecorder && DemoRecorder->Active && (MainTickCounter % demo_rate.Value() == 0)) {
+                DemoRecorder->SavePosition();
             }
 
             if ((MapChangeCounter < 0) && (!EscMenu.Active)) {
                 // DEMO
-                if (DemoRecorder.Active) {
-                    DemoRecorder.SaveNextFrame();
+                if (DemoRecorder && DemoRecorder->Active) {
+                    DemoRecorder->SaveNextFrame();
                 }
-                if (DemoPlayer.Active) {
-                    DemoPlayer.ProcessDemo();
+                if (DemoPlayer && DemoPlayer->Active) {
+                    DemoPlayer->ProcessDemo();
                 }
             }
 
@@ -419,25 +437,25 @@ namespace ClientGameImpl {
                 NewCam = MAX_SPRITES;
             }
 
-            if (!Sprite[NewCam].Active) {
+            if (!Sprite[NewCam] || !Sprite[NewCam]->Active) {
                 continue;  // Sprite slot empty
             }
-            if (Sprite[NewCam].DeadMeat) {
+            if (Sprite[NewCam]->DeadMeat) {
                 continue;  // Sprite is dead
             }
-            if (Sprite[NewCam].IsSpectator()) {
+            if (Sprite[NewCam]->IsSpectator()) {
                 continue;  // Sprite is a spectator
             }
 
-            if (Sprite[MySprite].Control.Up && (!sv_realisticmode.Value()) &&
-               Sprite[MySprite].IsNotSpectator()) {
+            if (Sprite[MySprite] && Sprite[MySprite]->Control.Up && (!sv_realisticmode.Value()) &&
+               Sprite[MySprite]->IsNotSpectator()) {
                 NewCam = 0;
                 ValidCam = true;
                 break;
             }  // Freecam if not Realistic
 
-            if (Sprite[MySprite].IsSpectator()) {
-                if (Sprite[MySprite].Control.Up) {
+            if (Sprite[MySprite] && Sprite[MySprite]->IsSpectator()) {
+                if (Sprite[MySprite] && Sprite[MySprite]->Control.Up) {
                     NewCam = 0;
                     ValidCam = true;
                     break;
@@ -447,7 +465,7 @@ namespace ClientGameImpl {
                 }  // Let spectator view all players
             }
 
-            if (Sprite[NewCam].IsNotInSameTeam(Sprite[MySprite])) {
+            if (Sprite[NewCam] && Sprite[MySprite] && Sprite[NewCam]->IsNotInSameTeam(*Sprite[MySprite])) {
                 continue;  // Don't swap camera to a player not on my team
             }
 
