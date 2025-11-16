@@ -19,7 +19,7 @@
 #include "Net.h"
 #include "NetworkClientConnection.h"
 #include "Constants.h"
-#include "Control.h"
+
 #include "PolyMap.h"
 #include "Game.h"
 #include "Client.h"

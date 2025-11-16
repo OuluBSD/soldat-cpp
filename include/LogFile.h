@@ -37,6 +37,8 @@ extern std::mutex LogLock;
 
 
 namespace LogFileImpl {
+    inline void WriteLogFile(TStringList*& F, const std::string& Name);  // Forward declaration
+    
     inline void NewLogFile(TStringList*& F, const std::string& Name) {
         // Assuming log_enable and log_level are defined elsewhere
         // if (!log_enable.Value()) return;
@@ -161,11 +163,11 @@ namespace LogFileImpl {
     }
 }
 
-// Using declarations to bring the functions into the global scope
-using LogFileImpl::NewLogFile;
-using LogFileImpl::WriteLogFile;
-using LogFileImpl::AddLineToLogFile;
-using LogFileImpl::NewLogFiles;
+// Global function declarations
+extern void NewLogFile(TStringList*& F, const std::string& Name);
+extern void WriteLogFile(TStringList*& F, const std::string& Name);
+extern void AddLineToLogFile(TStringList*& F, const std::string& S, const std::string& Name, bool WithDate = true);
+extern void NewLogFiles();
 
 // Global variables
 extern TStringList* GameLog;

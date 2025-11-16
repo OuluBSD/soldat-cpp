@@ -17,18 +17,13 @@
 #include <vector>
 #include <set>
 
-// Constants
-const int MAX_POLYS = 5000;
+// Polygon constants (some are defined in MapFile.h)
 const int MIN_SECTOR = -25;
-const int MAX_SECTOR = 25;
 const int MIN_SECTORZ = -35;
 const int MAX_SECTORZ = 35;
 const int SECTOR_TILE = 3;
 const int MIN_TILE = MIN_SECTOR * SECTOR_TILE;
 const int MAX_TILE = MAX_SECTOR * SECTOR_TILE;
-const int MAX_PROPS = 500;
-const int MAX_SPAWNPOINTS = 255;
-const int MAX_COLLIDERS = 128;
 
 // Polygon constants
 const int POLY_TYPE_NORMAL                = 0;

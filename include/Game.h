@@ -201,81 +201,20 @@ extern bool VoteHasVoted[MAX_SPRITES + 1];  // Pascal arrays start from 1
 extern int VoteCooldown[MAX_SPRITES + 1];  // Pascal arrays start from 1
 extern bool VoteKickReasonType;
 
-namespace GameImpl {
-    using ::Sprite;  // Make global Sprite vector accessible in this namespace
-    using ::SpriteParts;  // Make global SpriteParts accessible in this namespace
-    using ::sv_votepercent;  // Make cvar accessible
-    using ::sv_killlimit;  // Make cvar accessible
-    using ::sv_timelimit;  // Make cvar accessible
-    using ::sv_advancemode;  // Make cvar accessible
-    using ::sv_gamemode;  // Make cvar accessible
-    using ::PlayersNum;  // Make global variable accessible
-    using ::BotsNum;  // Make global variable accessible
-    using ::SpectatorsNum;  // Make global variable accessible
-    using ::PlayersTeamNum;  // Make global array accessible
-    using ::MySprite;  // Make global variable accessible
-    using ::TeamScore;  // Make global array accessible
-    using ::WeaponSel;  // Make global 2D array accessible
-    using ::MapChangeName;  // Make global variable accessible
-    using ::MapChangeCounter;  // Make global variable accessible
-    using ::MapChangeTime;  // Make global variable accessible
-    using ::TimeLimitCounter;  // Make global variable accessible
-    using ::TeamAliveNum;  // Make global array accessible
-    using ::TeamPlayersNum;  // Make global array accessible
-    using ::VoteActive;  // Make global variable accessible
-    using ::VoteType;  // Make global variable accessible
-    using ::VoteTarget;  // Make global variable accessible
-    using ::VoteStarter;  // Make global variable accessible
-    using ::VoteReason;  // Make global variable accessible
-    using ::VoteTimeRemaining;  // Make global variable accessible
-    using ::VoteNumVotes;  // Make global variable accessible
-    using ::VoteMaxVotes;  // Make global variable accessible
-    using ::VoteHasVoted;  // Make global array accessible
-    using ::Map;  // Make global variable accessible
-    using ::SortedPlayers;  // Make global array accessible
-    using ::SortedTeamScore;  // Make global array accessible
-    using ::GameWidth;  // Make global variable accessible
-    using ::GameHeight;  // Make global variable accessible
-    using ::GameWidthHalf;  // Make global variable accessible
-    using ::GameHeightHalf;  // Make global variable accessible
-    using ::DEFAULT_VOTING_TIME;  // Make constant accessible
-    using ::DEFAULT_GOALTICKS;  // Make constant accessible
-    using ::MAX_PLAYERS;  // Make constant accessible
-    using ::MAX_SPRITES;  // Make constant accessible
-    using ::MAX_BULLETS;  // Make constant accessible
-    using ::MAX_THINGS;  // Make constant accessible
-    using ::MAX_SPARKS;  // Make constant accessible
-    using ::DEFAULT_CEASEFIRE_TIME;  // Make constant accessible
-    using ::DEFAULT_MAPCHANGE_TIME;  // Make constant accessible
-    using ::MAIN_WEAPONS;  // Make constant accessible
-    using ::PRIMARY_WEAPONS;  // Make constant accessible
-    using ::SECONDARY_WEAPONS;  // Make constant accessible
-    using ::DEFAULT_WIDTH;  // Make constant accessible
-    using ::DEFAULT_HEIGHT;  // Make constant accessible
-    using ::MAX_GAME_WIDTH;  // Make constant accessible
-    using ::TEAM_ALPHA;  // Make constant accessible
-    using ::TEAM_BRAVO;  // Make constant accessible
-    using ::TEAM_CHARLIE;  // Make constant accessible
-    using ::TEAM_DELTA;  // Make constant accessible
-    using ::TEAM_NONE;  // Make constant accessible
-    using ::HUMAN;  // Make constant accessible
-    using ::BOT;  // Make constant accessible
-    using ::VOTE_KICK;  // Make constant accessible
-    using ::VOTE_MAP;  // Make constant accessible
-    using ::BONUS_NONE;  // Make constant accessible
-    using ::NOWEAPON;  // Make constant accessible
-    using ::DEFAULT_VOTE_TIME;  // Make constant accessible
-    using ::GAMESTYLE_TEAMMATCH;  // Make constant accessible
-    using ::GAMESTYLE_CTF;  // Make constant accessible
-    using ::GAMESTYLE_INF;  // Make constant accessible
-    using ::GAMESTYLE_HTF;  // Make constant accessible
-    using ::TICKS;  // Make constant accessible
-    using ::SECOND;  // Make constant accessible
-    using ::DEFAULT_VOTE_TIME;  // Make constant accessible
-    using ::HOUR;  // Make constant accessible
-    using ::DAY;  // Make constant accessible
-    using ::INT_MAX;  // Make constant accessible
+// Add missing extern declarations
+extern std::vector<std::unique_ptr<struct TSprite>> Sprite;  // Forward declaration used
+extern TIntCvar sv_votepercent;  // From Server.cpp
+extern TIntCvar sv_killlimit;  // From Server.cpp
+extern TIntCvar sv_timelimit;  // From Server.cpp
+extern TBooleanCvar sv_advancemode;  // From Server.cpp
+extern TIntCvar sv_gamemode;  // From Server.cpp
+extern int PlayersNum;
+extern int BotsNum;
+extern int SpectatorsNum;
+extern int PlayersTeamNum[5];
+extern uint8_t MySprite;
 
+namespace GameImpl {
     // Timing variables
     inline void Number27Timing() {
         static uint64_t TimeInMilLast = 0;

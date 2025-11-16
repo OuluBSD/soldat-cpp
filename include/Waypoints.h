@@ -47,22 +47,26 @@ struct TPathRec {
     }
 };
 
-struct TWaypoints {
-    TWaypoint Waypoint[MAX_WAYPOINTS + 1];  // Pascal arrays start from 1
+namespace WaypointsImpl {
+    struct TWaypoints {
+        TWaypoint Waypoint[MAX_WAYPOINTS + 1];  // Pascal arrays start from 1
 
-    TWaypoints() {
-        for (int i = 0; i <= MAX_WAYPOINTS; i++) {
-            Waypoint[i] = TWaypoint();
+        TWaypoints() {
+            for (int i = 0; i <= MAX_WAYPOINTS; i++) {
+                Waypoint[i] = TWaypoint();
+            }
         }
+
+        void LoadFromFile(const std::string& filename);
+        void SaveToFile(const std::string& filename);
+        int FindClosest(float X, float Y, float Radius, int CurrWaypoint);
+        int CreateWaypoint(int sX, int sY, int sPath);
+    };
+
+    inline float Distance(float x1, float y1, float x2, float y2) {
+        return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    void LoadFromFile(const std::string& filename);
-    void SaveToFile(const std::string& filename);
-    int FindClosest(float X, float Y, float Radius, int CurrWaypoint);
-    int CreateWaypoint(int sX, int sY, int sPath);
-};
-
-namespace WaypointsImpl {
     inline void TWaypoints::LoadFromFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::binary);
         if (!file.is_open()) {
@@ -104,10 +108,6 @@ namespace WaypointsImpl {
         }
     }
 
-    inline float Distance(float x1, float y1, float x2, float y2) {
-        return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    }
-
     inline int TWaypoints::FindClosest(float X, float Y, float Radius, int CurrWaypoint) {
         float d;
         for (int i = 1; i <= MAX_WAYPOINTS; i++) {
@@ -122,7 +122,8 @@ namespace WaypointsImpl {
     }
 
     inline int TWaypoints::CreateWaypoint(int sX, int sY, int sPath) {
-        for (int i = 1; i <= MAX_WAYPOINTS + 1; i++) {
+        int i;
+        for (i = 1; i <= MAX_WAYPOINTS + 1; i++) {
             if (i == MAX_WAYPOINTS + 1) {
                 return -1; // indicates failure
             }

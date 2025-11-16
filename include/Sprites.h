@@ -17,7 +17,7 @@
 #include "Vector.h"
 #include "Constants.h"
 #include "Weapons.h"
-#include "Game.h"
+
 
 // Forward declaration
 struct TSprite;
@@ -421,6 +421,8 @@ struct TSprite {
         uint8_t VoteWho;
         std::string VoteTargetName;
         std::string VoteReason;
+        float MouseAimX;
+        float MouseAimY;
     } Control;
 
     // Player object that's associated with this sprite
@@ -436,10 +438,31 @@ struct TSprite {
     void ApplyDamage(float Damage, uint8_t Bullet, uint8_t Where);
     void Kill(uint8_t Bullet, uint8_t Killer, uint8_t Where);
     void Respawn();
+    // Additional members that were referenced but missing
+    int BonusTime;
+    uint8_t BonusStyle;
+
     void Update();
     void UpdatePhysics();
     void UpdateAnimations();
     void SendSnapshot();
+    
+    // Helper methods that were referenced but missing
+    
+    // Check if sprite is not a spectator
+    bool IsNotSpectator() const {
+        return Player && Player->Team != TEAM_SPECTATOR;
+    }
+    
+    // Check if sprite is a spectator
+    bool IsSpectator() const {
+        return Player && Player->Team == TEAM_SPECTATOR;
+    }
+    
+    // Check if sprite is not playing solo (not spectator or none team)
+    bool IsNotSolo() const {
+        return Player && Player->Team != TEAM_SPECTATOR && Player->Team != TEAM_NONE;
+    }
 };
 
 // Global variables

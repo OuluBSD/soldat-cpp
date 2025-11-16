@@ -136,8 +136,6 @@ struct TGun {
     uint8_t BulletImageStyle;
     
     // Additional fields that would be initialized during build
-    uint16_t ClipOutTime;
-    uint16_t ClipInTime;
     uint16_t FireIntervalCountPrev;
     uint16_t ReloadTimeCountPrev;
     uint16_t StartUpTimeCountPrev;
@@ -150,8 +148,8 @@ struct TGun {
              Speed(0.0f), HitMultiply(0.0f), BulletSpread(0.0f), Push(0.0f),
              InheritedVelocity(0.0f), ModifierLegs(0.0f), ModifierChest(0.0f),
              ModifierHead(0.0f), NoCollision(0), FireMode(0), Timeout(0),
-             BulletStyle(0), FireStyle(0), BulletImageStyle(0), ClipOutTime(0),
-             ClipInTime(0), FireIntervalCountPrev(0), ReloadTimeCountPrev(0), StartUpTimeCountPrev(0) {}
+             BulletStyle(0), FireStyle(0), BulletImageStyle(0), 
+             FireIntervalCountPrev(0), ReloadTimeCountPrev(0), StartUpTimeCountPrev(0) {}
 };
 
 // Global variables

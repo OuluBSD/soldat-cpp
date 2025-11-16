@@ -125,7 +125,7 @@ struct TMapFile {
 
 // Function declarations
 bool LoadMapFile(const TMapInfo& MapInfo, TMapFile& Map);
-TMapColor MapColor(int32_t Color);
+void MapColor(int32_t Color, TMapColor& result);
 bool IsPropActive(TMapFile& Map, int Index);
 
 // Constants

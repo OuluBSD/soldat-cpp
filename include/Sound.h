@@ -14,10 +14,75 @@
 #include <memory>
 #include <cstring>
 #include <cmath>
+#ifdef WITH_OPENAL
+#ifdef WITH_OPENAL
 #include <AL/al.h>
 #include <AL/alc.h>
+#else
+// Provide stub definitions when OpenAL is not available
+using ALsizei = int;
+using ALuint = unsigned int;
+using ALint = int;
+using ALfloat = float;
+using ALenum = unsigned int;
+using ALCdevice = void;
+using ALCcontext = void;
+using ALCboolean = int;
+using ALCchar = char;
+
+const int AL_NO_ERROR = 0;
+const int AL_PLAYING = 1;
+const int AL_PAUSED = 2;
+const int AL_SOURCE_STATE = 1;
+const int AL_LOOPING = 2;
+const int AL_GAIN = 3;
+const int AL_POSITION = 4;
+const int AL_FORMAT_MONO8 = 0x1100;
+const int AL_FORMAT_MONO16 = 0x1101;
+const int AL_FORMAT_STEREO8 = 0x1102;
+const int AL_FORMAT_STEREO16 = 0x1103;
+const int AL_FORMAT_MONO_FLOAT32 = 0x10010;
+const int AL_FORMAT_STEREO_FLOAT32 = 0x10011;
+const int AL_NONE = 0;
+const int ALC_FALSE = 0;
+const int ALC_TRUE = 1;
+
+// Stub function declarations for OpenAL
+ALCcontext* alcCreateContext(ALCdevice* device, const int* attrlist) { return nullptr; }
+ALCboolean alcMakeContextCurrent(ALCcontext* context) { return ALC_FALSE; }
+void alcDestroyContext(ALCcontext* context) {}
+ALCdevice* alcOpenDevice(const ALCchar* devicename) { return nullptr; }
+ALCboolean alcCloseDevice(ALCdevice* device) { return ALC_FALSE; }
+void alDistanceModel(ALenum distanceModel) {}
+void alGenSources(ALsizei n, ALuint* sources) {}
+void alSourcei(ALuint source, ALenum param, ALint value) {}
+void alSourcef(ALuint source, ALenum param, ALfloat value) {}
+void alSource3f(ALuint source, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3) {}
+void alGetSourcei(ALuint source, ALenum param, ALint* value) {}
+void alSourceStop(ALuint source) {}
+void alBufferData(ALuint buffer, ALenum format, const void* data, ALsizei size, ALsizei freq) {}
+void alGenBuffers(ALsizei n, ALuint* buffers) {}
+void alDeleteBuffers(ALsizei n, const ALuint* buffers) {}
+void alSourcePause(ALuint source) {}
+void alSourcePlay(ALuint source) {}
+void alDeleteSources(ALsizei n, const ALuint* sources) {}
+ALenum alGetError() { return AL_NO_ERROR; }
+#endif
+#endif
 #include <SDL2/SDL.h>
+#ifdef WITH_PHYSFS
 #include <PhysFS.h>
+#else
+// Provide stub definitions when PhysFS is not available
+using PHYSFS_File = void;
+using PHYSFS_uint64 = unsigned long long;
+using PHYSFS_sint64 = long long;
+
+PHYSFS_File* PHYSFS_openRead(const char* filename) { return nullptr; }
+PHYSFS_uint64 PHYSFS_fileLength(PHYSFS_File* file) { return 0; }
+int PHYSFS_readBytes(PHYSFS_File* file, void* buffer, PHYSFS_uint64 len) { return 0; }
+int PHYSFS_close(PHYSFS_File* file) { return 0; }
+#endif
 #include "Vector.h"
 
 // Type definitions
