@@ -28,7 +28,6 @@
 #include "Sparks.h"      // For Spark
 #include "Things.h"      // For KillThing
 #include "Game.h"        // For BigText, BigDelay, and other game variables
-#include "InterfaceGraphics.h" // For BigScale, BigColor, BigPosX, BigPosY, BigX, etc.
 #endif
 
 #include <string>
@@ -38,12 +37,7 @@
 #include <algorithm>
 #include <cctype>
 
-// Forward declarations for types used later
-class TDemoPlayer;
-
 const char DEMO_MAGIC[6] = {'S', 'O', 'L', 'D', 'E', 'M'};
-
-
 
 // Add utility functions if not already available
 #ifndef EXTRACT_FILE_NAME_DEFINED
@@ -144,9 +138,6 @@ public:
 extern std::unique_ptr<TDemoRecorder> DemoRecorder;
 #ifndef SERVER_CODE
 extern std::unique_ptr<TDemoPlayer> DemoPlayer;
-extern std::wstring BigText[MAX_BIG_MESSAGES + 1];
-extern int BigDelay[MAX_BIG_MESSAGES + 1];
-// Add other required variables as needed
 #endif
 extern uint16_t RSize;
 extern uint8_t FreeCam;
