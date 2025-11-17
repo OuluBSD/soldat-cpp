@@ -47,7 +47,7 @@ namespace AIImpl {
     }
 
     inline void SimpleDecision(uint8_t SNum) {
-        TSprite& sprite = Sprite[SNum];
+        TSprite& sprite = *Sprite[SNum];
         TVector2 m = SpriteParts.Pos[SNum];
         TVector2 t = SpriteParts.Pos[sprite.Brain.TargetNum];
 
@@ -78,7 +78,7 @@ namespace AIImpl {
             sprite.Control.Fire = true;
 
             // if reloading
-            if (sprite.Weapon.AmmoCount == 0) {
+            if (sprite.AmmoCount[sprite.Weapon] == 0) {
                 if (!sprite.Brain.GoThing) {
                     sprite.Control.Right = false;
                     sprite.Control.Left = false;
@@ -97,7 +97,7 @@ namespace AIImpl {
             sprite.Control.Fire = true;
 
             // if reloading
-            if (sprite.Weapon.AmmoCount == 0) {
+            if (sprite.AmmoCount[sprite.Weapon] == 0) {
                 if (!sprite.Brain.GoThing) {
                     sprite.Control.Right = false;
                     sprite.Control.Left = false;
@@ -113,7 +113,7 @@ namespace AIImpl {
             sprite.Control.Fire = true;
 
             // if reloading
-            if (sprite.Weapon.AmmoCount == 0) {
+            if (sprite.AmmoCount[sprite.Weapon] == 0) {
                 if (!sprite.Brain.GoThing) {
                     sprite.Control.Right = false;
                     sprite.Control.Left = false;
@@ -136,13 +136,13 @@ namespace AIImpl {
         }
         else if (distToTargetX == DIST_VERY_FAR) {
             sprite.Control.Up = true;
-            if ((rand() % 2 == 0) || (sprite.Weapon.Num == Guns[MINIGUN].Num)) {
+            if ((rand() % 2 == 0) || (sprite.Weapon == Guns[MINIGUN].Num)) {
                 sprite.Control.Fire = true;
             }
 
             if (sprite.Brain.Camper > 0) {
                 if (rand() % 250 == 0) {
-                    if (sprite.BodyAnimation.ID != Prone.ID) {
+                    if (sprite.BodyAnimation != Prone.ID) {
                         sprite.Control.Prone = true;
                     }
                 }
@@ -156,13 +156,13 @@ namespace AIImpl {
             }
         }
         else if (distToTargetX == DIST_TOO_FAR) {
-            if ((rand() % 4 == 0) || (sprite.Weapon.Num == Guns[MINIGUN].Num)) {
+            if ((rand() % 4 == 0) || (sprite.Weapon == Guns[MINIGUN].Num)) {
                 sprite.Control.Fire = true;
             }
 
             if (sprite.Brain.Camper > 0) {
                 if (rand() % 300 == 0) {
-                    if (sprite.BodyAnimation.ID != Prone.ID) {
+                    if (sprite.BodyAnimation != Prone.ID) {
                         sprite.Control.Prone = true;
                     }
                 }
@@ -181,25 +181,25 @@ namespace AIImpl {
     }
 
     inline void GoToThing(uint8_t SNum, uint8_t TNum) {
-        TSprite& sprite = Sprite[SNum];
+        TSprite& sprite = *Sprite[SNum];
         TVector2 m = SpriteParts.Pos[SNum];
-        TVector2 t = Thing[TNum].Skeleton.Pos[2];
+        TVector2 t = (*Thing[TNum]).Skeleton.Pos[2];
 
         // Determine the closest point on the thing for the bot to go to
-        if ((Thing[TNum].Skeleton.Pos[2].x > Thing[TNum].Skeleton.Pos[1].x) && (m.x < Thing[TNum].Skeleton.Pos[2].x)) {
-            t = Thing[TNum].Skeleton.Pos[2];
+        if (((*Thing[TNum]).Skeleton.Pos[2].x > (*Thing[TNum]).Skeleton.Pos[1].x) && (m.x < (*Thing[TNum]).Skeleton.Pos[2].x)) {
+            t = (*Thing[TNum]).Skeleton.Pos[2];
         }
-        else if ((Thing[TNum].Skeleton.Pos[2].x > Thing[TNum].Skeleton.Pos[1].x) && (m.x > Thing[TNum].Skeleton.Pos[1].x)) {
-            t = Thing[TNum].Skeleton.Pos[1];
+        else if (((*Thing[TNum]).Skeleton.Pos[2].x > (*Thing[TNum]).Skeleton.Pos[1].x) && (m.x > (*Thing[TNum]).Skeleton.Pos[1].x)) {
+            t = (*Thing[TNum]).Skeleton.Pos[1];
         }
-        else if ((Thing[TNum].Skeleton.Pos[2].x < Thing[TNum].Skeleton.Pos[1].x) && (m.x < Thing[TNum].Skeleton.Pos[1].x)) {
-            t = Thing[TNum].Skeleton.Pos[1];
+        else if (((*Thing[TNum]).Skeleton.Pos[2].x < (*Thing[TNum]).Skeleton.Pos[1].x) && (m.x < (*Thing[TNum]).Skeleton.Pos[1].x)) {
+            t = (*Thing[TNum]).Skeleton.Pos[1];
         }
-        else if ((Thing[TNum].Skeleton.Pos[2].x < Thing[TNum].Skeleton.Pos[1].x) && (m.x > Thing[TNum].Skeleton.Pos[2].x)) {
-            t = Thing[TNum].Skeleton.Pos[2];
+        else if (((*Thing[TNum]).Skeleton.Pos[2].x < (*Thing[TNum]).Skeleton.Pos[1].x) && (m.x > (*Thing[TNum]).Skeleton.Pos[2].x)) {
+            t = (*Thing[TNum]).Skeleton.Pos[2];
         }
 
-        if (Thing[TNum].HoldingSprite > 0) {
+        if ((*Thing[TNum]).HoldingSprite > 0) {
             t.y = t.y + 5;
         }
 
@@ -215,14 +215,14 @@ namespace AIImpl {
 
     inline void ControlBot(TSprite& SpriteC) {
         // Only process if it's a bot, not dead, and not a dummy
-        if ((SpriteC.Player.ControlMethod == BOT) && 
+        if ((SpriteC.Player->ControlMethod == BOT) && 
             !SpriteC.DeadMeat && !SpriteC.Dummy) {
             
             // Store throw state to preserve it during FreeControls
             bool tempb = SpriteC.Control.ThrowNade;
             SpriteC.FreeControls();
             
-            if (SpriteC.BodyAnimation.ID == Throw.ID) {
+            if (SpriteC.BodyAnimation == Throw.ID) {
                 SpriteC.Control.ThrowNade = tempb;
             } else {
                 SpriteC.Control.ThrowNade = false;
@@ -239,7 +239,7 @@ namespace AIImpl {
 
             // For now, we'll just call SimpleDecision if the bot has a target
             if (SpriteC.Brain.TargetNum > 0 && SpriteC.Brain.TargetNum <= MAX_SPRITES) {
-                if (Sprite[SpriteC.Brain.TargetNum].Active) {
+                if ((*Sprite[SpriteC.Brain.TargetNum]).Active) {
                     SimpleDecision(SpriteC.Num);
                 }
             } else {

@@ -470,8 +470,10 @@ inline void TDemoPlayer::ProcessDemo() {
 
         if ((FSkipTo > 0) && (MainTickCounter >= FSkipTo)) {
             FSkipTo = -1;
-            ShouldRenderFrames = true;  // Assuming this is a global variable
-            GOALTICKS = static_cast<int>(demo_speed.Value() * DEFAULT_GOALTICKS);  // Assuming demo_speed exists
+#ifndef SERVER_CODE
+            ShouldRenderFrames = true;  // This should be accessible via ClientGame.h's using declaration
+#endif
+            GOALTICKS = static_cast<int>(demo_speed.Value() * DEFAULT_GOALTICKS);  // demo_speed should be accessible via Client.h
         }
 
         if (RSize == 0) {
@@ -501,7 +503,9 @@ inline void TDemoPlayer::ProcessDemo() {
 
 inline void TDemoPlayer::Position(int Ticks) {
     FSkipTo = Ticks;
-    ShouldRenderFrames = false;
+#ifndef SERVER_CODE
+    ShouldRenderFrames = false;  // This should be accessible via ClientGame.h's using declaration
+#endif
 
     if (FSkipTo < MainTickCounter) {
         // FDemoFile->Seek(sizeof(FDemoHeader), std::ios::beg);  // Would need implementation

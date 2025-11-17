@@ -52,14 +52,12 @@ extern TGameMenu* MapMenu;
 extern int KickMenuIndex;
 extern int MapMenuIndex;
 
-// Function declarations
-void InitGameMenus();
-void GameMenuShow(TGameMenu* Menu, bool Show = true);
-bool GameMenuAction(TGameMenu* Menu, int ButtonIndex);
-void GameMenuMouseMove();
-bool GameMenuClick();
+
 
 namespace GameMenusImpl {
+    // Forward declarations of functions used by other functions in this namespace
+    void GameMenuMouseMove(); // Forward declaration
+
     inline void InitButton(TGameMenu* Menu, int ButtonIndex, const std::wstring& Caption,
                           int x, int y, int w, int h, bool Active = true) {
         if (ButtonIndex >= 0 && ButtonIndex < static_cast<int>(Menu->Button.size())) {
@@ -92,8 +90,13 @@ namespace GameMenusImpl {
             EscMenu->x = static_cast<int>((GameWidth - EscMenu->w) / 2);
             EscMenu->y = static_cast<int>((GameHeight - EscMenu->h) / 2);
         } else {
+#ifndef SERVER_CODE
             EscMenu->x = static_cast<int>((RenderWidth - EscMenu->w) / 2);
             EscMenu->y = static_cast<int>((RenderHeight - EscMenu->h) / 2);
+#else
+            EscMenu->x = static_cast<int>((800 - EscMenu->w) / 2); // default fallback
+            EscMenu->y = static_cast<int>((600 - EscMenu->h) / 2); // default fallback
+#endif
         }
 
 #ifdef STEAM_CODE
@@ -192,11 +195,13 @@ namespace GameMenusImpl {
                 StatsMenuShow = false;
 
                 for (i = 1; i <= MAX_PLAYERS; i++) {
-                    if (Sprite[i].Active) {
-                        StopSound(Sprite[i].ReloadSoundChannel);
-                        StopSound(Sprite[i].JetsSoundChannel);
-                        StopSound(Sprite[i].GattlingSoundChannel);
-                        StopSound(Sprite[i].GattlingSoundChannel2);
+                    if (Sprite[i] && Sprite[i]->Active) {
+                        // Assuming these sound channels exist as members of TSprite
+                        // If they don't exist, they would need to be added to the TSprite structure
+                        if (Sprite[i]->ReloadSoundChannel) StopSound(Sprite[i]->ReloadSoundChannel);
+                        if (Sprite[i]->JetsSoundChannel) StopSound(Sprite[i]->JetsSoundChannel);
+                        if (Sprite[i]->GattlingSoundChannel) StopSound(Sprite[i]->GattlingSoundChannel);
+                        if (Sprite[i]->GattlingSoundChannel2) StopSound(Sprite[i]->GattlingSoundChannel2);
                     }
                 }
 
@@ -313,7 +318,7 @@ namespace GameMenusImpl {
                 GameMenuShow(TeamMenu, false);
                 SelTeam = static_cast<uint8_t>(ButtonIndex);
 
-                if ((MySprite == 0) || (ButtonIndex != Sprite[MySprite].Player.Team)) {
+                if ((MySprite == 0) || (Sprite[MySprite] && Sprite[MySprite]->Player && ButtonIndex != Sprite[MySprite]->Player->Team)) {
                     // NOTE this actually sends a change team request
                     // ClientSendPlayerInfo();  // Assuming this function exists
                 }
@@ -328,7 +333,8 @@ namespace GameMenusImpl {
                         case 0:  // prev
                             do {
                                 KickMenuIndex = ((MAX_SPRITES + KickMenuIndex - 2) % MAX_SPRITES) + 1;
-                            } while (!(Sprite[KickMenuIndex].Active || Sprite[KickMenuIndex].Player.DemoPlayer));
+                            } while (!((Sprite[KickMenuIndex] && Sprite[KickMenuIndex]->Active) || 
+                                    (Sprite[KickMenuIndex] && Sprite[KickMenuIndex]->Player && Sprite[KickMenuIndex]->Player->DemoPlayer)));
 
                             result = (KickMenuIndex != i);
                             break;
@@ -336,7 +342,8 @@ namespace GameMenusImpl {
                         case 1:  // next
                             do {
                                 KickMenuIndex = (KickMenuIndex % MAX_SPRITES) + 1;
-                            } while (!(Sprite[KickMenuIndex].Active || Sprite[KickMenuIndex].Player.DemoPlayer));
+                            } while (!((Sprite[KickMenuIndex] && Sprite[KickMenuIndex]->Active) || 
+                                    (Sprite[KickMenuIndex] && Sprite[KickMenuIndex]->Player && Sprite[KickMenuIndex]->Player->DemoPlayer)));
 
                             result = (KickMenuIndex != i);
                             break;
@@ -346,8 +353,10 @@ namespace GameMenusImpl {
 
                             if (result) {
                                 GameMenuShow(EscMenu, false);
+#ifndef SERVER_CODE
                                 ChatText = L" ";
                                 ChatChanged = true;
+#endif
                                 VoteKickReasonType = true;
                                 // SDL_StartTextInput();  // Assuming SDL functionality exists
                             }
@@ -392,22 +401,26 @@ namespace GameMenusImpl {
                 if ((WeaponActive[i] == 1) && (WeaponSel[MySprite][i] == 1)) {
                     if (i <= 10) {
                         if ((WeaponActive[i] == 1) && (WeaponSel[MySprite][i] == 1)) {
-                            Sprite[MySprite].SelWeapon = Guns[i].Num;
+                            if (Sprite[MySprite]) {
+                                Sprite[MySprite]->SelWeapon = Guns[i].Num;
+                            }
                         }
 
-                        if (Sprite[MySprite].SelWeapon > 0) {
+                        if (Sprite[MySprite] && Sprite[MySprite]->SelWeapon > 0) {
                             GameMenuShow(LimboMenu, false);
 
-                            if (!Sprite[MySprite].DeadMeat &&
-                                !(Sprite[MySprite].Weapon.Num == Guns[BOW].Num || 
-                                  Sprite[MySprite].Weapon.Num == Guns[BOW2].Num)) {
+                            if (Sprite[MySprite] && !Sprite[MySprite]->DeadMeat &&
+                                !(Sprite[MySprite]->Weapon == Guns[BOW].Num || 
+                                  Sprite[MySprite]->Weapon == Guns[BOW2].Num)) {
                                 // Sprite[MySprite].ApplyWeaponByNum(Sprite[MySprite].SelWeapon, 1);  // Assuming method exists
                                 // ClientSpriteSnapshot();  // Assuming this function exists
                             }
                         }
                     } else {
                         // cl_player_secwep.SetValue(i - 11);
-                        Sprite[MySprite].Player.SecWep = i - 11;
+                        if (Sprite[MySprite] && Sprite[MySprite]->Player) {
+                            Sprite[MySprite]->Player->SecWep = i - 11;
+                        }
                         // Sprite[MySprite].ApplyWeaponByNum(Guns[i].Num, 2);  // Assuming method exists
 
                         count = 0;
@@ -417,11 +430,13 @@ namespace GameMenusImpl {
 
                         if (count == 0) {
                             GameMenuShow(LimboMenu, false);
-                            Sprite[MySprite].Weapon = Sprite[MySprite].SecondaryWeapon;
-                            Sprite[MySprite].SecondaryWeapon = Guns[NOWEAPON];
+                            if (Sprite[MySprite]) {
+                                Sprite[MySprite]->Weapon = Sprite[MySprite]->SecondaryWeapon;
+                                Sprite[MySprite]->SecondaryWeapon = Guns[NOWEAPON].Num;
+                            }
                         }
 
-                        if (!Sprite[MySprite].DeadMeat) {
+                        if (Sprite[MySprite] && !Sprite[MySprite]->DeadMeat) {
                             // ClientSpriteSnapshot();  // Assuming this function exists
                         }
                     }
@@ -441,8 +456,13 @@ namespace GameMenusImpl {
         HoveredButton = nullptr;
         HoveredButtonIndex = 0;
 
+#ifndef SERVER_CODE
         float x = mx * _rscala.x;
         float y = my * _rscala.y;
+#else
+        float x = 0.0f;
+        float y = 0.0f;
+#endif
 
         for (size_t i = 0; i < GameMenu.size(); i++) {
             if (GameMenu[i].Active) {
@@ -470,19 +490,6 @@ namespace GameMenusImpl {
 }
 
 // Using declarations to bring into global namespace
-using GameMenusImpl::TGameButton;
-using GameMenusImpl::TGameMenu;
-using GameMenusImpl::GameMenu;
-using GameMenusImpl::HoveredMenu;
-using GameMenusImpl::HoveredButton;
-using GameMenusImpl::HoveredButtonIndex;
-using GameMenusImpl::EscMenu;
-using GameMenusImpl::TeamMenu;
-using GameMenusImpl::LimboMenu;
-using GameMenusImpl::KickMenu;
-using GameMenusImpl::MapMenu;
-using GameMenusImpl::KickMenuIndex;
-using GameMenusImpl::MapMenuIndex;
 using GameMenusImpl::InitGameMenus;
 using GameMenusImpl::GameMenuShow;
 using GameMenusImpl::GameMenuAction;

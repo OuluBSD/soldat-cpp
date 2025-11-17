@@ -1484,28 +1484,29 @@ namespace WeaponsImpl {
     }
 } // namespace WeaponsImpl
 
-// Using declarations to bring into global namespace
-using WeaponsImpl::TGun;
-using WeaponsImpl::Guns;
-using WeaponsImpl::DefaultGuns;
-using WeaponsImpl::DefaultWMChecksum;
-using WeaponsImpl::LoadedWMChecksum;
-using WeaponsImpl::CreateWeapons;
-using WeaponsImpl::CreateDefaultWeapons;
-using WeaponsImpl::CreateWeaponsBase;
-using WeaponsImpl::CreateNormalWeapons;
-using WeaponsImpl::CreateRealisticWeapons;
-using WeaponsImpl::BuildWeapons;
-using WeaponsImpl::CreateWMChecksum;
-using WeaponsImpl::WeaponNumToIndex;
-using WeaponsImpl::WeaponNameToNum;
-using WeaponsImpl::WeaponNumToName;
-using WeaponsImpl::IsMainWeaponIndex;
-using WeaponsImpl::IsSecondaryWeaponIndex;
-using WeaponsImpl::IsExtendedWeaponIndex;
-using WeaponsImpl::CalculateBink;
-using WeaponsImpl::WeaponNumInternalToExternal;
-using WeaponsImpl::WeaponNumExternalToInternal;
-using WeaponsImpl::WeaponNameByNum;
+// Declaration using extern to reference implementations in the namespace
+extern TGun Guns[TOTAL_WEAPONS + 1];  // Pascal arrays start from 1
+extern TGun DefaultGuns[TOTAL_WEAPONS + 1];  // Pascal arrays start from 1
+extern uint32_t DefaultWMChecksum;
+extern uint32_t LoadedWMChecksum;
+
+// Functions using the namespace implementations
+inline void CreateWeapons(bool RealisticMode) { WeaponsImpl::CreateWeapons(RealisticMode); }
+inline void CreateDefaultWeapons(bool RealisticMode) { WeaponsImpl::CreateDefaultWeapons(RealisticMode); }
+inline void CreateWeaponsBase() { WeaponsImpl::CreateWeaponsBase(); }
+inline void CreateNormalWeapons() { WeaponsImpl::CreateNormalWeapons(); }
+inline void CreateRealisticWeapons() { WeaponsImpl::CreateRealisticWeapons(); }
+inline void BuildWeapons() { WeaponsImpl::BuildWeapons(); }
+inline uint32_t CreateWMChecksum() { return WeaponsImpl::CreateWMChecksum(); }
+inline int16_t WeaponNumToIndex(uint8_t Num) { return WeaponsImpl::WeaponNumToIndex(Num); }
+inline int WeaponNameToNum(const std::string& Name) { return WeaponsImpl::WeaponNameToNum(Name); }
+inline std::string WeaponNumToName(uint8_t Num) { return WeaponsImpl::WeaponNumToName(Num); }
+inline bool IsMainWeaponIndex(int Index) { return WeaponsImpl::IsMainWeaponIndex(Index); }
+inline bool IsSecondaryWeaponIndex(int Index) { return WeaponsImpl::IsSecondaryWeaponIndex(Index); }
+inline bool IsExtendedWeaponIndex(int Index) { return WeaponsImpl::IsExtendedWeaponIndex(Index); }
+inline int CalculateBink(int Index, bool Realistic) { return WeaponsImpl::CalculateBink(Index, Realistic); }
+inline uint8_t WeaponNumInternalToExternal(uint8_t Num) { return WeaponsImpl::WeaponNumInternalToExternal(Num); }
+inline uint8_t WeaponNumExternalToInternal(uint8_t Num) { return WeaponsImpl::WeaponNumExternalToInternal(Num); }
+inline std::string WeaponNameByNum(uint8_t Num) { return WeaponsImpl::WeaponNameByNum(Num); }
 
 #endif // WEAPONS_H

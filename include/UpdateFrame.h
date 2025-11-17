@@ -52,13 +52,13 @@ namespace UpdateFrameImpl {
         MousePrev.y = my;
 
         if (MapChangeCounter < 0) {
-            if (DemoPlayer.Active && EscMenu.Active) {
+            if (DemoPlayer.Active() && EscMenu.Active) {
                 return;
             }
 
             for (int j = 1; j <= MAX_SPRITES; j++) {
-                if (Sprite[j].Active) {
-                    if (Sprite[j].IsNotSpectator()) {
+                if (Sprite[j] && Sprite[j]->Active) {
+                    if (Sprite[j]->IsNotSpectator()) {
                         if (ClientStopMovingCounter > 0) {
                             SpriteParts.DoEulerTimeStepFor(j);  // integrate sprite particles
                         }
@@ -67,19 +67,19 @@ namespace UpdateFrameImpl {
             }
 
             for (int j = 1; j <= MAX_SPRITES; j++) {
-                if (Sprite[j].Active) {
-                    Sprite[j].Update();  // update sprite
+                if (Sprite[j] && Sprite[j]->Active) {
+                    Sprite[j]->Update();  // update sprite
                 }
             }
 
             // Bullets update
             for (int j = 1; j <= MAX_BULLETS; j++) {
-                if (Bullet[j].Active) {
-                    Bullet[j].Update();
+                if (Bullet[j] && Bullet[j]->Active) {
+                    Bullet[j]->Update();
                 }
 
-                if (Bullet[j].PingAdd > 0) {
-                    Bullet[j].PingAdd -= 4;
+                if (Bullet[j] && Bullet[j]->PingAdd > 0) {
+                    Bullet[j]->PingAdd -= 4;
                 }
             }
 
@@ -87,16 +87,16 @@ namespace UpdateFrameImpl {
 
             SparksCount = 0;
             for (int j = 1; j <= MAX_SPARKS; j++) {
-                if (Spark[j].Active) {
-                    Spark[j].Update();
+                if (Spark[j] && Spark[j]->Active) {
+                    Spark[j]->Update();
                     SparksCount++;
                 }
             }
 
             // update Things
             for (int j = 1; j <= MAX_THINGS; j++) {
-                if (Thing[j].Active) {
-                    Thing[j].Update();
+                if (Thing[j] && Thing[j]->Active) {
+                    Thing[j]->Update();
                 }
             }
 
@@ -109,14 +109,15 @@ namespace UpdateFrameImpl {
 
             // Change spectate target away from dead player
             if (MainTickCounter % (SECOND * 5) == 0) {
-                if ((CameraFollowSprite > 0) && Sprite[CameraFollowSprite].DeadMeat &&
-                    (sv_realisticmode.Value) && (sv_survivalmode.Value) && !SurvivalEndRound) {
+                if ((CameraFollowSprite > 0) && Sprite[CameraFollowSprite] && 
+                    Sprite[CameraFollowSprite]->DeadMeat &&
+                    (sv_realisticmode.Value()) && (sv_survivalmode.Value()) && !SurvivalEndRound) {
                     CameraFollowSprite = GetCameraTarget();
                 }
             }
 
             // Weather effects
-            if (r_weathereffects.Value) {
+            if (r_weathereffects.Value()) {
                 switch (Map.Weather) {
                     case 1: MakeRain(); break;
                     case 2: MakeSandStorm(); break;
@@ -128,7 +129,7 @@ namespace UpdateFrameImpl {
             // allow camera switching in demos while paused
             //if DemoPlay then
             //  for j := 1 to MAX_SPRITES do
-            //   if Sprite[j].Active then
+            //   if Sprite[j] && Sprite[j]->Active then
             //    ControlSprite(Sprite[j]);
         }
 
@@ -137,24 +138,24 @@ namespace UpdateFrameImpl {
         CursorFriendly = false;
 
         // TODO(helloer): While watching demos this code needs to use SpectNumber instead of MySprite
-        if ((MySprite > 0) && (!DemoPlayer.Active)) {
+        if ((MySprite > 0) && (!DemoPlayer.Active())) {
             for (int j = 1; j <= MAX_SPRITES; j++) {
-                if (Sprite[j].Active && Sprite[j].IsNotSpectator() &&
-                    (j != MySprite) && (Sprite[j].BonusStyle != BONUS_PREDATOR) &&
-                    ((Sprite[j].Position == POS_STAND) ||
-                    (Sprite[j].IsNotSolo() && Sprite[j].IsInSameTeam(Sprite[MySprite])) ||
-                    Sprite[MySprite].DeadMeat || Sprite[j].DeadMeat) &&
-                    ((Sprite[j].Visible > 40) || (!sv_realisticmode.Value))) {
+                if (Sprite[j] && Sprite[j]->Active && Sprite[j]->IsNotSpectator() &&
+                    (j != MySprite) && (Sprite[j]->BonusStyle != BONUS_PREDATOR) &&
+                    ((Sprite[j]->Position == POS_STAND) ||
+                    (Sprite[j]->IsNotSolo() && Sprite[j]->IsInSameTeam(Sprite[MySprite].get())) ||
+                    (Sprite[MySprite] && Sprite[MySprite]->DeadMeat) || (Sprite[j] && Sprite[j]->DeadMeat)) &&
+                    ((Sprite[j]->Visible > 40) || (!sv_realisticmode.Value()))) {
                     
-                    if (Distance(-GameWidthHalf + camerax + mx, -GameHeightHalf + cameray + my,
+                    if (Distance(-GameWidthHalf + CameraX + mx, -GameHeightHalf + CameraY + my,
                         SpriteParts.Pos[j].X, SpriteParts.Pos[j].Y) <
                         CURSORSPRITE_DISTANCE) {
                         
-                        CursorText = Sprite[j].Player.Name;
+                        CursorText = Sprite[j]->Player->Name;
                         if (IsTeamGame()) {
-                            if (Sprite[j].IsInSameTeam(Sprite[MySprite])) {
+                            if (Sprite[j]->IsInSameTeam(Sprite[MySprite].get())) {
                                 CursorText = CursorText + " " +
-                                    std::to_string(static_cast<int>(round((Sprite[j].Health / STARTHEALTH) * 100))) + "%";
+                                    std::to_string(static_cast<int>(round((Sprite[j]->Health / STARTHEALTH) * 100))) + "%";
                                 CursorFriendly = true;
                             }
                         }
@@ -220,8 +221,8 @@ namespace UpdateFrameImpl {
             // Idle counter
             if (MySprite > 0) {
                 if (MapChangeCounter < 99999999) {
-                    if (Sprite[MySprite].IsNotSpectator() &&
-                            (!Sprite[MySprite].Player.DemoPlayer)) {
+                    if (Sprite[MySprite] && Sprite[MySprite]->IsNotSpectator() &&
+                            (!Sprite[MySprite]->Player || !Sprite[MySprite]->Player->DemoPlayer)) {
                         if (OldMouseX - static_cast<int>(round(mx)) == 0) {
                             IdleCounter++;
                         } else {
@@ -334,16 +335,17 @@ namespace UpdateFrameImpl {
 
         // MOVE -=CAMERA=-
         if ((CameraFollowSprite > 0) && (CameraFollowSprite < MAX_SPRITES + 1)) {
-            if (Sprite[CameraFollowSprite].Active && Sprite[CameraFollowSprite].IsNotSpectator()) {
+            if (Sprite[CameraFollowSprite] && Sprite[CameraFollowSprite]->Active && 
+                Sprite[CameraFollowSprite]->IsNotSpectator()) {
                 // FIXME(skoskav): Scope zoom and non-default resolution makes this a bit complicated. Why
                 // does the magic number ~6.8 work so well?
 
                 TVector2 M;
-                M.X = expf(r_zoom.Value) * ((mx - GameWidthHalf) / Sprite[CameraFollowSprite].AimDistCoef *
+                M.X = expf(r_zoom.Value()) * ((mx - GameWidthHalf) / Sprite[CameraFollowSprite]->AimDistCoef *
                     ((2 * 640 / GameWidth - 1) +
-                    (GameWidth - 640) / GameWidth * (DEFAULTAIMDIST - Sprite[CameraFollowSprite].AimDistCoef) / 6.8f));
+                    (GameWidth - 640) / GameWidth * (DEFAULTAIMDIST - Sprite[CameraFollowSprite]->AimDistCoef) / 6.8f));
 
-                M.Y = expf(r_zoom.Value) * ((my - GameHeightHalf) / Sprite[CameraFollowSprite].AimDistCoef);
+                M.Y = expf(r_zoom.Value()) * ((my - GameHeightHalf) / Sprite[CameraFollowSprite]->AimDistCoef);
                 
                 TVector2 CamV = {CameraX, CameraY};
                 TVector2 P = {SpriteParts.Pos[CameraFollowSprite].X, SpriteParts.Pos[CameraFollowSprite].Y};
@@ -379,7 +381,7 @@ namespace UpdateFrameImpl {
         }
 
         // safety
-        if ((MySprite > 0) && (Sprite[MySprite].IsSpectator)) {
+        if ((MySprite > 0) && (Sprite[MySprite] && Sprite[MySprite]->IsSpectator())) {
             if ((CameraX > MAX_SECTORZ * Map.SectorsDivision) ||
                 (CameraX < MIN_SECTORZ * Map.SectorsDivision) ||
                 (CameraY > MAX_SECTORZ * Map.SectorsDivision) ||
@@ -402,7 +404,7 @@ namespace UpdateFrameImpl {
             }
         }
 
-        if ((demo_autorecord.Value) && (DemoRecorder.Active == false) && (Map.Name != "")) {
+        if ((demo_autorecord.Value()) && (DemoRecorder.Active() == false) && (Map.Name != "")) {
             DemoRecorder.StartRecord(UserDirectory + "demos/" +
                 FormatDateTime("yyyy-mm-dd_hh-nn-ss_", Now()) + Map.Name + ".sdm");
         }

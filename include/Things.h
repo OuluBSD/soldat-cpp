@@ -51,6 +51,13 @@ struct TThing {
     bool Visible;
     uint8_t Team;
     
+    // Skeleton structure for animations - referenced in AI.h
+    struct {
+        struct {
+            TVector2 Pos[20];  // Assuming max number of body parts
+        } Skeleton;
+    };
+    
     // Constructor
     TThing();
     

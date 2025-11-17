@@ -189,6 +189,9 @@ struct TSprite {
         bool FreeMove;
         bool FreeCam;
         bool Hook;
+        bool Prone;  // Added for AI.h compatibility
+        bool Jetpack; // Added for AI.h compatibility
+        bool ThrowNade; // Added for AI.h compatibility
         uint8_t NextWeapNum;
         uint8_t PrevWeapNum;
         bool NextSecWeap;
@@ -450,6 +453,23 @@ struct TSprite {
     
     // Helper methods that were referenced but missing
     
+    // Reset all control inputs to false/deselected
+    void FreeControls() {
+        this->Control.Up = false;
+        this->Control.Down = false;
+        this->Control.Left = false;
+        this->Control.Right = false;
+        this->Control.Jump = false;
+        this->Control.ThrowGrenade = false;
+        this->Control.Fire = false;
+        this->Control.SecondaryFire = false;
+        this->Control.Reload = false;
+        this->Control.Change = false;
+        this->Control.Crouch = false;
+        this->Control.Walk = false;
+        // Add other control elements as needed
+    }
+    
     // Check if sprite is not a spectator
     bool IsNotSpectator() const {
         return Player && Player->Team != TEAM_SPECTATOR;
@@ -465,6 +485,59 @@ struct TSprite {
         return Player && Player->Team != TEAM_SPECTATOR && Player->Team != TEAM_NONE;
     }
     
+    // Brain structure for AI
+    struct {
+        uint8_t TargetNum;
+        bool GoThing;
+        uint8_t Camper;
+        uint8_t Accuracy;
+        uint8_t FavWeapon;
+        std::string Friend;
+        uint8_t DeadKill;
+        uint8_t GrenadeFreq;
+        uint8_t Use;
+        uint8_t ChatFreq;
+        std::string ChatKill;
+        std::string ChatDead;
+        std::string ChatLowHealth;
+        std::string ChatSeeEnemy;
+        std::string ChatWinning;
+        uint8_t CurrentWaypoint;
+        uint8_t NextWaypoint;
+        uint8_t OldWaypoint;
+        uint8_t PathNum;
+        uint8_t PissedOff;
+        uint8_t WaypointTime;
+        uint8_t LastWaypoint;
+        uint8_t OnePlaceCount;
+        uint8_t WaypointTimeoutCounter;
+        uint8_t FallSave;
+    } Brain;
+
+    // Additional members that were referenced in the codebase
+    bool Dummy;
+    uint8_t BodyAnimation;  // Just an ID value, not a struct
+    uint8_t ReloadSoundChannel;  // Sound channel ID
+    uint8_t JetsSoundChannel;  // Sound channel ID
+    uint8_t GattlingSoundChannel;  // Sound channel ID
+    uint8_t GattlingSoundChannel2;  // Sound channel ID
+    uint8_t SelWeapon;
+    bool Fired;
+    float AimDistCoef;
+    bool Visible;
+    uint8_t Alpha;
+    bool HasCigar;
+    bool Style;
+    int16_t CeaseFireCounter;
+    uint8_t JetsCount;
+    bool TertiaryWeapon;
+    uint8_t Direction;
+    bool Skeleton;  // This might be a flag
+    uint8_t HoldedThing;
+    bool InBase;
+    bool HasPack;
+    uint8_t PingAdd;
+
     // Check if another sprite is not in the same team
     bool IsNotInSameTeam(const TSprite* other) const {
         return other && Player && other->Player && Player->Team != other->Player->Team && Player->Team != TEAM_NONE && other->Player->Team != TEAM_NONE;
