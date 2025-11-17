@@ -16,18 +16,48 @@
 #include "Console.h"
 #include "Util.h"
 #include "Cvar.h"
+#include "Game.h"
+#include "SysUtils.h"  // Assuming this contains DateTimeToUnix and other utilities
+
 #ifdef SERVER_CODE
 #include "Server.h"
 #else
 #include "Client.h"
+#include "GameStrings.h"
 #endif
+
 #include <string>
 #include <vector>
 #include <memory>
 #include <fstream>
-#include "SysUtils.h"  // Assuming this contains DateTimeToUnix and other utilities
+#include <algorithm>
+#include <cctype>
 
 const char DEMO_MAGIC[6] = {'S', 'O', 'L', 'D', 'E', 'M'};
+
+// Add utility functions if not already available
+#ifndef EXTRACT_FILE_NAME_DEFINED
+#define EXTRACT_FILE_NAME_DEFINED
+
+namespace Util {
+    inline std::string ExtractFileName(const std::string& path) {
+        size_t pos = path.find_last_of("/\\");
+        if (pos != std::string::npos) {
+            return path.substr(pos + 1);
+        }
+        return path;
+    }
+    
+    inline void StringToArray(char* dest, const std::string& src) {
+        size_t len = std::min(src.length(), static_cast<size_t>(160)); // Assuming 160 byte array limit
+        std::copy(src.begin(), src.begin() + len, dest);
+        dest[len] = '\0'; // Ensure null termination
+    }
+}
+using Util::ExtractFileName;
+using Util::StringToArray;
+
+#endif
 
 #pragma pack(push, 1)  // Pascal records are tightly packed
 struct TDemoHeader {
@@ -172,7 +202,7 @@ public:
         std::string filenameOnly = ExtractFileName(Filename);
 
         std::wstring wideStr(filenameOnly.begin(), filenameOnly.end());
-        MainConsole.Console(L"Recording demo: " + wideStr, INFO_MESSAGE_COLOR);
+        MainConsole.Console(wideStr.c_str(), INFO_MESSAGE_COLOR);
 
         FName = filenameOnly;
         FActive = true;
@@ -206,9 +236,9 @@ public:
         }
 
         std::wstring wideStr(FName.begin(), FName.end());
-        MainConsole.Console(L"Demo stopped (" + wideStr + L")", INFO_MESSAGE_COLOR);
+        MainConsole.Console((L"Demo stopped (" + wideStr + L")").c_str(), INFO_MESSAGE_COLOR);
 
-        KillSprite(MAX_SPRITES);
+        KillSprite(MAX_SPRITES, 0, 0, 0);  // Provide all required arguments for KillSprite
 
         // Go back to beginning of file to update header
         // FDemoFile->Position = 0;  // Would need implementation
@@ -309,7 +339,7 @@ public:
         } else {
             FName = ExtractFileName(Filename);
             std::wstring wideFName(FName.begin(), FName.end());
-            MainConsole.Console(L"Playing demo " + wideFName, INFO_MESSAGE_COLOR);
+            MainConsole.Console((L"Playing demo " + wideFName).c_str(), INFO_MESSAGE_COLOR);
             Spectator = 1;  // Assuming this is a global variable
             FActive = true;
             result = true;
@@ -392,7 +422,7 @@ public:
 
             for (int i = 1; i <= MAX_SPRITES; i++) {
                 if (Sprite[i] && Sprite[i]->Active) {
-                    KillSprite(i);
+                    KillSprite(i, 0, 0, 0);  // Provide all required arguments for KillSprite
                 }
             }
             for (int i = 1; i <= MAX_BULLETS; i++) {
