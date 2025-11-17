@@ -22,7 +22,6 @@
 #include "Game.h"
 #include "Net.h"
 #include "Sprites.h"
-#include "Demo.h"
 
 // Forward declarations
 struct TClientNetwork;

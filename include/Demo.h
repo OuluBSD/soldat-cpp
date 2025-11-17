@@ -24,6 +24,10 @@
 #else
 #include "Client.h"
 #include "GameStrings.h"
+#include "ClientGame.h"  // For ShouldRenderFrames
+#include "Sparks.h"      // For Spark
+#include "Things.h"      // For KillThing
+#include "Game.h"        // For BigText, BigDelay, and other game variables
 #endif
 
 #include <string>
@@ -33,7 +37,15 @@
 #include <algorithm>
 #include <cctype>
 
+// Forward declarations for class types
+class TDemoRecorder;
+class TDemoPlayer;
+
 const char DEMO_MAGIC[6] = {'S', 'O', 'L', 'D', 'E', 'M'};
+
+// Forward declarations for global variables used in class methods
+// These are defined in Demo.cpp and declared as extern later in this file
+class TDemoPlayer; // Forward declaration of the class
 
 // Add utility functions if not already available
 #ifndef EXTRACT_FILE_NAME_DEFINED
@@ -107,7 +119,7 @@ public:
     
     int CreateDemoPlayer() {
         if (Sprite[MAX_SPRITES] && Sprite[MAX_SPRITES]->Active) {
-            MainConsole.Console(L"Failed to create Demo Recorder player. Demos can be recorded with up to 31 players", INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(L"Failed to create Demo Recorder player. Demos can be recorded with up to 31 players"), INFO_MESSAGE_COLOR);
             StopRecord();
             return -1;
         }
@@ -132,7 +144,7 @@ public:
         // First, get a free sprite number
         uint8_t freeSpriteNum = GetNextFreeSpriteNum();
         if (freeSpriteNum == 0) {
-            MainConsole.Console(L"Failed to create Demo Recorder player. No free sprite slots", INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(L"Failed to create Demo Recorder player. No free sprite slots"), INFO_MESSAGE_COLOR);
             StopRecord();
             return -1;
         }
@@ -192,7 +204,7 @@ public:
         bool result = false;
 
 #ifndef SERVER_CODE
-        if (DemoPlayer && DemoPlayer->GetActive()) {
+        if (DemoPlayer && DemoPlayer->Active()) {
             return false;
         }
 #endif
@@ -202,7 +214,7 @@ public:
         std::string filenameOnly = ExtractFileName(Filename);
 
         std::wstring wideStr(filenameOnly.begin(), filenameOnly.end());
-        MainConsole.Console(wideStr.c_str(), INFO_MESSAGE_COLOR);
+        MainConsole.Console(WideString(wideStr.c_str()), INFO_MESSAGE_COLOR);
 
         FName = filenameOnly;
         FActive = true;
@@ -236,7 +248,7 @@ public:
         }
 
         std::wstring wideStr(FName.begin(), FName.end());
-        MainConsole.Console((L"Demo stopped (" + wideStr + L")").c_str(), INFO_MESSAGE_COLOR);
+        MainConsole.Console(WideString((L"Demo stopped (" + wideStr + L")").c_str()), INFO_MESSAGE_COLOR);
 
         KillSprite(MAX_SPRITES, 0, 0, 0);  // Provide all required arguments for KillSprite
 
@@ -257,7 +269,7 @@ public:
             std::string errMsg = "Failed to save demo file: ";
             errMsg += e.what();
             std::wstring wideErr(errMsg.begin(), errMsg.end());
-            MainConsole.Console(wideErr, INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(wideErr.c_str()), INFO_MESSAGE_COLOR);
         }
 
         FActive = false;
@@ -318,7 +330,7 @@ public:
         if (!file.is_open()) {
             std::string errMsg = "Failed to load demo file: Could not open file";
             std::wstring wideErrMsg(errMsg.begin(), errMsg.end());
-            MainConsole.Console(wideErrMsg, INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(wideErrMsg.c_str()), INFO_MESSAGE_COLOR);
             return false;
         }
 
@@ -328,18 +340,18 @@ public:
         if (std::string(FDemoHeader.Header, 6) != std::string(DEMO_MAGIC, 6)) {
             std::string errMsg = "The provided file is not valid: " + FName;
             std::wstring wideErrMsg(errMsg.begin(), errMsg.end());
-            MainConsole.Console(wideErrMsg, INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(wideErrMsg.c_str()), INFO_MESSAGE_COLOR);
             return false;
         } else if (FDemoHeader.Version != DEMO_VERSION) {
             std::string errMsg = "Wrong demo version: " + std::to_string(DEMO_VERSION) + " - " +
                                 std::to_string(FDemoHeader.Version);
             std::wstring wideErrMsg(errMsg.begin(), errMsg.end());
-            MainConsole.Console(wideErrMsg, INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString(wideErrMsg.c_str()), INFO_MESSAGE_COLOR);
             return false;
         } else {
             FName = ExtractFileName(Filename);
             std::wstring wideFName(FName.begin(), FName.end());
-            MainConsole.Console((L"Playing demo " + wideFName).c_str(), INFO_MESSAGE_COLOR);
+            MainConsole.Console(WideString((L"Playing demo " + wideFName).c_str()), INFO_MESSAGE_COLOR);
             Spectator = 1;  // Assuming this is a global variable
             FActive = true;
             result = true;
@@ -353,7 +365,7 @@ public:
             return;
         }
 
-        MainConsole.Console(L"Demo stopped", INFO_MESSAGE_COLOR);
+        MainConsole.Console(WideString(L"Demo stopped"), INFO_MESSAGE_COLOR);
 
         FDemoFile.reset();  // Equivalent to Free()
 
@@ -481,14 +493,7 @@ public:
 };
 #endif
 
-// Global variables
-extern std::unique_ptr<TDemoRecorder> DemoRecorder;
-#ifndef SERVER_CODE
-extern std::unique_ptr<TDemoPlayer> DemoPlayer;
-#endif
-extern uint16_t RSize;
-extern uint8_t FreeCam;
-extern uint8_t NoTexts;
+
 
 // Initialize global objects
 inline void DemoInit() {
@@ -497,5 +502,15 @@ inline void DemoInit() {
     DemoPlayer = std::make_unique<TDemoPlayer>();
 #endif
 }
+
+// Global variables
+extern std::unique_ptr<TDemoRecorder> DemoRecorder;
+#ifndef SERVER_CODE
+extern std::unique_ptr<TDemoPlayer> DemoPlayer;
+#endif
+extern uint16_t RSize;
+extern uint8_t FreeCam;
+extern uint8_t NoTexts;
+extern uint8_t CameraFollowSprite;
 
 #endif // DEMO_H
