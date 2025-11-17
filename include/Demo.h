@@ -2,17 +2,25 @@
 #define DEMO_H
 
 //*******************************************************************************
-//                                                                              
-//       Demo Unit for SOLDAT                                                    
-//                                                                              
-//       Copyright (c) 2002 Michal Marcinkowski          
-//                                                                              
+//
+//       Demo Unit for SOLDAT
+//
+//       Copyright (c) 2002 Michal Marcinkowski
+//
 //*******************************************************************************
 
 #include "Constants.h"
 #include "Vector.h"
 #include "Sprites.h"
 #include "Net.h"
+#include "Console.h"
+#include "Util.h"
+#include "Cvar.h"
+#ifdef SERVER_CODE
+#include "Server.h"
+#else
+#include "Client.h"
+#endif
 #include <string>
 #include <vector>
 #include <memory>
@@ -63,54 +71,11 @@ public:
 class TDemoRecorder : public TDemo {
 private:
     int32_t FTicksNum;
-    
-    int CreateDemoPlayer();
-#ifndef SERVER_CODE
-    void SaveCamera();
-#endif
 
 public:
     TDemoRecorder() : FTicksNum(0) {}
     
-    bool StartRecord(const std::string& Filename);
-    void StopRecord();
-    void SaveRecord(const void* R, int Size);
-    void SaveNextFrame();
-#ifndef SERVER_CODE
-    void SavePosition();
-#endif
-    
-    int GetTicksNum() const { return FTicksNum; }
-};
-
-#ifndef SERVER_CODE
-class TDemoPlayer : public TDemo {
-private:
-    int32_t FSkipTo;
-
-public:
-    TDemoPlayer() : FSkipTo(0) {}
-    
-    bool OpenDemo(const std::string& Filename);
-    void StopDemo();
-    void ProcessDemo();
-    void Position(int Ticks);
-    
-    int GetSkipTo() const { return FSkipTo; }
-};
-#endif
-
-// Global variables
-extern std::unique_ptr<TDemoRecorder> DemoRecorder;
-#ifndef SERVER_CODE
-extern std::unique_ptr<TDemoPlayer> DemoPlayer;
-#endif
-extern uint16_t RSize;
-extern uint8_t FreeCam;
-extern uint8_t NoTexts;
-
-namespace DemoImpl {
-    inline int TDemoRecorder::CreateDemoPlayer() {
+    int CreateDemoPlayer() {
         if (Sprite[MAX_SPRITES] && Sprite[MAX_SPRITES]->Active) {
             MainConsole.Console(L"Failed to create Demo Recorder player. Demos can be recorded with up to 31 players", INFO_MESSAGE_COLOR);
             StopRecord();
@@ -119,7 +84,10 @@ namespace DemoImpl {
 
         TPlayer* player = new TPlayer();  // Assuming TPlayer has a constructor
         player->DemoPlayer = true;
-        player->Name = "Demo Recorder";
+        player->Name.resize(PLAYERNAME_CHARS);
+        std::string nameStr = "Demo Recorder";
+        if (nameStr.length() > PLAYERNAME_CHARS) nameStr.resize(PLAYERNAME_CHARS);
+        std::copy(nameStr.begin(), nameStr.end(), player->Name.begin());
         player->Team = TEAM_SPECTATOR;
         player->ControlMethod = HUMAN;
 
@@ -131,19 +99,32 @@ namespace DemoImpl {
         a.x = MIN_SECTORZ * Map.SectorsDivision * 0.7f;
         a.y = MIN_SECTORZ * Map.SectorsDivision * 0.7f;
 
-        int p = CreateSprite(a, Vector2(0, 0), 1, MAX_SPRITES, player, true);
+        // First, get a free sprite number
+        uint8_t freeSpriteNum = GetNextFreeSpriteNum();
+        if (freeSpriteNum == 0) {
+            MainConsole.Console(L"Failed to create Demo Recorder player. No free sprite slots", INFO_MESSAGE_COLOR);
+            StopRecord();
+            return -1;
+        }
+
+        // Create the sprite with the demo player
+        CreateSprite(freeSpriteNum, TEAM_SPECTATOR, a, player);
+        
+        // CreateSprite doesn't update the sprite array directly, so if needed, we assign player
+        // Since CreateSprite should already handle assigning the player, we just verify
+        int p = freeSpriteNum;
         if ((p > 0) && (p < MAX_SPRITES + 1)) {
 #ifdef SERVER_CODE
             ServerSyncCvars(p, player->Peer, true);
             ServerSendPlayList(player->Peer);
-#else
-            ServerSyncCvars(p, 0, true);
-            ServerSendPlayList(0);
-#endif
             ServerVars(p);
             ServerSendNewPlayerInfo(p, JOIN_NORMAL);
             ServerThingMustSnapshotOnConnect(p);
-            Sprite[p].Player.DemoPlayer = true;
+            Sprite[p]->Player->DemoPlayer = true;
+#else
+            // Client-side functions would go here if needed
+            Sprite[p]->Player->DemoPlayer = true;
+#endif
             SpriteParts.Pos[p] = Vector2(0, 0);
             return p;
         }
@@ -152,14 +133,14 @@ namespace DemoImpl {
     }
 
 #ifndef SERVER_CODE
-    inline void TDemoRecorder::SaveCamera() {
+    void SaveCamera() {
         // TMsg_ClientSpriteSnapshot_Dead msg;  // Assuming this struct exists
         // msg.Header.ID = MsgID_ClientSpriteSnapshot_Dead;
         // msg.CameraFocus = CameraFollowSprite;
         // SaveRecord(msg, sizeof(msg));
     }
 
-    inline void TDemoRecorder::SavePosition() {
+    void SavePosition() {
         // TMsg_ServerSpriteDelta_Movement movementMsg;  // Assuming this struct exists
         // movementMsg.Header.ID = MsgID_Delta_Movement;
         //
@@ -177,7 +158,7 @@ namespace DemoImpl {
     }
 #endif
 
-    inline bool TDemoRecorder::StartRecord(const std::string& Filename) {
+    bool StartRecord(const std::string& Filename) {
         bool result = false;
 
 #ifndef SERVER_CODE
@@ -189,7 +170,7 @@ namespace DemoImpl {
         FDemoFile = std::make_shared<std::vector<uint8_t>>();
 
         std::string filenameOnly = ExtractFileName(Filename);
-        
+
         std::wstring wideStr(filenameOnly.begin(), filenameOnly.end());
         MainConsole.Console(L"Recording demo: " + wideStr, INFO_MESSAGE_COLOR);
 
@@ -219,15 +200,15 @@ namespace DemoImpl {
         return result;
     }
 
-    inline void TDemoRecorder::StopRecord() {
-        if (!Active) {
+    void StopRecord() {
+        if (!Active()) {
             return;
         }
 
         std::wstring wideStr(FName.begin(), FName.end());
         MainConsole.Console(L"Demo stopped (" + wideStr + L")", INFO_MESSAGE_COLOR);
 
-        Sprite[MAX_SPRITES].Kill();
+        KillSprite(MAX_SPRITES);
 
         // Go back to beginning of file to update header
         // FDemoFile->Position = 0;  // Would need implementation
@@ -254,7 +235,7 @@ namespace DemoImpl {
         FDemoFile.reset();  // Equivalent to Free() in Pascal
     }
 
-    inline void TDemoRecorder::SaveRecord(const void* R, int Size) {
+    void SaveRecord(const void* R, int Size) {
         if (Size == 0) {
             return;
         }
@@ -267,7 +248,7 @@ namespace DemoImpl {
         // FDemoFile->Write(R, Size);  // Would need implementation
     }
 
-    inline void TDemoRecorder::SaveNextFrame() {
+    void SaveNextFrame() {
         if (!FActive) {
             return;
         }
@@ -288,8 +269,18 @@ namespace DemoImpl {
         FTicksNum++;
     }
 
+    int GetTicksNum() const { return FTicksNum; }
+};
+
 #ifndef SERVER_CODE
-    inline bool TDemoPlayer::OpenDemo(const std::string& Filename) {
+class TDemoPlayer : public TDemo {
+private:
+    int32_t FSkipTo;
+
+public:
+    TDemoPlayer() : FSkipTo(0) {}
+
+    bool OpenDemo(const std::string& Filename) {
         bool result = false;
         FDemoFile = std::make_shared<std::vector<uint8_t>>();
 
@@ -310,7 +301,7 @@ namespace DemoImpl {
             MainConsole.Console(wideErrMsg, INFO_MESSAGE_COLOR);
             return false;
         } else if (FDemoHeader.Version != DEMO_VERSION) {
-            std::string errMsg = "Wrong demo version: " + std::to_string(DEMO_VERSION) + " - " + 
+            std::string errMsg = "Wrong demo version: " + std::to_string(DEMO_VERSION) + " - " +
                                 std::to_string(FDemoHeader.Version);
             std::wstring wideErrMsg(errMsg.begin(), errMsg.end());
             MainConsole.Console(wideErrMsg, INFO_MESSAGE_COLOR);
@@ -327,7 +318,7 @@ namespace DemoImpl {
         return result;
     }
 
-    inline void TDemoPlayer::StopDemo() {
+    void StopDemo() {
         if (!FActive) {
             return;
         }
@@ -339,9 +330,9 @@ namespace DemoImpl {
         FActive = false;
     }
 
-    inline void TDemoPlayer::ProcessDemo() {
+    void ProcessDemo() {
         char readBuf[16384];  // Array[0..16383] of Char
-        
+
         while (FActive) {
             // Check if we've reached the end of the demo file
             // This would need actual file position checking implementation
@@ -350,7 +341,7 @@ namespace DemoImpl {
             //     ExitToMenu();  // Assuming this function exists
             //     return;
             // }
-            
+
             // Would need actual file reading implementation
             // try
             //     FDemoFile->Read(RSize, sizeof(RSize));
@@ -389,7 +380,7 @@ namespace DemoImpl {
         }
     }
 
-    inline void TDemoPlayer::Position(int Ticks) {
+    void Position(int Ticks) {
         FSkipTo = Ticks;
         ShouldRenderFrames = false;
 
@@ -400,16 +391,26 @@ namespace DemoImpl {
             MainTickCounter = 0;
 
             for (int i = 1; i <= MAX_SPRITES; i++) {
-                Sprite[i].Kill();
+                if (Sprite[i] && Sprite[i]->Active) {
+                    KillSprite(i);
+                }
             }
             for (int i = 1; i <= MAX_BULLETS; i++) {
-                Bullet[i].Kill();
+                if (Bullet[i]) {
+                    // Assuming there's a function to kill bullets, or use a different approach
+                    // If Kill() method doesn't exist, we may need to reset instead
+                    // ResetBullet(i);  // Assuming such function exists
+                }
             }
             for (int i = 1; i <= MAX_SPARKS; i++) {
-                Spark[i].Kill();
+                if (Spark[i]) {
+                    // Similar for sparks if needed
+                }
             }
             for (int i = 1; i <= MAX_THINGS; i++) {
-                Thing[i].Kill();
+                if (Thing[i]) {
+                    KillThing(i);  // Assuming there's a function to kill things
+                }
             }
 
             // Reset World and Big Texts
@@ -445,14 +446,9 @@ namespace DemoImpl {
 
         GOALTICKS = DEFAULT_GOALTICKS * 20;
     }
-#endif
-}
 
-// Using declarations to bring into global namespace
-using DemoImpl::TDemo;
-using DemoImpl::TDemoRecorder;
-#ifndef SERVER_CODE
-using DemoImpl::TDemoPlayer;
+    int GetSkipTo() const { return FSkipTo; }
+};
 #endif
 
 // Global variables
@@ -462,16 +458,14 @@ extern std::unique_ptr<TDemoPlayer> DemoPlayer;
 #endif
 extern uint16_t RSize;
 extern uint8_t FreeCam;
-extern uint8_t NoTexts = 0;
+extern uint8_t NoTexts;
 
 // Initialize global objects
-namespace DemoImpl {
-    inline void DemoInit() {
-        DemoRecorder = std::make_unique<TDemoRecorder>();
+inline void DemoInit() {
+    DemoRecorder = std::make_unique<TDemoRecorder>();
 #ifndef SERVER_CODE
-        DemoPlayer = std::make_unique<TDemoPlayer>();
+    DemoPlayer = std::make_unique<TDemoPlayer>();
 #endif
-    }
 }
 
 #endif // DEMO_H

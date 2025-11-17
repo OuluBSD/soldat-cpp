@@ -22,6 +22,7 @@
 #include "Sha1.h"
 #include "Util.h"
 #include "Cvar.h"  // For cvar access like log_enable, sv_gamemode, etc.
+#include "Net.h"
 #include <vector>
 #include <string>
 #include <memory>

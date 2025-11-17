@@ -98,17 +98,17 @@ namespace GameMenusImpl {
 
 #ifdef STEAM_CODE
         EscMenu->Button.resize(5);
-        InitButton(EscMenu, 0, L"1 " + _(L"Exit to menu"), 5, 1 * 25, 240, 25);
-        InitButton(EscMenu, 1, L"2 " + _(L"Change map"), 5, 2 * 25, 240, 25);
-        InitButton(EscMenu, 2, L"3 " + _(L"Kick player"), 5, 3 * 25, 240, 25);
-        InitButton(EscMenu, 3, L"4 " + _(L"Change team"), 5, 4 * 25, 240, 25);
+        InitButton(EscMenu, 0, std::wstring(L"1 ") + _(L"Exit to menu"), 5, 1 * 25, 240, 25);
+        InitButton(EscMenu, 1, std::wstring(L"2 ") + _(L"Change map"), 5, 2 * 25, 240, 25);
+        InitButton(EscMenu, 2, std::wstring(L"3 ") + _(L"Kick player"), 5, 3 * 25, 240, 25);
+        InitButton(EscMenu, 3, std::wstring(L"4 ") + _(L"Change team"), 5, 4 * 25, 240, 25);
         InitButton(EscMenu, 4, _(L"Server Website"), 5, 7 * 25, 240, 15);
 #else
         EscMenu->Button.resize(4);
-        InitButton(EscMenu, 0, L"1 " + _(L"Exit to menu"), 5, 1 * 25, 240, 25);
-        InitButton(EscMenu, 1, L"2 " + _(L"Change map"), 5, 2 * 25, 240, 25);
-        InitButton(EscMenu, 2, L"3 " + _(L"Kick player"), 5, 3 * 25, 240, 25);
-        InitButton(EscMenu, 3, L"4 " + _(L"Change team"), 5, 4 * 25, 240, 25);
+        InitButton(EscMenu, 0, std::wstring(L"1 ") + _(L"Exit to menu"), 5, 1 * 25, 240, 25);
+        InitButton(EscMenu, 1, std::wstring(L"2 ") + _(L"Change map"), 5, 2 * 25, 240, 25);
+        InitButton(EscMenu, 2, std::wstring(L"3 ") + _(L"Kick player"), 5, 3 * 25, 240, 25);
+        InitButton(EscMenu, 3, std::wstring(L"4 ") + _(L"Change team"), 5, 4 * 25, 240, 25);
 #endif
 
         // team menu
@@ -118,12 +118,12 @@ namespace GameMenusImpl {
         TeamMenu->y = 0;
 
         TeamMenu->Button.resize(6);
-        InitButton(TeamMenu, 0, L"0 " + _(L"0 Player"), 40, 140 + 40 * 1, 215, 35);
-        InitButton(TeamMenu, 1, L"1 " + _(L"Alpha Team"), 40, 140 + 40 * 1, 215, 35);
-        InitButton(TeamMenu, 2, L"2 " + _(L"Bravo Team"), 40, 140 + 40 * 2, 215, 35);
-        InitButton(TeamMenu, 3, L"3 " + _(L"Charlie Team"), 40, 140 + 40 * 3, 215, 35);
-        InitButton(TeamMenu, 4, L"4 " + _(L"Delta Team"), 40, 140 + 40 * 4, 215, 35);
-        InitButton(TeamMenu, 5, L"5 " + _(L"Spectator"), 40, 140 + 40 * 5, 215, 35);
+        InitButton(TeamMenu, 0, std::wstring(L"0 ") + _(L"0 Player"), 40, 140 + 40 * 1, 215, 35);
+        InitButton(TeamMenu, 1, std::wstring(L"1 ") + _(L"Alpha Team"), 40, 140 + 40 * 1, 215, 35);
+        InitButton(TeamMenu, 2, std::wstring(L"2 ") + _(L"Bravo Team"), 40, 140 + 40 * 2, 215, 35);
+        InitButton(TeamMenu, 3, std::wstring(L"3 ") + _(L"Charlie Team"), 40, 140 + 40 * 3, 215, 35);
+        InitButton(TeamMenu, 4, std::wstring(L"4 ") + _(L"Delta Team"), 40, 140 + 40 * 4, 215, 35);
+        InitButton(TeamMenu, 5, std::wstring(L"5 ") + _(L"Spectator"), 40, 140 + 40 * 5, 215, 35);
 
         // limbo menu
         LimboMenu->w = 0;

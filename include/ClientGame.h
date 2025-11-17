@@ -26,14 +26,7 @@ struct TFrameTiming;
 
 
 
-extern uint8_t CursorPosition;
-extern bool TabCompletePressed;
-extern int ChatTimeCounter;
 
-extern int ClientStopMovingCounter;
-extern bool ForceClientSpriteSnapshotMov;
-extern int LastForceClientSpriteSnapshotMovTick;
-extern int MenuTimer;
 
 struct TFrameTiming {
     int64_t Frequency;
@@ -549,21 +542,13 @@ using ClientGameImpl::TabComplete;
 using ClientGameImpl::ResetWeaponStats;
 using ClientGameImpl::BigMessage;
 using ClientGameImpl::GetCameraTarget;
+#ifdef STEAM_CODE
 using ClientGameImpl::GetMicData;
+#endif
 
 
 
 
-extern uint8_t CursorPosition = 0;
-extern bool TabCompletePressed = false;
-extern int ChatTimeCounter = 0;
 
-extern int ClientStopMovingCounter = 99999;
-extern bool ForceClientSpriteSnapshotMov = false;
-extern int LastForceClientSpriteSnapshotMovTick = 0;
-extern int MenuTimer = 0;
-
-// Frame timing variable
-extern TFrameTiming FrameTiming;
 
 #endif // CLIENT_GAME_H
