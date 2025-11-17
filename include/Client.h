@@ -27,93 +27,49 @@
 struct TClientNetwork;
 struct TSteam;
 
-namespace ClientImpl {
-    // Type definitions
-    struct TWeaponStat {
-        std::string Name;
-        uint32_t TextureID;
-        uint32_t Shots, Hits, Kills, Headshots;
-        uint8_t Accuracy;
 
-        TWeaponStat() : TextureID(0), Shots(0), Hits(0), Kills(0), Headshots(0), Accuracy(0) {}
-    };
+// Type definitions
+struct TWeaponStat {
+    std::string Name;
+    uint32_t TextureID;
+    uint32_t Shots, Hits, Kills, Headshots;
+    uint8_t Accuracy;
 
-    // Global variables
-    extern bool GameLoopRun;
-    extern bool ProgReady;
+    TWeaponStat() : TextureID(0), Shots(0), Hits(0), Kills(0), Headshots(0), Accuracy(0) {}
+};
 
-    extern std::string JoinPassword;  // server password
-    extern std::string JoinPort;      // join port to server
-    extern std::string JoinIP;        // join ip to server
+// Global variables
+extern bool GameLoopRun;
+extern bool ProgReady;
 
-    extern bool WindowReady;
-    extern uint8_t Initing;
-    extern bool GraphicsInitialized;
+extern std::string JoinPassword;  // server password
+extern std::string JoinPort;      // join port to server
+extern std::string JoinIP;        // join ip to server
 
-    extern std::string BaseDirectory;
-    extern std::string UserDirectory;
+extern bool WindowReady;
+extern uint8_t Initing;
+extern bool GraphicsInitialized;
 
-    extern std::string ModDir;
-    extern bool UsesServerMod;
+extern std::string BaseDirectory;
+extern std::string UserDirectory;
 
-    // Function declarations
-    void JoinServer();
-    void StartGame();
-    void Shutdown();
-    void ExitToMenu();
-    void RestartGraph();
-    void ShowMessage(const std::string& MessageText); // overload
-    void ShowMessage(const std::wstring& MessageText); // overload
-    void ClientDisconnect();
-    void ClientSpriteSnapshot();
-    void ClientSpriteSnapshotMov();
-    void ClientSpriteSnapshotDead();
+extern std::string ModDir;
+extern bool UsesServerMod;
 
-    // Function implementations
-    inline void RestartGraph() {
-        // WindowReady = false;
-        // DoTextureLoading(true);
-        //
-        // // Load Map
-        // Map.LoadMap(MapChange, r_forcebg.Value, r_forcebg_color1.Value, r_forcebg_color2.Value);
-        //
-        // WindowReady = true;
-        //
-        // if (!EscMenu.Active()) {
-        //     mx = GameWidthHalf;
-        //     my = GameHeightHalf;
-        //     MousePrev.x = mx;
-        //     MousePrev.y = my;
-        // }
-        //
-        // MainConsole.Console(_("Graphics restart"), DEBUG_MESSAGE_COLOR);
-    }
-}
+// Function declarations
+void JoinServer();
+void StartGame();
+void Shutdown();
+void ExitToMenu();
+void RestartGraph();
+void ShowMessage(const std::string& MessageText); // overload
+void ShowMessage(const std::wstring& MessageText); // overload
+void ClientDisconnect();
+void ClientSpriteSnapshot();
+void ClientSpriteSnapshotMov();
+void ClientSpriteSnapshotDead();
 
-// Using declarations to bring functions into global namespace
-using ClientImpl::TWeaponStat;
-using ClientImpl::GameLoopRun;
-using ClientImpl::ProgReady;
-using ClientImpl::JoinPassword;
-using ClientImpl::JoinPort;
-using ClientImpl::JoinIP;
-using ClientImpl::WindowReady;
-using ClientImpl::Initing;
-using ClientImpl::GraphicsInitialized;
-using ClientImpl::BaseDirectory;
-using ClientImpl::UserDirectory;
-using ClientImpl::ModDir;
-using ClientImpl::UsesServerMod;
-using ClientImpl::JoinServer;
-using ClientImpl::StartGame;
-using ClientImpl::Shutdown;
-using ClientImpl::ExitToMenu;
-using ClientImpl::RestartGraph;
-using ClientImpl::ShowMessage;
-using ClientImpl::ClientDisconnect;
-using ClientImpl::ClientSpriteSnapshot;
-using ClientImpl::ClientSpriteSnapshotMov;
-using ClientImpl::ClientSpriteSnapshotDead;
+
 
 // CVar declarations (would be defined elsewhere)
 extern TBooleanCvar log_enable;
@@ -266,8 +222,10 @@ extern float Grav;
 
 extern uint8_t Connection;
 
+#ifndef SERVER_CODE
 extern uint8_t WeaponActive[MAIN_WEAPONS + 1]; // sync
 extern int WeaponsInGame; // sync
+#endif
 
 extern uint8_t SniperLine;
 
@@ -282,7 +240,9 @@ extern uint8_t SelTeam;
 extern uint8_t MySprite;
 
 // Network
+#ifndef SERVER_CODE
 extern TClientNetwork* UDP;
+#endif
 
 // Consoles
 extern TConsole MainConsole;
