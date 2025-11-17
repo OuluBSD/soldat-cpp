@@ -41,6 +41,36 @@
 // Forward declarations for types used later
 class TDemoPlayer;
 
+// Define TSpark structure based on Pascal definition
+// From Pascal: TSpark = object
+//   Active: Boolean;
+//   Num: SmallInt;
+//   LifeReal: Single;
+//   Life, LifePrev: Byte;
+//   Style, Owner: Byte;
+struct TSpark {
+    bool Active;
+    int16_t Num;
+    float LifeReal;
+    uint8_t Life;
+    uint8_t LifePrev;
+    uint8_t Style;
+    uint8_t Owner;
+    
+    TSpark() : Active(false), Num(0), LifeReal(0.0f), Life(0), LifePrev(0), Style(0), Owner(0) {}
+    
+    void Kill() {
+        Active = false;
+        Style = 0;
+    }
+};
+
+#ifndef SERVER_CODE
+// Global array for Spark objects (matching Pascal: Spark: array[1..MAX_SPARKS] of TSpark)
+extern TSpark* Spark[MAX_SPARKS + 1];
+// ShouldRenderFrames and other client variables should be available through ClientGame.h's using declarations
+#endif
+
 const char DEMO_MAGIC[6] = {'S', 'O', 'L', 'D', 'E', 'M'};
 
 
@@ -146,8 +176,11 @@ extern std::unique_ptr<TDemoRecorder> DemoRecorder;
 extern std::unique_ptr<TDemoPlayer> DemoPlayer;
 extern std::wstring BigText[MAX_BIG_MESSAGES + 1];
 extern int BigDelay[MAX_BIG_MESSAGES + 1];
+extern void KillThing(uint8_t Num);  // Global function to remove a thing
 // Add other required variables as needed
 #endif
+
+
 extern uint16_t RSize;
 extern uint8_t FreeCam;
 extern uint8_t NoTexts;
