@@ -97,11 +97,17 @@ namespace GameStringsImpl {
 }
 
 // Global variable definition
-extern std::unique_ptr<TMOFile> TranslationFile = nullptr;
+extern std::unique_ptr<TMOFile> TranslationFile;
 
 // Using declarations to bring into global namespace
 using GameStringsImpl::InitTranslation;
 using GameStringsImpl::_;
 using GameStringsImpl::DeInitTranslation;
+
+// Define the global variable (only once, not in multiple header inclusions)
+#ifndef GAMESTRINGS_IMPL
+#define GAMESTRINGS_IMPL
+std::unique_ptr<TMOFile> TranslationFile = nullptr;
+#endif
 
 #endif // GAMESTRINGS_H

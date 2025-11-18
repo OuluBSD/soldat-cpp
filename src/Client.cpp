@@ -49,9 +49,6 @@ namespace ClientImpl {
 
     uint8_t Connection = CONNECTION_INTERNET;
 
-    uint8_t WeaponActive[MAIN_WEAPONS + 1] = {0}; // sync
-    int WeaponsInGame = 0; // sync
-
     uint8_t SniperLine = 0;
 
     uint8_t Trails = 1;
@@ -63,9 +60,6 @@ namespace ClientImpl {
     uint8_t SelTeam = 0;
 
     uint8_t MySprite = 0;
-
-    // Network
-    TClientNetwork* UDP = nullptr;
 
     // Consoles
     TConsole MainConsole;
@@ -946,9 +940,6 @@ float Grav = 0.06f;
 
 uint8_t Connection = CONNECTION_INTERNET;
 
-uint8_t WeaponActive[MAIN_WEAPONS + 1] = {0}; // sync
-int WeaponsInGame = 0; // sync
-
 uint8_t SniperLine = 0;
 
 uint8_t Trails = 1;
@@ -960,9 +951,6 @@ bool LimboLock = false;
 uint8_t SelTeam = 0;
 
 uint8_t MySprite = 0;
-
-// Network
-TClientNetwork* UDP = nullptr;
 
 // Consoles
 TConsole MainConsole;
@@ -1013,6 +1001,11 @@ uint8_t RadioCooldown = 3;
 TVector2 CameraPrev = {0.0f, 0.0f};
 float CameraX = 0.0f, CameraY = 0.0f;  // camera x and y within world
 uint8_t CameraFollowSprite = 0;  // Tag number of object to follow
+
+// Define global variables that are declared as extern in the header
+uint8_t WeaponActive[MAIN_WEAPONS + 1] = {0}; // sync
+int WeaponsInGame = 0; // sync
+TClientNetwork* UDP = nullptr;
 
 #ifdef STEAM_CODE
 TSteam* SteamAPI = nullptr;

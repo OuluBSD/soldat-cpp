@@ -580,4 +580,13 @@ inline void DemoInit() {
 #endif
 }
 
+// Define the global variables (only once, not in multiple header inclusions)
+#ifndef DEMO_IMPL
+#define DEMO_IMPL
+std::unique_ptr<TDemoRecorder> DemoRecorder = nullptr;
+#ifndef SERVER_CODE
+std::unique_ptr<TDemoPlayer> DemoPlayer = nullptr;
+#endif
+#endif
+
 #endif // DEMO_H

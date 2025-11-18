@@ -250,9 +250,9 @@ namespace GameRenderingImpl {
             // Shutdown();
         }
 
-        int w = RenderWidth;
-        int h = RenderHeight;
-        float s = r_scaleinterface.Value() ? (float)RenderHeight / GameHeight : 1.0f;
+        int w = ClientGameImpl::RenderWidth;
+        int h = ClientGameImpl::RenderHeight;
+        float s = r_scaleinterface.Value() ? (float)ClientGameImpl::RenderHeight / GameHeight : 1.0f;
 
         // Create fonts
         Fonts[1] = GfxCreateFont(FontPath[1].c_str(), Npot(w / 2), Npot(h / 2));
@@ -291,7 +291,7 @@ namespace GameRenderingImpl {
         FontStyles[FONT_WEAPONS_MENU].Flags = 0;
 
         FontStyles[FONT_WORLD].Font = Fonts[1];
-        FontStyles[FONT_WORLD].Size = 128 * ((float)RenderHeight / GameHeight);
+        FontStyles[FONT_WORLD].Size = 128 * ((float)ClientGameImpl::RenderHeight / GameHeight);
         FontStyles[FONT_WORLD].Stretch = font_1_scale.Value() / 100;
         FontStyles[FONT_WORLD].Flags = 0;
 
@@ -335,7 +335,8 @@ namespace GameRenderingImpl {
         }
 
         GameWindow = SDL_CreateWindow("Soldat",
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowWidth, WindowHeight, WindowFlags);
+            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+            ClientGameImpl::WindowWidth, ClientGameImpl::WindowHeight, WindowFlags);
 
         // Load icon file
         // FileBuffer := PHYSFS_readBuffer('icon.bmp');
@@ -357,7 +358,7 @@ namespace GameRenderingImpl {
             GfxLog("Error while setting SDL_GL_SetSwapInterval: " + std::string(SDL_GetError()));
         }
 
-        GfxViewport(0, 0, WindowWidth, WindowHeight);
+        GfxViewport(0, 0, ClientGameImpl::WindowWidth, ClientGameImpl::WindowHeight);
 
         Textures.resize(GFXID_END + 1);
         LoadModInfo();
@@ -371,15 +372,16 @@ namespace GameRenderingImpl {
         }
 
         if (cl_actionsnap.Value()) {
-            ActionSnapTexture = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, true);
+            ActionSnapTexture = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, true);
         }
 
         if (GfxFramebufferSupported) {
-            if ((WindowWidth != RenderWidth) || (WindowHeight != RenderHeight)) {
-                RenderTarget = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, true);
+            if ((ClientGameImpl::WindowWidth != ClientGameImpl::RenderWidth) || 
+                (ClientGameImpl::WindowHeight != ClientGameImpl::RenderHeight)) {
+                RenderTarget = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, true);
 
                 if (RenderTarget.GetSamples() > 0) {
-                    RenderTargetAA = GfxCreateRenderTarget(RenderWidth, RenderHeight, 4, false);
+                    RenderTargetAA = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, false);
 
                     if (r_resizefilter.Value() >= 2) {
                         GfxTextureFilter(RenderTargetAA, GFX_LINEAR, GFX_LINEAR);
