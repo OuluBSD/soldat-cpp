@@ -109,8 +109,8 @@ namespace GostekGraphicsImpl {
             (Soldier.CeaseFireCounter > CeaseFireTime - 5) ||
             ((sv_realisticmode.Value) && (Soldier.Visible == 0)) ||
             (Soldier.IsSpectator) ||
-            (Soldier.Player.Name == "") ||
-            (Soldier.Player.DemoPlayer)) {
+            (Soldier.Player->Name == "") ||
+            (Soldier.Player->DemoPlayer)) {
             return;
         }
 
@@ -122,10 +122,10 @@ namespace GostekGraphicsImpl {
         uint8_t Alpha[ALPHA_NADES + 1];
 
         Color[COLOR_NONE]      = RGBA(0xFFFFFF);
-        Color[COLOR_MAIN]      = RGBA(Soldier.Player.ShirtColor);
-        Color[COLOR_PANTS]     = RGBA(Soldier.Player.PantsColor);
-        Color[COLOR_SKIN]      = RGBA(Soldier.Player.SkinColor);
-        Color[COLOR_HAIR]      = RGBA(Soldier.Player.HairColor);
+        Color[COLOR_MAIN]      = RGBA(Soldier.Player->ShirtColor);
+        Color[COLOR_PANTS]     = RGBA(Soldier.Player->PantsColor);
+        Color[COLOR_SKIN]      = RGBA(Soldier.Player->SkinColor);
+        Color[COLOR_HAIR]      = RGBA(Soldier.Player->HairColor);
         Color[COLOR_CYGAR]     = RGBA(0xFFFFFF);
         Color[COLOR_HEADBLOOD] = RGBA(0xACA9A8);
 
@@ -136,11 +136,11 @@ namespace GostekGraphicsImpl {
         Alpha[ALPHA_BASE] = Soldier.Alpha;
         Alpha[ALPHA_BLOOD] = std::max(0, std::min(255, 200 - static_cast<int>(roundf(Soldier.Health))));
 
-        if (Soldier.Health > (90 - 40 * static_cast<int>(sv_realisticmode.Value))) {
+        if (Soldier.Health > (90 - 40 * static_cast<int>(sv_realisticmode.Value()))) {
             Alpha[ALPHA_BLOOD] = 0;
         }
 
-        if ((sv_realisticmode.Value) && (Soldier.Visible > 0) && (Soldier.Visible < 45) &&
+        if ((sv_realisticmode.Value()) && (Soldier.Visible > 0) && (Soldier.Visible < 45) &&
             (Soldier.Alpha > 60)) {
             Soldier.Alpha = 3 * Soldier.Visible;
             Alpha[ALPHA_BASE] = Soldier.Alpha;
@@ -193,7 +193,7 @@ namespace GostekGraphicsImpl {
         }
 
         // Chain
-        switch (Soldier.Player.Chain) {
+        switch (Soldier.Player->Chain) {
             case 1:
                 Visible.insert(GOSTEK_SILVER_LCHAIN);
                 Visible.insert(GOSTEK_SILVER_RCHAIN);
@@ -226,7 +226,7 @@ namespace GostekGraphicsImpl {
                            (Soldier.BodyAnimation.CurrFrame > 4);
 
             if (Soldier.WearHelmet == 1) {
-                switch (Soldier.Player.HeadCap) {
+                switch (Soldier.Player->HeadCap) {
                     case GFX_GOSTEK_HELM:
                         if (Grabbed) {
                             Visible.insert(GOSTEK_GRABBED_HELMET);
@@ -244,8 +244,8 @@ namespace GostekGraphicsImpl {
                 }
             }
 
-            if (Grabbed || (Soldier.WearHelmet != 1) || (Soldier.Player.HairStyle == 3)) {
-                switch (Soldier.Player.HairStyle) {
+            if (Grabbed || (Soldier.WearHelmet != 1) || (Soldier.Player->HairStyle == 3)) {
+                switch (Soldier.Player->HairStyle) {
                     case 1:
                         for (int i = 0; i <= 5; i++) {
                             Visible.insert(GOSTEK_HAIR_DREADLOCKS + i);
@@ -336,7 +336,7 @@ namespace GostekGraphicsImpl {
         // Draw
         int Team2Offset = 0;
 
-        if (Soldier.Player.Team == TEAM_BRAVO || Soldier.Player.Team == TEAM_DELTA) {
+        if (Soldier.Player->Team == TEAM_BRAVO || Soldier.Player->Team == TEAM_DELTA) {
             Team2Offset = GFX_GOSTEK_TEAM2_STOPA - GFX_GOSTEK_STOPA;
         }
 

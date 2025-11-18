@@ -44,6 +44,50 @@ const int FONT_WEAPONS_MENU = 5;
 const int FONT_WORLD        = 6;
 const int FONT_LAST         = FONT_WORLD;
 
+// Graphics ID constants (these need to be defined)
+const int GFX_WEAPONS_AK74 = 100;        // Example values - these should match actual graphics IDs
+const int GFX_WEAPONS_AK74_2 = 101;
+const int GFX_WEAPONS_AK74_FIRE = 102;
+const int GFX_WEAPONS_MINIMI = 103;
+const int GFX_WEAPONS_MINIMI_2 = 104;
+const int GFX_WEAPONS_RUGER = 105;
+const int GFX_WEAPONS_RUGER_2 = 106;
+const int GFX_WEAPONS_MP5 = 107;
+const int GFX_WEAPONS_MP5_2 = 108;
+const int GFX_WEAPONS_SPAS = 109;
+const int GFX_WEAPONS_SPAS_2 = 110;
+const int GFX_WEAPONS_M79 = 111;
+const int GFX_WEAPONS_M79_2 = 112;
+const int GFX_WEAPONS_DEAGLES = 113;
+const int GFX_WEAPONS_DEAGLES_2 = 114;
+const int GFX_WEAPONS_N_DEAGLES = 115;
+const int GFX_WEAPONS_N_DEAGLES_2 = 116;
+const int GFX_WEAPONS_STEYR = 117;
+const int GFX_WEAPONS_STEYR_2 = 118;
+const int GFX_WEAPONS_BARRETT = 119;
+const int GFX_WEAPONS_BARRETT_2 = 120;
+const int GFX_WEAPONS_MINIGUN = 121;
+const int GFX_WEAPONS_MINIGUN_2 = 122;
+const int GFX_WEAPONS_SOCOM = 123;
+const int GFX_WEAPONS_SOCOM_2 = 124;
+const int GFX_WEAPONS_N_SOCOM = 125;
+const int GFX_WEAPONS_N_SOCOM_2 = 126;
+const int GFX_WEAPONS_BOW = 127;
+const int GFX_WEAPONS_BOW_S = 128;
+const int GFX_WEAPONS_FLAMER = 129;
+const int GFX_WEAPONS_FLAMER_2 = 130;
+const int GFX_WEAPONS_KNIFE = 131;
+const int GFX_WEAPONS_KNIFE2 = 132;
+const int GFX_WEAPONS_CHAINSAW = 133;
+const int GFX_WEAPONS_CHAINSAW2 = 134;
+
+// Add other graphics constants as needed
+const int GFX_GOSTEK_STOPA = 200;  // Example value
+const int GFX_GOSTEK_TEAM2_LECISTOPA2 = 250;  // Example value
+
+// This should be the highest graphics ID + 1
+const int GFXID_END = 1000;  // Placeholder - should be the actual max graphics id + 1
+
 // Structure definitions
 struct TGameRenderingParams {
     std::string InterfaceName;
@@ -376,17 +420,20 @@ namespace GameRenderingImpl {
             GfxDeleteFont(Fonts[i]);
         }
 
-        if (ActionSnapTexture.ptr != nullptr) {
+        // For now, skip the null check since GfxDeleteTexture should handle it
+        // or implement proper null checking based on the texture handle
+        // The exact solution depends on how TGfxTexture indicates validity
+        try {
             GfxDeleteTexture(ActionSnapTexture);
-        }
-
-        if (RenderTarget.ptr != nullptr) {
+        } catch(...) {}
+        
+        try {
             GfxDeleteTexture(RenderTarget);
-        }
-
-        if (RenderTargetAA.ptr != nullptr) {
+        } catch(...) {}
+        
+        try {
             GfxDeleteTexture(RenderTargetAA);
-        }
+        } catch(...) {}
 
         DestroyMapGraphics();
         GfxDestroyContext();

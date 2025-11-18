@@ -91,8 +91,8 @@ namespace GameMenusImpl {
             EscMenu->y = static_cast<int>((GameHeight - EscMenu->h) / 2);
         } else {
 #ifndef SERVER_CODE
-            EscMenu->x = static_cast<int>((RenderWidth - EscMenu->w) / 2);
-            EscMenu->y = static_cast<int>((RenderHeight - EscMenu->h) / 2);
+            EscMenu->x = static_cast<int>((ClientGameImpl::RenderWidth - EscMenu->w) / 2);
+            EscMenu->y = static_cast<int>((ClientGameImpl::RenderHeight - EscMenu->h) / 2);
 #else
             EscMenu->x = static_cast<int>((800 - EscMenu->w) / 2); // default fallback
             EscMenu->y = static_cast<int>((600 - EscMenu->h) / 2); // default fallback
@@ -354,8 +354,8 @@ namespace GameMenusImpl {
                             if (result) {
                                 GameMenuShow(EscMenu, false);
 #ifndef SERVER_CODE
-                                ChatText = L" ";
-                                ChatChanged = true;
+                                ClientGameImpl::ChatText = L" ";
+                                ClientGameImpl::ChatChanged = true;
 #endif
                                 VoteKickReasonType = true;
                                 // SDL_StartTextInput();  // Assuming SDL functionality exists
@@ -457,8 +457,8 @@ namespace GameMenusImpl {
         HoveredButtonIndex = 0;
 
 #ifndef SERVER_CODE
-        float x = mx * _rscala.x;
-        float y = my * _rscala.y;
+        float x = ClientGameImpl::mx * _rscala.x;
+        float y = ClientGameImpl::my * _rscala.y;
 #else
         float x = 0.0f;
         float y = 0.0f;

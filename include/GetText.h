@@ -19,4 +19,7 @@
     #define N_(String) gettext_noop(String)
 #endif
 
+// Ensure wstring is properly declared if needed elsewhere
+// This file shouldn't declare wstring functions, that's for other headers to handle
+
 #endif // GETTEXT_H
