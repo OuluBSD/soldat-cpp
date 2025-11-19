@@ -9,11 +9,13 @@
 // If GetText library is available, define the standard functions
 #ifdef HAVE_GETTEXT
     #include <libintl.h>
+    #define SOLDAT_GETTEXT_DEFINED
     #define _(String) gettext(String)
     #define gettext_noop(String) String
     #define N_(String) gettext_noop(String)
 #else
     // If GetText is not available, define macros as no-ops
+    #define SOLDAT_GETTEXT_DEFINED
     #define _(String) (String)
     #define gettext_noop(String) String
     #define N_(String) gettext_noop(String)

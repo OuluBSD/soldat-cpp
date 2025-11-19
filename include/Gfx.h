@@ -121,14 +121,7 @@ void GfxSaveScreen(const std::string& Filename, int x, int y, int w, int h,
                    bool Async = true);
 void GfxSetMipmapBias(float Bias);
 
-// Pseudo constructors
-TGfxColor ARGB(uint32_t argb);
-TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b);
-TGfxColor RGBA(uint32_t rgba);
-TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b, double a);
-TGfxColor RGBA(uint32_t rgb, float a);
-TGfxVertex GfxVertex(float x, float y, float u, float v, const TGfxColor& c);
+
 
 // Texture functions
 TGfxTexture* GfxCreateTexture(int w, int h, int c, uint8_t* Data = nullptr);
@@ -214,17 +207,7 @@ void GfxDrawSprite(TGfxSprite* s, float x, float y, float sx, float sy,
                    float rx, float ry, float r, const TGfxColor& Color, 
                    const TGfxRect& rc);
 
-// Matrix functions
-void GfxMat3Rot(float r, float* result);
-void GfxMat3Ortho(float l, float r, float t, float b, float* result);
-void GfxMat3Transform(float tx, float ty, float sx, float sy, float cx, float cy, 
-                      float r, float* result);
-TVector2 GfxMat3Mul(const float* m, float x, float y);
 
-// Utility functions
-int Npot(int x);
-float RectWidth(const TGfxRect& Rect);
-float RectHeight(const TGfxRect& Rect);
 
 // External variable for logging
 extern void (*GfxLog)(const std::string& s);

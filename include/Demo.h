@@ -29,6 +29,7 @@
 #include "Things.h"      // For KillThing
 #include "Game.h"        // For BigText, BigDelay, and other game variables
 #include "InterfaceGraphics.h" // For BigScale, BigColor, BigPosX, BigPosY, BigX, etc.
+#include "ClientGame.h"  // For ClientGameImpl namespace access
 #endif
 
 #include <string>
@@ -184,7 +185,10 @@ extern void KillThing(uint8_t Num);  // Global function to remove a thing
 extern uint16_t RSize;
 extern uint8_t FreeCam;
 extern uint8_t NoTexts;
+#ifndef CAMERA_FOLLOW_SPRITE_DECLARED
 extern uint8_t CameraFollowSprite;
+#define CAMERA_FOLLOW_SPRITE_DECLARED
+#endif
 
 // Now implement the methods outside the class definitions
 inline TDemo::TDemo() : FActive(false), FName(""), FOldCam(0) {
@@ -471,7 +475,7 @@ inline void TDemoPlayer::ProcessDemo() {
         if ((FSkipTo > 0) && (MainTickCounter >= FSkipTo)) {
             FSkipTo = -1;
 #ifndef SERVER_CODE
-            ClientGameImpl::ShouldRenderFrames = true;  // Access directly from namespace
+            ClientGameImpl::ShouldRenderFrames = true;
 #endif
             GOALTICKS = static_cast<int>(demo_speed.Value() * DEFAULT_GOALTICKS);  // demo_speed should be accessible via Client.h
         }
@@ -504,7 +508,7 @@ inline void TDemoPlayer::ProcessDemo() {
 inline void TDemoPlayer::Position(int Ticks) {
     FSkipTo = Ticks;
 #ifndef SERVER_CODE
-    ClientGameImpl::ShouldRenderFrames = false;  // Access directly from namespace
+    ClientGameImpl::ShouldRenderFrames = false;
 #endif
 
     if (FSkipTo < MainTickCounter) {

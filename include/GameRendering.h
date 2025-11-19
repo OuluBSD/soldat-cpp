@@ -97,19 +97,6 @@ struct TGameRenderingParams {
 extern TGameRenderingParams GameRenderingParams;
 extern TGfxSpriteArray Textures;
 
-// Function declarations
-bool InitGameGraphics();
-void ReloadGraphics();
-void DestroyGameGraphics();
-void RenderFrame(double TimeElapsed, double FramePercent, bool Paused);
-void RenderGameInfo(const std::wstring& TextString);
-bool DoTextureLoading(bool FinishLoading = false);
-void SetFontStyle(int Style);
-void SetFontStyle(int Style, float Scale);
-float FontStyleSize(int Style);
-void TakeScreenshot(const std::string& Filename, bool Async = true);
-std::string PngOverride(const std::string& Filename);
-
 namespace GameRenderingImpl {
 
     // Structure definitions
@@ -516,6 +503,24 @@ namespace GameRenderingImpl {
             return true;
         }
         return false;
+    }
+
+    inline void SetFontStyle(int Style) {
+        SetFontStyle(Style, 1.0f);
+    }
+
+    inline void SetFontStyle(int Style, float Scale) {
+        if (Style <= FONT_LAST) {
+            GfxSetFontTable(FontStyles[Style].Font, FontStyles[Style].TableIndex);
+            GfxTextScale(Scale);
+        }
+    }
+
+    inline float FontStyleSize(int Style) {
+        if (Style <= FONT_LAST) {
+            return FontStyles[Style].Size;
+        }
+        return 0.0f;
     }
 
     inline bool DoTextureLoading(bool FinishLoading = false) {

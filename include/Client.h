@@ -22,6 +22,7 @@
 #include "Game.h"
 #include "Net.h"
 #include "Sprites.h"
+#include "ClientGame.h"
 
 // Forward declarations
 struct TClientNetwork;
@@ -223,7 +224,10 @@ extern float Grav;
 extern uint8_t Connection;
 
 #ifndef SERVER_CODE
+#ifndef WEAPON_ACTIVE_DECLARED
 extern uint8_t WeaponActive[MAIN_WEAPONS + 1]; // sync
+#define WEAPON_ACTIVE_DECLARED
+#endif
 extern int WeaponsInGame; // sync
 #endif
 
@@ -237,11 +241,17 @@ extern uint8_t PacketAdjusting;
 extern bool LimboLock;
 extern uint8_t SelTeam;
 
+#ifndef MY_SPRITE_DECLARED
 extern uint8_t MySprite;
+#define MY_SPRITE_DECLARED
+#endif
 
 // Network
 #ifndef SERVER_CODE
+#ifndef UDP_DECLARED
 extern TClientNetwork* UDP;
+#define UDP_DECLARED
+#endif
 #endif
 
 // Consoles

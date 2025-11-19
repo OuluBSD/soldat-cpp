@@ -15,6 +15,8 @@
 #include "Net.h"
 #include "UpdateFrame.h"
 #include "Demo.h"
+#include "Cvar.h"  // For cvar declarations
+#include "Console.h"  // For MainConsole
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
@@ -22,6 +24,23 @@
 
 // Forward declarations (these would be defined in other headers)
 struct TFrameTiming;
+
+// Forward declarations for types used but defined elsewhere
+struct TWeaponStat;  // Defined in Client.h
+struct TConsole;     // Defined in Console.h
+struct TBooleanCvar; // Defined in Cvar.h
+struct TIntCvar;     // Defined in Cvar.h
+struct TFloatCvar;   // Defined in Cvar.h
+struct TColorCvar;   // Defined in Cvar.h
+
+// Function forward declarations needed
+void ClientDisconnect();
+void ClientSpriteSnapshot();
+void ClientSpriteSnapshotMov();
+void ClientSpriteSnapshotDead();
+void ShowMapChangeScoreboard();
+void ExitToMenu();
+void GameMenuShow(void* Menu, bool Show); // Using void* as a placeholder
 
 
 
@@ -56,6 +75,10 @@ namespace ClientGameImpl {
     inline bool MapChanged = false;
     inline bool ChatChanged = true;  // used for blinking chat input
     inline bool ShouldRenderFrames = true;  // false during game request phase
+
+    // Demo recorder and player
+    inline std::unique_ptr<TDemoRecorder> DemoRecorder = nullptr;
+    inline std::unique_ptr<TDemoPlayer> DemoPlayer = nullptr;
 
     // used for action snap
     inline uint8_t ActionSnap = 1;
@@ -542,6 +565,8 @@ using ClientGameImpl::TabComplete;
 using ClientGameImpl::ResetWeaponStats;
 using ClientGameImpl::BigMessage;
 using ClientGameImpl::GetCameraTarget;
+using ClientGameImpl::DemoRecorder;
+using ClientGameImpl::DemoPlayer;
 #ifdef STEAM_CODE
 using ClientGameImpl::GetMicData;
 #endif

@@ -23,10 +23,76 @@
 #include <set>
 #include <cmath>
 
-// Constants for IDs would be defined in the include file
-// For now, we'll define placeholders
-const int GOSTEK_FIRST = 0;  // This would be defined by the include file
-const int GOSTEK_LAST = 100; // This would be defined by the include file
+// Constants for Gostek graphics IDs
+const int GOSTEK_FIRST = 0;
+const int GOSTEK_HEAD = 1;
+const int GOSTEK_HEAD_DMG = 2;
+const int GOSTEK_HEAD_DEAD = 3;
+const int GOSTEK_HEAD_DEAD_DMG = 4;
+const int GOSTEK_RAMBO_BADGE = 5;
+const int GOSTEK_CHEST_DMG = 6;
+const int GOSTEK_HIP_DMG = 7;
+const int GOSTEK_LEFT_THIGH_DMG = 8;
+const int GOSTEK_LEFT_LOWERLEG_DMG = 9;
+const int GOSTEK_LEFT_FOREARM_DMG = 10;
+const int GOSTEK_LEFT_ARM_DMG = 11;
+const int GOSTEK_RIGHT_THIGH_DMG = 12;
+const int GOSTEK_RIGHT_LOWERLEG_DMG = 13;
+const int GOSTEK_RIGHT_FOREARM_DMG = 14;
+const int GOSTEK_RIGHT_ARM_DMG = 15;
+const int GOSTEK_LEFT_FOOT = 16;
+const int GOSTEK_RIGHT_FOOT = 17;
+const int GOSTEK_LEFT_JETFOOT = 18;
+const int GOSTEK_RIGHT_JETFOOT = 19;
+const int GOSTEK_CIGAR = 20;
+const int GOSTEK_SILVER_LCHAIN = 21;
+const int GOSTEK_SILVER_RCHAIN = 22;
+const int GOSTEK_SILVER_PENDANT = 23;
+const int GOSTEK_GOLDEN_LCHAIN = 24;
+const int GOSTEK_GOLDEN_RCHAIN = 25;
+const int GOSTEK_GOLDEN_PENDANT = 26;
+const int GOSTEK_VEST = 27;
+const int GOSTEK_HELMET = 28;
+const int GOSTEK_GRABBED_HELMET = 29;
+const int GOSTEK_HAT = 30;
+const int GOSTEK_GRABBED_HAT = 31;
+const int GOSTEK_HAIR_NORMAL = 32;
+const int GOSTEK_HAIR_PUNK = 33;
+const int GOSTEK_MR_T = 34;
+const int GOSTEK_HAIR_DREADLOCKS = 35;
+const int GOSTEK_HAIR_DREADLOCK1 = 36;
+const int GOSTEK_HAIR_DREADLOCK2 = 37;
+const int GOSTEK_HAIR_DREADLOCK3 = 38;
+const int GOSTEK_HAIR_DREADLOCK4 = 39;
+const int GOSTEK_HAIR_DREADLOCK5 = 40;
+const int GOSTEK_SECONDARY_FIRST = 41;
+const int GOSTEK_SECONDARY_GRENADE = 42;
+const int GOSTEK_SECONDARY_CG = 43;
+const int GOSTEK_SECONDARY_KNIFE = 44;
+const int GOSTEK_SECONDARY_TNT = 45;
+const int GOSTEK_SECONDARY_LAST = 46;
+const int GOSTEK_PRIMARY_FIRST = 47;
+const int GOSTEK_PRIMARY_FLAMER = 48;
+const int GOSTEK_PRIMARY_BOW = 49;
+const int GOSTEK_PRIMARY_BOW_STRING = 50;
+const int GOSTEK_PRIMARY_BOW_RELOAD = 51;
+const int GOSTEK_PRIMARY_BOW_STRING_RELOAD = 52;
+const int GOSTEK_PRIMARY_BOW_FIRE = 53;
+const int GOSTEK_PRIMARY_BOW_ARROW = 54;
+const int GOSTEK_PRIMARY_BOW_ARROW_RELOAD = 55;
+const int GOSTEK_PRIMARY_MINIGUN = 56;
+const int GOSTEK_PRIMARY_MINIGUN_CLIP = 57;
+const int GOSTEK_PRIMARY_MINIGUN_FIRE = 58;
+const int GOSTEK_FRAG_GRENADE1 = 59;
+const int GOSTEK_CLUSTER_GRENADE1 = 60;
+const int GOSTEK_LAST = 100;
+
+// Graphics IDs for Gostek (soldier graphics)
+const int GFX_GOSTEK_STOPA = 200;
+const int GFX_GOSTEK_TEAM2_STOPA = 201;
+const int GFX_GOSTEK_HELM = 202;
+const int GFX_GOSTEK_KAP = 203;
+const int GFX_GOSTEK_TEAM2_LECISTOPA2 = 250;
 
 const int COLOR_NONE      = 0;
 const int COLOR_MAIN      = 1;
@@ -107,7 +173,7 @@ namespace GostekGraphicsImpl {
     inline void RenderGostek(TSprite& Soldier) {
         if ((Soldier.Style != 1) ||
             (Soldier.CeaseFireCounter > CeaseFireTime - 5) ||
-            ((sv_realisticmode.Value) && (Soldier.Visible == 0)) ||
+            ((sv_realisticmode.Value()) && (Soldier.Visible == 0)) ||
             (Soldier.IsSpectator) ||
             (Soldier.Player->Name == "") ||
             (Soldier.Player->DemoPlayer)) {

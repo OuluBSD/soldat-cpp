@@ -199,7 +199,10 @@ extern TBooleanCvar ac_enable;
 extern std::string ServerIP;
 extern int ServerPort;
 extern int BonusFreq;
+#ifndef WEAPON_ACTIVE_DECLARED
 extern uint8_t WeaponActive[16];  // Pascal arrays from -1 to 15
+#define WEAPON_ACTIVE_DECLARED
+#endif
 
 extern std::vector<std::string> MapsList;
 
@@ -263,7 +266,10 @@ extern float Grav;
 
 extern std::string ModDir;
 
+#ifndef UDP_DECLARED
 extern TServerNetwork* UDP;
+#define UDP_DECLARED
+#endif
 
 extern std::unique_ptr<TLobbyThread> LobbyThread;
 

@@ -33,11 +33,7 @@ public:
 // Global variables
 extern std::unique_ptr<TMOFile> TranslationFile;
 
-// Function declarations
-bool InitTranslation(const std::string& Filename);
-std::wstring _(const std::wstring& InputText); // overload
-std::wstring _(const std::string& InputText);  // overload
-void DeInitTranslation();
+
 
 namespace GameStringsImpl {
     inline bool InitTranslation(const std::string& Filename) {
@@ -61,6 +57,7 @@ namespace GameStringsImpl {
         return true;
     }
 
+#ifndef SOLDAT_GETTEXT_DEFINED
     inline std::wstring _(const std::wstring& InputText) {
         std::wstring translation = InputText;
         
@@ -88,6 +85,7 @@ namespace GameStringsImpl {
         
         return translation;
     }
+#endif  // SOLDAT_GETTEXT_DEFINED
 
     inline void DeInitTranslation() {
         if (TranslationFile) {
@@ -101,7 +99,9 @@ extern std::unique_ptr<TMOFile> TranslationFile;
 
 // Using declarations to bring into global namespace
 using GameStringsImpl::InitTranslation;
+#ifndef SOLDAT_GETTEXT_DEFINED
 using GameStringsImpl::_;
+#endif
 using GameStringsImpl::DeInitTranslation;
 
 // Define the global variable (only once, not in multiple header inclusions)
