@@ -27,7 +27,6 @@
 struct TFrameTiming;
 
 // Forward declarations for types used but defined elsewhere
-struct TWeaponStat;  // Defined in Client.h
 struct TConsole;     // Defined in Console.h
 struct TBooleanCvar; // Defined in Cvar.h
 struct TIntCvar;     // Defined in Cvar.h
@@ -68,6 +67,20 @@ struct TFrameTiming {
 namespace ClientGameImpl {
     // FrameTiming variable declaration
     extern TFrameTiming FrameTiming;
+
+    // Extern global variables needed within this namespace
+    // These are defined in other compilation units
+    extern TBooleanCvar r_fpslimit;
+    extern TIntCvar r_maxfps;
+    extern TWeaponStat WepStats[21];
+    extern TIntCvar demo_rate;
+    extern uint8_t RadioCooldown;
+    extern TBooleanCvar sv_radio;
+    extern uint8_t PacketAdjusting;
+    extern uint8_t Connection;
+    extern TIntCvar r_sleeptime;
+    extern TIntCvar sv_realisticmode;
+    extern TConsole MainConsole;
     
     // Global variables
     inline TVector2 MousePrev = {0.0f, 0.0f};
@@ -130,8 +143,8 @@ namespace ClientGameImpl {
         FrameTiming.Fps = 0;
         FrameTiming.FpsAccum = 0;
 
-        if (::r_fpslimit.Value()) {
-            FrameTiming.MinDeltaTime = 1.0 / ::r_maxfps.Value();
+        if (r_fpslimit.Value()) {
+            FrameTiming.MinDeltaTime = 1.0 / r_maxfps.Value();
         }
 
         TickTime = 0;
@@ -231,11 +244,11 @@ namespace ClientGameImpl {
     // Resets the stats of all weapons
     inline void ResetWeaponStats() {
         for (uint8_t i = 0; i <= 20; i++) {
-            ::WepStats[i].Shots = 0;
-            ::WepStats[i].Hits = 0;
-            ::WepStats[i].Kills = 0;
-            ::WepStats[i].Headshots = 0;
-            ::WepStats[i].Accuracy = 0;
+            WepStats[i].Shots = 0;
+            WepStats[i].Hits = 0;
+            WepStats[i].Kills = 0;
+            WepStats[i].Headshots = 0;
+            WepStats[i].Accuracy = 0;
         }
     }
 
@@ -290,7 +303,7 @@ namespace ClientGameImpl {
             // General game updating
             Update_Frame();
 
-            if (DemoRecorder && DemoRecorder->Active() && (MainTickCounter % ::demo_rate.Value() == 0)) {
+            if (DemoRecorder && DemoRecorder->Active() && (MainTickCounter % demo_rate.Value() == 0)) {
                 DemoRecorder->SavePosition();
             }
 
@@ -306,13 +319,13 @@ namespace ClientGameImpl {
 
             // Radio Cooldown
             if ((MainTickCounter % SECOND == 0) &&
-                (::RadioCooldown > 0) && (::sv_radio.Value())) {
-                ::RadioCooldown--;
+                (RadioCooldown > 0) && (sv_radio.Value())) {
+                RadioCooldown--;
             }
 
             // Packet rate send adjusting
             float Adjust = 1.0f;
-            if (::PacketAdjusting == 1) {
+            if (PacketAdjusting == 1) {
                 int HeavySendersNum = PlayersNum - SpectatorsNum;
 
                 if (HeavySendersNum < 5) {
@@ -358,7 +371,7 @@ namespace ClientGameImpl {
 
                 ClientStopMovingCounter--;
 
-                if (::Connection == INTERNET) {
+                if (Connection == INTERNET) {
                     if (Sprite[MySprite]->Active) {
                         if (!Sprite[MySprite]->DeadMeat) {
                             if ((MainTickCounter % static_cast<int>(std::round(7 * Adjust)) == 1) &&
@@ -376,7 +389,7 @@ namespace ClientGameImpl {
                         }
                     }
                 }
-                else if (::Connection == LAN) {
+                else if (Connection == LAN) {
                     if (!Sprite[MySprite]->DeadMeat) {
                         if (MainTickCounter % static_cast<int>(std::round(4 * Adjust)) == 0) {
                             ClientSpriteSnapshot();
