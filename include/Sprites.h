@@ -17,6 +17,7 @@
 #include "Vector.h"
 #include "Constants.h"
 #include "Weapons.h"
+#include "Net.h"
 
 
 // Forward declaration
@@ -430,7 +431,7 @@ struct TSprite {
     } Control;
 
     // Player object that's associated with this sprite
-    class TPlayer* Player;
+    TPlayer* Player;
     
     // Constructor
     TSprite();

@@ -174,7 +174,7 @@ namespace GostekGraphicsImpl {
         if ((Soldier.Style != 1) ||
             (Soldier.CeaseFireCounter > CeaseFireTime - 5) ||
             ((sv_realisticmode.Value()) && (Soldier.Visible == 0)) ||
-            (Soldier.IsSpectator) ||
+            (Soldier.IsSpectator()) ||
             (Soldier.Player->Name == "") ||
             (Soldier.Player->DemoPlayer)) {
             return;
@@ -331,7 +331,7 @@ namespace GostekGraphicsImpl {
         }
 
         // Secondary weapon (on the back)
-        int weaponIndex = WeaponNumToIndex(Soldier.SecondaryWeapon.Num);
+        int weaponIndex = WeaponNumToIndex(static_cast<int>(Soldier.SecondaryWeapon));
 
         if (weaponIndex >= EAGLE && weaponIndex <= FLAMER) {
             Visible.insert(GOSTEK_SECONDARY_FIRST + weaponIndex - EAGLE);
@@ -461,7 +461,7 @@ namespace GostekGraphicsImpl {
                     sx = std::min(1.5f, sqrtf((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1)) / gs->Flex);
                 }
 
-                DrawGostekSprite(Textures[Tex], x1, y1 + 1, sx, sy, cx, cy, r, Color[gs->Color]);
+                DrawGostekSprite(&Textures[Tex], x1, y1 + 1, sx, sy, cx, cy, r, Color[gs->Color]);
             }
         }
     }

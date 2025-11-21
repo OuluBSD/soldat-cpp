@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <algorithm>  // For std::transform
 #include <SDL2/SDL.h>
 #include "Constants.h"
 #include "Weapons.h"

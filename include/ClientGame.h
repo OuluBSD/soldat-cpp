@@ -17,6 +17,7 @@
 #include "Demo.h"
 #include "Cvar.h"  // For cvar declarations
 #include "Console.h"  // For MainConsole
+#include "Client.h"  // For variables like r_fpslimit, r_maxfps, etc.
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>

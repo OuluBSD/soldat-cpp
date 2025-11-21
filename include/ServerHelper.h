@@ -28,33 +28,7 @@
 #include "BanSystem.h"
 #include "Command.h"
 
-// Constants that need to be defined
-const int MAX_SPRITES = 32;  // This should come from Constants.h but adding as placeholder
-const int GAMESTYLE_TEAMMATCH = 2;
-const int GAMESTYLE_CTF = 3;
-const int GAMESTYLE_INF = 5;
-const int GAMESTYLE_HTF = 6;
-const int GAMESTYLE_DEATHMATCH = 0;
-const int GAMESTYLE_POINTMATCH = 1;
-const int GAMESTYLE_RAMBO = 4;
 
-const int TEAM_NONE = 0;
-const int TEAM_ALPHA = 1;
-const int TEAM_BRAVO = 2;
-const int TEAM_CHARLIE = 3;
-const int TEAM_DELTA = 4;
-const int TEAM_SPECTATOR = 5;
-
-const int MAX_PLAYERS = 32;  // Placeholder - should be from constants
-const int MAX_THINGS = 255;  // Placeholder - should be from constants
-const int MAX_WAYPOINTS = 5000;  // Placeholder - should be from constants
-const int MAX_CONNECTIONS = 8;  // Placeholder - should be from constants
-const int MAX_SECTOR = 25;  // Placeholder - should be from constants
-const int MAX_POLYS = 5000;  // Placeholder - should be from constants
-
-const int PERMANENT = -1000;  // Placeholder - should be from constants
-const int BOT = 2;  // Assuming this is the control method for bots
-const int HUMAN = 1;  // Assuming this is the control method for humans
 
 // Function declarations
 std::string CheckNextMap();
@@ -282,7 +256,7 @@ namespace ServerHelperImpl {
 
     inline void UpdateWaveRespawnTime() {
         float playersNumFloat = static_cast<float>(PlayersNum);
-        WaveRespawnTime = static_cast<int>(std::round(playersNumFloat * WAVESPRAWN_TIME_MULTIPLIER) * 60);
+        WaveRespawnTime = static_cast<int>(std::round(playersNumFloat * WAVERESPAWN_TIME_MULITPLIER) * 60);
         
         if (WaveRespawnTime > sv_respawntime_minwave.Value()) {
             WaveRespawnTime = sv_respawntime_maxwave.Value();

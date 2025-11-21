@@ -97,6 +97,13 @@ struct TGameRenderingParams {
 extern TGameRenderingParams GameRenderingParams;
 extern TGfxSpriteArray Textures;
 
+// Additional needed extern variables
+extern int GOS_RESTRICT_WIDTH;
+extern int GOS_RESTRICT_HEIGHT;
+extern int WEP_RESTRICT_WIDTH;
+extern int WEP_RESTRICT_HEIGHT;
+extern SDL_Window* GameWindow;
+
 namespace GameRenderingImpl {
 
     // Structure definitions
@@ -188,7 +195,7 @@ namespace GameRenderingImpl {
     }
 
     inline void LoadInterface() {
-        if (LoadInterfaceData(GameRenderingParams.InterfaceName)) {
+        if (InterfaceGraphicsImpl::LoadInterfaceData(GameRenderingParams.InterfaceName)) {
             LoadInterfaceTextures(GameRenderingParams.InterfaceName);
         } else {
             LoadInterfaceTextures("");
@@ -505,8 +512,11 @@ namespace GameRenderingImpl {
         return false;
     }
 
-    inline void SetFontStyle(int Style) {
-        SetFontStyle(Style, 1.0f);
+    inline void SetFontStyle(int Style, float Scale = 1.0f) {
+        if (Style <= FONT_LAST) {
+            GfxSetFontTable(FontStyles[Style].Font, FontStyles[Style].TableIndex);
+            GfxTextScale(Scale);
+        }
     }
 
     inline void SetFontStyle(int Style, float Scale) {

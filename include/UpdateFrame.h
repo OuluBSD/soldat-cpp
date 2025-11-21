@@ -37,6 +37,51 @@
 // Function declaration
 void Update_Frame();
 
+// External variable declarations
+extern int SparksCount;
+extern int ShotDistanceShow;
+extern int ChatTimeCounter;
+extern int IdleCounter;
+extern int OldMouseX;
+extern int ScreenCounter;
+extern uint8_t CameraFollowSprite;
+extern float CameraX, CameraY;
+extern float mx, my;
+extern TVector2 CameraPrev;
+extern TVector2 MousePrev;
+extern int MainTickCounter;
+extern uint8_t MapChangeCounter;
+extern std::string MapChangeName;
+extern int TimeLimitCounter;
+extern float ShotDistance;
+extern uint16_t HitSprayCounter;
+extern bool ScreenTaken;
+extern bool TargetMode;
+extern bool SurvivalEndRound;
+extern bool DemoPlayer;
+extern bool DemoRecorder;
+extern int PlayersNum;
+extern int MySprite;
+extern int MapChangeTime;
+extern std::vector<std::unique_ptr<struct TSprite>> Sprite;
+extern std::vector<std::unique_ptr<struct TBullet>> Bullet;
+extern std::vector<std::unique_ptr<struct TSpark>> Spark;
+extern std::vector<std::unique_ptr<struct TThing>> Thing;
+extern TMapInfo Map;
+extern int GrenadeEffectTimer;
+extern bool MuteAll;
+extern TGameMenu* EscMenu;
+extern TConsole MainConsole;
+extern TConsole KillConsole;
+extern std::wstring ChatMessage[MAX_SPRITES + 1];
+extern bool ChatTeam[MAX_SPRITES + 1];
+extern int ChatDelay[MAX_SPRITES + 1];
+extern int BigDelay[MAX_BIG_MESSAGES + 1];
+extern int WorldDelay[MAX_BIG_MESSAGES + 1];
+extern bool ScreenTaken;
+extern std::string ConsoleLogFileName;
+extern std::string UserDirectory;
+
 namespace UpdateFrameImpl {
 
     // Internal variables
@@ -52,7 +97,7 @@ namespace UpdateFrameImpl {
         MousePrev.y = my;
 
         if (MapChangeCounter < 0) {
-            if (DemoPlayer.Active() && EscMenu.Active) {
+            if (DemoPlayer && DemoPlayer->Active() && EscMenu && EscMenu->Active) {
                 return;
             }
 
@@ -138,7 +183,7 @@ namespace UpdateFrameImpl {
         CursorFriendly = false;
 
         // TODO(helloer): While watching demos this code needs to use SpectNumber instead of MySprite
-        if ((MySprite > 0) && (!DemoPlayer.Active())) {
+        if ((MySprite > 0) && (!DemoPlayer || !DemoPlayer->Active())) {
             for (int j = 1; j <= MAX_SPRITES; j++) {
                 if (Sprite[j] && Sprite[j]->Active && Sprite[j]->IsNotSpectator() &&
                     (j != MySprite) && (Sprite[j]->BonusStyle != BONUS_PREDATOR) &&
@@ -148,7 +193,7 @@ namespace UpdateFrameImpl {
                     ((Sprite[j]->Visible > 40) || (!sv_realisticmode.Value()))) {
                     
                     if (Distance(-GameWidthHalf + CameraX + mx, -GameHeightHalf + CameraY + my,
-                        SpriteParts.Pos[j].X, SpriteParts.Pos[j].Y) <
+                        SpriteParts.Pos[j].x, SpriteParts.Pos[j].y) <
                         CURSORSPRITE_DISTANCE) {
                         
                         CursorText = Sprite[j]->Player->Name;
@@ -404,9 +449,11 @@ namespace UpdateFrameImpl {
             }
         }
 
-        if ((demo_autorecord.Value()) && (DemoRecorder.Active() == false) && (Map.Name != "")) {
-            DemoRecorder.StartRecord(UserDirectory + "demos/" +
-                FormatDateTime("yyyy-mm-dd_hh-nn-ss_", Now()) + Map.Name + ".sdm");
+        if ((demo_autorecord.Value()) && (!DemoRecorder || !DemoRecorder->Active()) && (Map.Name != "")) {
+            if (DemoRecorder) {
+                DemoRecorder->StartRecord(UserDirectory + "demos/" +
+                    FormatDateTime("yyyy-mm-dd_hh-nn-ss_", Now()) + Map.Name + ".sdm");
+            }
         }
     }
 

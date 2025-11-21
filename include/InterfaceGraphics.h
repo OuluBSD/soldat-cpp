@@ -15,8 +15,10 @@
 #include "Gfx.h"
 #include "GameRendering.h"
 #include "Client.h"
+#include "Game.h"  // For game variables like MySprite, CameraFollowSprite
 #include <string>
 #include <vector>
+#include <cmath>  // For std::floorf and other math functions
 
 // External variables for chat messages
 extern std::wstring ChatMessage[MAX_SPRITES + 1];  // 1-indexed
@@ -232,8 +234,8 @@ namespace InterfaceGraphicsImpl {
     }
 
     inline bool IsInteractiveInterface() {
-        return Sprite[MySprite].IsNotSpectator ||
-            ((CameraFollowSprite > 0) && (sv_advancedspectator.Value));
+        return Sprite[MySprite] && Sprite[MySprite]->IsNotSpectator() ||
+            ((CameraFollowSprite > 0) && (sv_advancedspectator.Value()));
     }
 
     inline float PixelAlignX(float x) {
@@ -283,11 +285,11 @@ namespace InterfaceGraphicsImpl {
         }
 
         p = std::max(0.0f, std::min(1.0f, p));
-        w = Textures[t].Width;
-        h = Textures[t].Height;
+        w = Textures[t]->Width;
+        h = Textures[t]->Height;
 
-        float px = PixelAlignX(rx * _iscala.x) + (x - rx);
-        float py = PixelAlignY(ry * _iscala.y) + (y - ry);
+        float px = PixelAlignX(rx * _IScala.x) + (x - rx);
+        float py = PixelAlignY(ry * _IScala.y) + (y - ry);
         TGfxRect rc = {0, 0, 0, 0};
         rc.Top = 0;
         rc.Bottom = h;
@@ -299,7 +301,7 @@ namespace InterfaceGraphicsImpl {
             if (PosType == VERTICAL) {
                 rc.Right = w;
                 rc.Top = h * (1 - p);
-                py += rc.Top * Textures[t].Scale;
+                py += rc.Top * Textures[t]->Scale;
             }
         } else {
             rc.Left = w * (1 - p);
@@ -308,11 +310,11 @@ namespace InterfaceGraphicsImpl {
             if (PosType == VERTICAL) {
                 rc.Left = 0;
                 rc.Bottom = h * p;
-                py += (h * (1 - p)) * Textures[t].Scale;
+                py += (h * (1 - p)) * Textures[t]->Scale;
             }
         }
 
-        GfxDrawSprite(Textures[t], px, py, 0, 0, DegToRad(r), RGBA(0xFFFFFF, Int.Alpha), rc);
+        GfxDrawSprite(Textures[t], px, py, 0, 0, DegToRad(r), RGBA(0xFFFFFF, 255), rc);
     }
 
     inline void GetWeaponAttribs(int i, std::vector<TAttr>& Attrs) {

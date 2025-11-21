@@ -16,6 +16,9 @@
 #include "Constants.h"
 #include "Weapons.h"
 #include "Client.h"
+#include "Game.h"  // For GameWidth, GameHeight, etc.
+#include "InterfaceGraphics.h"  // For _rscala, FragsMenuShow, StatsMenuShow, NoobShow
+#include "Net.h"  // For VoteMapCount, VoteMapName
 
 // Forward declarations
 struct TGameButton;

@@ -21,6 +21,20 @@
 #include "InterfaceGraphics.h"
 #include "Input.h"
 #include <physfs.h>
+#include <algorithm>
+#include <cctype>
+
+// Fix PHYSFS function name differences
+#ifndef PHYSFS_init
+#define PHYSFS_Init PHYSFS_init
+#endif
+
+// Define toLower function
+std::string toLower(const std::string& s) {
+    std::string result = s;
+    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
+    return result;
+}
 
 namespace ClientImpl {
     // Initialize global variables
@@ -48,6 +62,12 @@ namespace ClientImpl {
     float Grav = 0.06f;
 
     uint8_t Connection = CONNECTION_INTERNET;
+    
+    // Define scale factors if they're not defined elsewhere
+    TVector2 _RScala = {1.0f, 1.0f};
+    TVector2 _IScala = {1.0f, 1.0f};
+    TVector2 _rscala = {1.0f, 1.0f};  // lowercase version
+    TVector2 _iscala = {1.0f, 1.0f};  // lowercase version
 
     uint8_t SniperLine = 0;
 
