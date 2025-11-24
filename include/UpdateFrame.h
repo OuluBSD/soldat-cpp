@@ -28,7 +28,6 @@
 #include "LogFile.h"
 #include "WeatherEffects.h"
 #include "Sparks.h"
-#include "ClientGame.h"
 #include "InterfaceGraphics.h"
 #include "GameMenus.h"
 #include "Input.h"

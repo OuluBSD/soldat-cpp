@@ -81,12 +81,7 @@ const int GFX_WEAPONS_KNIFE2 = 132;
 const int GFX_WEAPONS_CHAINSAW = 133;
 const int GFX_WEAPONS_CHAINSAW2 = 134;
 
-// Add other graphics constants as needed
-const int GFX_GOSTEK_STOPA = 200;  // Example value
-const int GFX_GOSTEK_TEAM2_LECISTOPA2 = 250;  // Example value
 
-// This should be the highest graphics ID + 1
-const int GFXID_END = 1000;  // Placeholder - should be the actual max graphics id + 1
 
 // Structure definitions
 struct TGameRenderingParams {
@@ -98,13 +93,13 @@ extern TGameRenderingParams GameRenderingParams;
 extern TGfxSpriteArray Textures;
 
 // Additional needed extern variables
-extern int GOS_RESTRICT_WIDTH;
-extern int GOS_RESTRICT_HEIGHT;
-extern int WEP_RESTRICT_WIDTH;
-extern int WEP_RESTRICT_HEIGHT;
+
 extern SDL_Window* GameWindow;
 
 namespace GameRenderingImpl {
+
+    // Define GFXID_END as a constant value
+    const int GFXID_END = 1000;  // Should be the highest graphics ID + 1
 
     // Structure definitions
     struct TTextureLoadData {

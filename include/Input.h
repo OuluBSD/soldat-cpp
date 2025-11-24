@@ -68,12 +68,6 @@ struct TBind {
     TBind() : Action(TAction::None), KeyId(0), KeyMod(0), Command(L"") {}
 };
 
-// Function declarations
-bool BindKey(const std::string& key, const std::string& action, const std::string& command, uint16_t Modifier);
-TBind* FindKeyBind(uint16_t KeyMods, SDL_Scancode KeyCode);
-void StartInput();
-void UnbindAll();
-
 // Global variables
 extern std::vector<TBind> Binds;
 extern bool KeyStatus[513];  // Array [0..512] of Boolean;
@@ -81,6 +75,16 @@ extern SDL_Window* GameWindow;
 extern SDL_GLContext GameGLContext;
 
 namespace InputImpl {
+    // Make the global types available in this namespace
+    using TAction = ::TAction;
+    using TBind = ::TBind;
+
+    // Forward declarations for inline functions
+    bool BindKey(const std::string& key, const std::string& action, const std::string& command, uint16_t Modifier);
+    TBind* FindKeyBind(uint16_t KeyMods, SDL_Scancode KeyCode);
+    void StartInput();
+    void UnbindAll();
+
     inline bool BindKey(const std::string& key, const std::string& action, const std::string& command, uint16_t Modifier) {
         if (Binds.empty()) {
             Binds.resize(1);

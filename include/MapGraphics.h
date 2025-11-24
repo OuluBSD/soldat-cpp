@@ -13,6 +13,9 @@
 #include "MapFile.h"
 #include "Vector.h"
 #include "Util.h"
+#include <physfs.h>
+#include "ClientGame.h"
+#include "GameRendering.h"
 #include <vector>
 #include <string>
 
@@ -54,15 +57,7 @@ struct TMapGraphics {
     }
 };
 
-// Function declarations
-void LoadMapGraphics(TMapFile& MapFile, bool BgForce, 
-                     const TMapColor& BgColorTop, const TMapColor& BgColorBtm);
-void DestroyMapGraphics();
-void UpdateProps(double t);
-void RenderProps(int Level);
-void RenderMinimap(float x, float y, uint8_t Alpha);
-void WorldToMinimap(float x, float y, float& ox, float& oy);
-void SetTextureFilter(TGfxTexture* Texture, bool AllowMipmaps);
+
 
 namespace MapGraphicsImpl {
 
@@ -74,7 +69,7 @@ namespace MapGraphicsImpl {
         s[0] = ModDir + "textures/" + TexName;
         s[1] = "current_map/textures/" + TexName;
 
-        if (!PHYSFS_exists(PChar(PngOverride(s[1])))) {
+        if (!PHYSFS_exists(UtilImpl::PChar(GameRenderingImpl::PngOverride(s[1])))) {
             s[1] = "textures/" + TexName;
         }
 
@@ -85,7 +80,7 @@ namespace MapGraphicsImpl {
         }
 
         for (const auto& path : s) {
-            Filename = PngOverride(path);
+            Filename = GameRenderingImpl::PngOverride(path);
 
             if (PHYSFS_exists(PChar(Filename))) {
                 Result = new TGfxImage(Filename, ColorKey);
@@ -130,8 +125,8 @@ namespace MapGraphicsImpl {
 
     inline float GetTextureTargetScale(TMapFile& MapFile, TGfxImage* Image) {
         TVector2 Scale = {0, 0};
-        float ResolutionX = static_cast<float>(RenderWidth) / GameWidth;
-        float ResolutionY = static_cast<float>(RenderHeight) / GameHeight;
+        float ResolutionX = static_cast<float>(ClientGameImpl::RenderWidth) / GameWidth;
+        float ResolutionY = static_cast<float>(ClientGameImpl::RenderHeight) / GameHeight;
 
         for (int i = 0; i < static_cast<int>(MapFile.Polygons.size()); i++) {
             TMapVertex a = MapFile.Polygons[i].Vertices[0];

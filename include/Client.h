@@ -22,7 +22,6 @@
 #include "Game.h"
 #include "Net.h"
 #include "Sprites.h"
-#include "ClientGame.h"
 
 // Forward declarations
 struct TClientNetwork;
@@ -310,5 +309,7 @@ extern TSteam* SteamAPI;
 extern bool VoiceSpeakingNow;
 extern bool ForceReconnect;
 #endif
+
+#include "ClientGame.h"  // Included here after type definitions are available
 
 #endif // CLIENT_H

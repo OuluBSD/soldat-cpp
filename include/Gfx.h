@@ -319,7 +319,7 @@ private:
     TGfxTexture* GetTexture(int Index);
     int GetSpriteCount();
     int GetTextureCount();
-    bool IsLoading();
+    bool IsLoading() const;
     void LoadNextImage();
     void PackRects();
     void UpdateNextSprite();
@@ -346,10 +346,6 @@ public:
 
 namespace GfxImpl {
 
-    inline TGfxColor ARGB(uint32_t argb) {
-        return RGBA(argb, argb >> 24);
-    }
-
     inline TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
         TGfxColor result;
         result.r = r;
@@ -357,6 +353,10 @@ namespace GfxImpl {
         result.b = b;
         result.a = a;
         return result;
+    }
+
+    inline TGfxColor ARGB(uint32_t argb) {
+        return RGBA((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
     }
 
     inline TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b) {
@@ -374,15 +374,6 @@ namespace GfxImpl {
         result.r = (rgba & 0x00FF0000) >> 16;
         result.g = (rgba & 0x0000FF00) >> 8;
         result.b = (rgba & 0x000000FF);
-        return result;
-    }
-
-    inline TGfxColor RGBA(uint8_t r, uint8_t g, uint8_t b, double a) {
-        TGfxColor result;
-        result.r = r;
-        result.g = g;
-        result.b = b;
-        result.a = static_cast<uint8_t>(a);
         return result;
     }
 

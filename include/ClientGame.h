@@ -13,14 +13,15 @@
 #include "Vector.h"
 #include "Sprites.h"
 #include "Net.h"
-#include "UpdateFrame.h"
 #include "Demo.h"
 #include "Cvar.h"  // For cvar declarations
 #include "Console.h"  // For MainConsole
 #include "Client.h"  // For variables like r_fpslimit, r_maxfps, etc.
+#include "GameMenus.h" // For EscMenu and TeamMenu
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include <cmath>
 
 // Forward declarations (these would be defined in other headers)
@@ -41,6 +42,7 @@ void ClientSpriteSnapshotDead();
 void ShowMapChangeScoreboard();
 void ExitToMenu();
 void GameMenuShow(void* Menu, bool Show); // Using void* as a placeholder
+void Update_Frame(); // Defined in UpdateFrame.h
 
 
 
@@ -83,23 +85,15 @@ namespace ClientGameImpl {
     extern TConsole MainConsole;
     
     // Global variables
-    inline TVector2 MousePrev = {0.0f, 0.0f};
-    inline float mx = 0.0f;
-    inline float my = 0.0f;
     inline bool MapChanged = false;
     inline bool ChatChanged = true;  // used for blinking chat input
     inline bool ShouldRenderFrames = true;  // false during game request phase
-
-    // Demo recorder and player
-    inline std::unique_ptr<TDemoRecorder> DemoRecorder = nullptr;
-    inline std::unique_ptr<TDemoPlayer> DemoPlayer = nullptr;
 
     // used for action snap
     inline uint8_t ActionSnap = 1;
     inline bool ActionSnapTaken = false;
     inline int CapScreen = 255;
     inline bool ShowScreen = false;
-    inline uint8_t ScreenCounter = 255;
     
     // Additional variables that were missing
     inline bool IsFullscreen = false;
@@ -118,7 +112,6 @@ namespace ClientGameImpl {
     inline uint8_t CurrentTabCompletePlayer = 0;
     inline uint8_t CursorPosition = 0;  // For chat cursor position
     inline bool TabCompletePressed = false;  // For tab completion
-    inline uint8_t ChatTimeCounter = 0;  // For chat blinking
     inline int ClientStopMovingCounter = 0;  // For connection issues
     inline bool ForceClientSpriteSnapshotMov = false;
     inline int LastForceClientSpriteSnapshotMovTick = 0;
@@ -539,9 +532,8 @@ namespace ClientGameImpl {
     
 
 // Using declarations to bring into global namespace
-using ClientGameImpl::MousePrev;
-using ClientGameImpl::mx;
-using ClientGameImpl::my;
+// MousePrev, mx, my, ScreenCounter, ChatTimeCounter, DemoRecorder, DemoPlayer
+// are defined elsewhere, so not using from ClientGameImpl to avoid conflicts
 using ClientGameImpl::MapChanged;
 using ClientGameImpl::ChatChanged;
 using ClientGameImpl::ShouldRenderFrames;
@@ -549,7 +541,6 @@ using ClientGameImpl::ActionSnap;
 using ClientGameImpl::ActionSnapTaken;
 using ClientGameImpl::CapScreen;
 using ClientGameImpl::ShowScreen;
-using ClientGameImpl::ScreenCounter;
 using ClientGameImpl::IsFullscreen;
 using ClientGameImpl::ScreenWidth;
 using ClientGameImpl::ScreenHeight;
@@ -566,7 +557,6 @@ using ClientGameImpl::CompletionBaseSeparator;
 using ClientGameImpl::CurrentTabCompletePlayer;
 using ClientGameImpl::CursorPosition;
 using ClientGameImpl::TabCompletePressed;
-using ClientGameImpl::ChatTimeCounter;
 using ClientGameImpl::ClientStopMovingCounter;
 using ClientGameImpl::ForceClientSpriteSnapshotMov;
 using ClientGameImpl::LastForceClientSpriteSnapshotMovTick;
@@ -579,8 +569,6 @@ using ClientGameImpl::TabComplete;
 using ClientGameImpl::ResetWeaponStats;
 using ClientGameImpl::BigMessage;
 using ClientGameImpl::GetCameraTarget;
-using ClientGameImpl::DemoRecorder;
-using ClientGameImpl::DemoPlayer;
 #ifdef STEAM_CODE
 using ClientGameImpl::GetMicData;
 #endif

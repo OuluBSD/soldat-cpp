@@ -24,12 +24,10 @@
 #else
 #include "Client.h"
 #include "GameStrings.h"
-#include "ClientGame.h"  // For ShouldRenderFrames
 #include "Sparks.h"      // For Spark
 #include "Things.h"      // For KillThing
 #include "Game.h"        // For BigText, BigDelay, and other game variables
 #include "InterfaceGraphics.h" // For BigScale, BigColor, BigPosX, BigPosY, BigX, etc.
-#include "ClientGame.h"  // For ClientGameImpl namespace access
 #endif
 
 #include <string>
@@ -38,6 +36,14 @@
 #include <fstream>
 #include <algorithm>
 #include <cctype>
+
+// Let's remove the problematic conflicting declarations and just use proper includes
+// These forward declarations should be sufficient without redeclaring constants
+struct TConsole;  // Defined in Console.h
+struct TGameMenu; // Defined in GameMenus.h
+extern TConsole MainConsole;  // Defined in Client.h
+extern TConsole BigConsole;   // Defined in Client.h
+extern uint8_t Spectator; // Defined in Client.h
 
 // Forward declarations for types used later
 class TDemoPlayer;

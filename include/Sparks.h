@@ -10,19 +10,17 @@
 //*******************************************************************************
 
 #include "Vector.h"
+#include "Constants.h" // MAX_SPARKS is defined here
 #include <string>
-
-const int MAX_SPARKS = 1000;
 
 // Forward declaration
 struct TVector2;
-
-void CreateSpark(TVector2 Pos, TVector2 Vel, uint8_t Type, uint8_t TTL, uint8_t Intensity);
 
 namespace SparksImpl {
     void CreateSpark(TVector2 Pos, TVector2 Vel, uint8_t Type, uint8_t TTL, uint8_t Intensity);
 }
 
+// Use the namespace function
 using SparksImpl::CreateSpark;
 
 #endif // SPARKS_H

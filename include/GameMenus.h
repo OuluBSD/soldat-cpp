@@ -18,6 +18,7 @@
 #include "Client.h"
 #include "Game.h"  // For GameWidth, GameHeight, etc.
 #include "InterfaceGraphics.h"  // For _rscala, FragsMenuShow, StatsMenuShow, NoobShow
+#include "Sound.h"  // For StopSound function
 #include "Net.h"  // For VoteMapCount, VoteMapName
 
 // Forward declarations

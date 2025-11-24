@@ -27,9 +27,6 @@ const int LEVEL_OFF = 0;
 const int LEVEL_DEBUG = 1;
 const int LEVEL_TRACE = 2;
 
-// Function declarations
-void Debug(const std::string& Msg);
-void Trace(const std::string& Msg);
 #ifdef STEAM_CODE
 extern "C" void SteamWarning(int Severity, const char* WarnMessage);
 #endif
