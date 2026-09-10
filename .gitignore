@@ -50,3 +50,4 @@ Release
 # build temp files
 errors.txt
 
+.kilo/

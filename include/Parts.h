@@ -226,33 +226,33 @@ void TParticleSystem::Clone(const TParticleSystem& Other) {
     PartCount = Other.PartCount;
 
     // Copy Active vector elements (skip index 0, start from 1)
-    for (int i = 1; i <= PartCount; i++) {
+    for (size_t i = 1; i <= PartCount; i++) {
         if (i < Other.Active.size()) {
             Active[i] = Other.Active[i];
         }
     }
-    for (int i = 1; i <= PartCount; i++) {
+    for (size_t i = 1; i <= PartCount; i++) {
         if (i < Other.Pos.size()) {
             Pos[i] = Other.Pos[i];
         }
     }
-    for (int i = 1; i <= PartCount; i++) {
+    for (size_t i = 1; i <= PartCount; i++) {
         if (i < Other.Velocity.size()) {
             Velocity[i] = Other.Velocity[i];
         }
     }
-    for (int i = 1; i <= PartCount; i++) {
+    for (size_t i = 1; i <= PartCount; i++) {
         if (i < Other.OldPos.size()) {
             OldPos[i] = Other.OldPos[i];
         }
     }
-    for (int i = 1; i <= PartCount; i++) {
+    for (size_t i = 1; i <= PartCount; i++) {
         if (i < Other.OneOverMass.size()) {
             OneOverMass[i] = Other.OneOverMass[i];
         }
     }
 
-    for (int i = 1; i <= ConstraintCount; i++) {
+    for (size_t i = 1; i <= ConstraintCount; i++) {
         if (i < Other.Constraints.size()) {
             const TConstraint& otherConstraint = Other.Constraints[i];
             TConstraint& constraint = Constraints[i];

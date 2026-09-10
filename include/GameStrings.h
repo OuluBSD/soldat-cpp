@@ -36,7 +36,7 @@ extern std::unique_ptr<TMOFile> TranslationFile;
 
 
 namespace GameStringsImpl {
-    inline bool InitTranslation(const std::string& Filename) {
+    inline bool InitTranslation(const std::string& /*Filename*/) {
         // Note: This function would require PhysFS for file access and GetText functionality for translations
         // Creating a stream from the physical file system
         // TStream* translationStream = PHYSFS_readAsStream(Filename.c_str());

@@ -21,6 +21,8 @@
 #include "Weapons.h"
 #include "Cvar.h"
 #include "LobbyClient.h"
+#include "MathUtils.h"
+#include "LogFile.h"
 
 // Function declarations
 void UpdateFrame();
@@ -299,7 +301,7 @@ namespace ServerLoopImpl {
     inline void UpdateFrame() {
         // Trace('UpdateFrame');  // Assuming this function exists elsewhere
         
-        TVector2 M = Default(TVector2);
+        TVector2 M = {0, 0};
 
         if (MapChangeCounter < 0) {
             for (int j = 1; j <= MAX_SPRITES; j++) {
@@ -691,10 +693,10 @@ namespace ServerLoopImpl {
                 }
 
                 if (x == 0) {
-                    M = Default(TVector2);
+                    M = {0, 0};
                     RandomizeStart(M, 15);
 
-                    j = CreateThing(M, 255, OBJECT_RAMBO_BOW, 255);
+                    j = CreateThing(255, OBJECT_RAMBO_BOW, M, 255);
                 }
             }
         }
@@ -725,7 +727,7 @@ namespace ServerLoopImpl {
 
                 if (x == 0) {
                     if (RandomizeStart(M, 5)) {
-                        TeamFlag[1] = CreateThing(M, 255, OBJECT_ALPHA_FLAG, 255);
+                        TeamFlag[1] = CreateThing(255, OBJECT_ALPHA_FLAG, M, 255);
                     }
                 }
 
@@ -752,7 +754,7 @@ namespace ServerLoopImpl {
 
                 if (x == 0) {
                     if (RandomizeStart(M, 6)) {
-                        TeamFlag[2] = CreateThing(M, 255, OBJECT_BRAVO_FLAG, 255);
+                        TeamFlag[2] = CreateThing(255, OBJECT_BRAVO_FLAG, M, 255);
                     }
                 }
             }
@@ -783,7 +785,7 @@ namespace ServerLoopImpl {
 
                 if (x == 0) {
                     if (RandomizeStart(M, 14)) {
-                        TeamFlag[1] = CreateThing(M, 255, OBJECT_POINTMATCH_FLAG, 255);
+                        TeamFlag[1] = CreateThing(255, OBJECT_POINTMATCH_FLAG, M, 255);
                     }
                 }
             }

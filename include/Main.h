@@ -70,7 +70,7 @@ namespace MainImpl {
         }
 
         if ((Signal == SIGTERM) || (Signal == SIGQUIT)) {
-            MainConsole.Console("", GAME_MESSAGE_COLOR);
+            MainConsole.Console(std::string(""), GAME_MESSAGE_COLOR);
             MainConsole.Console("Signal received, shutting down", GAME_MESSAGE_COLOR);
             ProgReady = false;
         }
@@ -137,16 +137,16 @@ namespace MainImpl {
         }
         catch (const std::exception& e) {
             ProgReady = false;
-            MainConsole.Console("Server Encountered an error:", GAME_MESSAGE_COLOR);
+            MainConsole.Console(std::string("Server Encountered an error:"), GAME_MESSAGE_COLOR);
             MainConsole.Console(std::string(e.what()), GAME_MESSAGE_COLOR);
         }
         catch (...) {
             ProgReady = false;
-            MainConsole.Console("Server Encountered an unknown error:", GAME_MESSAGE_COLOR);
+            MainConsole.Console(std::string("Server Encountered an unknown error:"), GAME_MESSAGE_COLOR);
         }
 
         // Any needed cleanup code here
-        ShutDown();
+        Shutdown();
         ClearSigHooks();
     }
 

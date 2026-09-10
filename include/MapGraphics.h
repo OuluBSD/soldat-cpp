@@ -16,6 +16,7 @@
 #include <physfs.h>
 #include "ClientGame.h"
 #include "GameRendering.h"
+#include "Util.h"
 #include <vector>
 #include <string>
 
@@ -69,7 +70,7 @@ namespace MapGraphicsImpl {
         s[0] = ModDir + "textures/" + TexName;
         s[1] = "current_map/textures/" + TexName;
 
-        if (!PHYSFS_exists(UtilImpl::PChar(GameRenderingImpl::PngOverride(s[1])))) {
+        if (!PHYSFS_exists(UtilImpl::PChar(Util::PngOverride(s[1])))) {
             s[1] = "textures/" + TexName;
         }
 
@@ -80,9 +81,9 @@ namespace MapGraphicsImpl {
         }
 
         for (const auto& path : s) {
-            Filename = GameRenderingImpl::PngOverride(path);
+            Filename = Util::PngOverride(path);
 
-            if (PHYSFS_exists(PChar(Filename))) {
+            if (PHYSFS_exists(UtilImpl::PChar(Filename))) {
                 Result = new TGfxImage(Filename, ColorKey);
 
                 if (Result->GetImageData() == nullptr) {
@@ -125,8 +126,8 @@ namespace MapGraphicsImpl {
 
     inline float GetTextureTargetScale(TMapFile& MapFile, TGfxImage* Image) {
         TVector2 Scale = {0, 0};
-        float ResolutionX = static_cast<float>(ClientGameImpl::RenderWidth) / GameWidth;
-        float ResolutionY = static_cast<float>(ClientGameImpl::RenderHeight) / GameHeight;
+        float ResolutionX = static_cast<float>(r_renderwidth.Value()) / GameWidth;
+        float ResolutionY = static_cast<float>(r_renderheight.Value()) / GameHeight;
 
         for (int i = 0; i < static_cast<int>(MapFile.Polygons.size()); i++) {
             TMapVertex a = MapFile.Polygons[i].Vertices[0];

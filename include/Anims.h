@@ -55,7 +55,7 @@ struct TAnimation {
         }
     }
     
-    void LoadFromFile(const std::string& Filename) {
+    void LoadFromFile(const std::string& /*Filename*/) {
         // This function requires PHYSFS which isn't available in the current context
         // This is a simplified version that would need to be expanded with actual PHYSFS implementation
 
@@ -91,7 +91,7 @@ struct TAnimation {
 };
 
 // Function implementation
-void LoadAnimObjects(const std::string& ModDir) {
+void LoadAnimObjects(const std::string& /*ModDir*/) {
     // AddLineToLogFile(GameLog, 'Loading Animations. ' + ModDir, ConsoleLogFileName);
 
     // In a real implementation, this would load each animation from files

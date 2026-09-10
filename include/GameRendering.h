@@ -135,9 +135,9 @@ namespace GameRenderingImpl {
     extern TGfxSpritesheet* InterfaceSpritesheet;
     extern TGfxFont Fonts[2];
     extern TFontStyle FontStyles[FONT_LAST + 1];
-    extern TGfxTexture ActionSnapTexture;
-    extern TGfxTexture RenderTarget;
-    extern TGfxTexture RenderTargetAA;
+    extern TGfxTexture* ActionSnapTexture;
+    extern TGfxTexture* RenderTarget;
+    extern TGfxTexture* RenderTargetAA;
     extern std::string ScreenshotPath;
     extern bool ScreenshotAsync;
     extern float ImageScale[GFXID_END + 1];
@@ -190,7 +190,7 @@ namespace GameRenderingImpl {
     }
 
     inline void LoadInterface() {
-        if (InterfaceGraphicsImpl::LoadInterfaceData(GameRenderingParams.InterfaceName)) {
+        if (LoadInterfaceData(GameRenderingParams.InterfaceName)) {
             LoadInterfaceTextures(GameRenderingParams.InterfaceName);
         } else {
             LoadInterfaceTextures("");
@@ -239,9 +239,9 @@ namespace GameRenderingImpl {
             // Shutdown();
         }
 
-        int w = ClientGameImpl::RenderWidth;
-        int h = ClientGameImpl::RenderHeight;
-        float s = r_scaleinterface.Value() ? (float)ClientGameImpl::RenderHeight / GameHeight : 1.0f;
+        int w = r_renderwidth.Value();
+        int h = r_renderheight.Value();
+        float s = r_scaleinterface.Value() ? (float)r_renderheight.Value() / GameHeight : 1.0f;
 
         // Create fonts
         Fonts[1] = GfxCreateFont(FontPath[1].c_str(), Npot(w / 2), Npot(h / 2));
@@ -280,7 +280,7 @@ namespace GameRenderingImpl {
         FontStyles[FONT_WEAPONS_MENU].Flags = 0;
 
         FontStyles[FONT_WORLD].Font = Fonts[1];
-        FontStyles[FONT_WORLD].Size = 128 * ((float)ClientGameImpl::RenderHeight / GameHeight);
+        FontStyles[FONT_WORLD].Size = 128 * ((float)r_renderheight.Value() / GameHeight);
         FontStyles[FONT_WORLD].Stretch = font_1_scale.Value() / 100;
         FontStyles[FONT_WORLD].Flags = 0;
 
@@ -325,7 +325,7 @@ namespace GameRenderingImpl {
 
         GameWindow = SDL_CreateWindow("Soldat",
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-            ClientGameImpl::WindowWidth, ClientGameImpl::WindowHeight, WindowFlags);
+            r_windowwidth.Value(), r_windowheight.Value(), WindowFlags);
 
         // Load icon file
         // FileBuffer := PHYSFS_readBuffer('icon.bmp');
@@ -347,7 +347,7 @@ namespace GameRenderingImpl {
             GfxLog("Error while setting SDL_GL_SetSwapInterval: " + std::string(SDL_GetError()));
         }
 
-        GfxViewport(0, 0, ClientGameImpl::WindowWidth, ClientGameImpl::WindowHeight);
+        GfxViewport(0, 0, r_windowwidth.Value(), r_windowheight.Value());
 
         Textures.resize(GFXID_END + 1);
         LoadModInfo();
@@ -361,16 +361,16 @@ namespace GameRenderingImpl {
         }
 
         if (cl_actionsnap.Value()) {
-            ActionSnapTexture = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, true);
+            ActionSnapTexture = GfxCreateRenderTarget(r_renderwidth.Value(), r_renderheight.Value(), 4, true);
         }
 
         if (GfxFramebufferSupported) {
-            if ((ClientGameImpl::WindowWidth != ClientGameImpl::RenderWidth) || 
-                (ClientGameImpl::WindowHeight != ClientGameImpl::RenderHeight)) {
-                RenderTarget = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, true);
+            if ((r_windowwidth.Value() != r_renderwidth.Value()) ||
+                (r_windowheight.Value() != r_renderheight.Value())) {
+                RenderTarget = GfxCreateRenderTarget(r_renderwidth.Value(), r_renderheight.Value(), 4, true);
 
-                if (RenderTarget.GetSamples() > 0) {
-                    RenderTargetAA = GfxCreateRenderTarget(ClientGameImpl::RenderWidth, ClientGameImpl::RenderHeight, 4, false);
+                if (RenderTarget->GetSamples() > 0) {
+                    RenderTargetAA = GfxCreateRenderTarget(r_renderwidth.Value(), r_renderheight.Value(), 4, false);
 
                     if (r_resizefilter.Value() >= 2) {
                         GfxTextureFilter(RenderTargetAA, GFX_LINEAR, GFX_LINEAR);
@@ -514,13 +514,6 @@ namespace GameRenderingImpl {
         }
     }
 
-    inline void SetFontStyle(int Style, float Scale) {
-        if (Style <= FONT_LAST) {
-            GfxSetFontTable(FontStyles[Style].Font, FontStyles[Style].TableIndex);
-            GfxTextScale(Scale);
-        }
-    }
-
     inline float FontStyleSize(int Style) {
         if (Style <= FONT_LAST) {
             return FontStyles[Style].Size;
@@ -536,9 +529,7 @@ namespace GameRenderingImpl {
 
 } // namespace GameRenderingImpl
 
-using GameRenderingImpl::TGameRenderingParams;
-using GameRenderingImpl::GameRenderingParams;
-using GameRenderingImpl::Textures;
+
 using GameRenderingImpl::InitGameGraphics;
 using GameRenderingImpl::ReloadGraphics;
 using GameRenderingImpl::DestroyGameGraphics;

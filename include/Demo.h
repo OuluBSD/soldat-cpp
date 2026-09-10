@@ -481,7 +481,7 @@ inline void TDemoPlayer::ProcessDemo() {
         if ((FSkipTo > 0) && (MainTickCounter >= FSkipTo)) {
             FSkipTo = -1;
 #ifndef SERVER_CODE
-            ClientGameImpl::ShouldRenderFrames = true;
+            ShouldRenderFrames = true;
 #endif
             GOALTICKS = static_cast<int>(demo_speed.Value() * DEFAULT_GOALTICKS);  // demo_speed should be accessible via Client.h
         }
@@ -514,7 +514,7 @@ inline void TDemoPlayer::ProcessDemo() {
 inline void TDemoPlayer::Position(int Ticks) {
     FSkipTo = Ticks;
 #ifndef SERVER_CODE
-    ClientGameImpl::ShouldRenderFrames = false;
+    ShouldRenderFrames = false;
 #endif
 
     if (FSkipTo < MainTickCounter) {

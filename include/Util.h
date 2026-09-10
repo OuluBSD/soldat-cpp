@@ -289,6 +289,23 @@ namespace Util {
         #endif
     }
     
+    // Convert PNG file extension
+    inline std::string PngOverride(const std::string& filename) {
+        std::string result = filename;
+        size_t lastdot = result.find_last_of(".");
+
+        if (lastdot != std::string::npos) {
+            std::string currentExt = result.substr(lastdot);
+            if (UtilImpl::toLower(currentExt) == ".bmp") {
+                result = result.substr(0, lastdot) + ".png";
+            }
+        } else {
+            result += ".png";
+        }
+
+        return result;
+    }
+    
     // Convert degrees to radians
     inline float DegToRad(float degrees) {
         return degrees * 3.14159265358979323846f / 180.0f;

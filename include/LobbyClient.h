@@ -144,8 +144,6 @@ namespace LobbyClientImpl {
     }
 }
 
-// Using declarations to bring functions into global namespace
-using LobbyClientImpl::TLobbyThread;
-using LobbyClientImpl::GetOS;
+
 
 #endif // LOBBY_CLIENT_H

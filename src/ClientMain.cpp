@@ -26,9 +26,9 @@
 
 // Global variables for client
 bool ClientRunning = true;
-int MySprite = 0;  // ID of this client's sprite
+uint8_t MySprite = 0;  // ID of this client's sprite
 int MainTickCounter = 0;
-int CameraFollowSprite = 0;
+uint8_t CameraFollowSprite = 0;
 
 // Function prototypes
 bool InitializeClient();
@@ -147,7 +147,7 @@ void UpdateClientState() {
     UpdateGameStats();
 
     // If demo is active, process demo frames
-    if (DemoPlayer && DemoPlayer->Active) {
+    if (DemoPlayer && DemoPlayer->Active()) {
         DemoPlayer->ProcessDemo();
     }
 }

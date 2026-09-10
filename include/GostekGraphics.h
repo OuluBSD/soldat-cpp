@@ -194,7 +194,7 @@ namespace GostekGraphicsImpl {
         Color[COLOR_CYGAR]     = RGBA(0xFFFFFF);
         Color[COLOR_HEADBLOOD] = RGBA(0xACA9A8);
 
-        if (Soldier.HasCigar == 5) {
+        if (Soldier.HasCigar) {
             Color[COLOR_CYGAR] = RGBA(0x616161);
         }
 
@@ -205,8 +205,7 @@ namespace GostekGraphicsImpl {
             Alpha[ALPHA_BLOOD] = 0;
         }
 
-        if ((sv_realisticmode.Value()) && (Soldier.Visible > 0) && (Soldier.Visible < 45) &&
-            (Soldier.Alpha > 60)) {
+        if ((sv_realisticmode.Value()) && (Soldier.Visible > 0) && (Soldier.Alpha > 60)) {
             Soldier.Alpha = 3 * Soldier.Visible;
             Alpha[ALPHA_BASE] = Soldier.Alpha;
             Alpha[ALPHA_BLOOD] = 0;
@@ -272,7 +271,7 @@ namespace GostekGraphicsImpl {
         }
 
         // Cigar
-        if ((Soldier.HasCigar == 5) || (Soldier.HasCigar == 10)) {
+        if (Soldier.HasCigar) {
             Visible.insert(GOSTEK_CIGAR);
         }
 

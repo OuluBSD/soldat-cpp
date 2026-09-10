@@ -13,7 +13,7 @@
 #include <chrono>
 
 // DateTime to Unix timestamp conversion
-inline int64_t DateTimeToUnix(double DateTime) {
+inline int64_t DateTimeToUnix(double /*DateTime*/) {
     // Simplified implementation - in real Pascal this would have a more complex conversion
     // For now we'll use a simple approach based on the standard Unix epoch
     time_t currentTime = time(nullptr);

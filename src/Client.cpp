@@ -131,6 +131,11 @@ namespace ClientImpl {
     float CameraX = 0.0f, CameraY = 0.0f;  // camera x and y within world
     uint8_t CameraFollowSprite = 0;  // Tag number of object to follow
 
+    // Mouse variables
+    int mx = 0;
+    int my = 0;
+    TVector2 MousePrev = {0.0f, 0.0f};
+
 #ifdef STEAM_CODE
     TSteam* SteamAPI = nullptr;
     bool VoiceSpeakingNow = false;
@@ -247,12 +252,12 @@ namespace ClientImpl {
 
         for (int i = 1; i <= MAX_SPRITES; i++) {
             if (Sprite[i] && Sprite[i]->Active) {
-                Sprite[i]->Kill();
+                Sprite[i]->Kill(0, 0, 0);
             }
         }
         for (int i = 1; i <= MAX_BULLETS; i++) {
             if (Bullet[i]) {
-                Bullet[i]->Kill();
+                Bullet[i]->Active = false;
             }
         }
         for (int i = 1; i <= MAX_SPARKS; i++) {
@@ -262,7 +267,7 @@ namespace ClientImpl {
         }
         for (int i = 1; i <= MAX_THINGS; i++) {
             if (Thing[i]) {
-                Thing[i]->Kill();
+                Thing[i]->Active = false;
             }
         }
 

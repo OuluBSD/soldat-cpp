@@ -15,7 +15,6 @@
 #include <cstring>
 #include <cmath>
 #ifdef WITH_OPENAL
-#ifdef WITH_OPENAL
 #include <AL/al.h>
 #include <AL/alc.h>
 #else
@@ -46,6 +45,9 @@ const int AL_FORMAT_STEREO_FLOAT32 = 0x10011;
 const int AL_NONE = 0;
 const int ALC_FALSE = 0;
 const int ALC_TRUE = 1;
+const int AL_TRUE = 1;
+const int AL_FALSE = 0;
+const int AL_BUFFER = 0x1009;
 
 // Stub function declarations for OpenAL
 ALCcontext* alcCreateContext(ALCdevice* device, const int* attrlist) { return nullptr; }
@@ -67,128 +69,72 @@ void alSourcePause(ALuint source) {}
 void alSourcePlay(ALuint source) {}
 void alDeleteSources(ALsizei n, const ALuint* sources) {}
 ALenum alGetError() { return AL_NO_ERROR; }
-#endif
 #endif
 #include <SDL2/SDL.h>
-#ifdef WITH_OPENAL
-#include <AL/al.h>
-#include <AL/alc.h>
-#else
-// Provide stub definitions when OpenAL is not available
-using ALsizei = int;
-using ALuint = unsigned int;
-using ALint = int;
-using ALfloat = float;
-using ALenum = unsigned int;
-using ALCdevice = void;
-using ALCcontext = void;
-using ALCboolean = int;
-using ALCchar = char;
-
-const int AL_NO_ERROR = 0;
-const int AL_PLAYING = 1;
-const int AL_PAUSED = 2;
-const int AL_SOURCE_STATE = 1;
-const int AL_LOOPING = 2;
-const int AL_GAIN = 3;
-const int AL_POSITION = 4;
-const int AL_FORMAT_MONO8 = 0x1100;
-const int AL_FORMAT_MONO16 = 0x1101;
-const int AL_FORMAT_STEREO8 = 0x1102;
-const int AL_FORMAT_STEREO16 = 0x1103;
-const int AL_FORMAT_MONO_FLOAT32 = 0x10010;
-const int AL_FORMAT_STEREO_FLOAT32 = 0x10011;
-const int AL_NONE = 0;
-const int ALC_FALSE = 0;
-const int ALC_TRUE = 1;
-
-// Stub function declarations for OpenAL
-ALCcontext* alcCreateContext(ALCdevice* device, const int* attrlist) { return nullptr; }
-ALCboolean alcMakeContextCurrent(ALCcontext* context) { return ALC_FALSE; }
-void alcDestroyContext(ALCcontext* context) {}
-ALCdevice* alcOpenDevice(const ALCchar* devicename) { return nullptr; }
-ALCboolean alcCloseDevice(ALCdevice* device) { return ALC_FALSE; }
-void alDistanceModel(ALenum distanceModel) {}
-void alGenSources(ALsizei n, ALuint* sources) {}
-void alSourcei(ALuint source, ALenum param, ALint value) {}
-void alSourcef(ALuint source, ALenum param, ALfloat value) {}
-void alSource3f(ALuint source, ALenum param, ALfloat value1, ALfloat value2, ALfloat value3) {}
-void alGetSourcei(ALuint source, ALenum param, ALint* value) {}
-void alSourceStop(ALuint source) {}
-void alBufferData(ALuint buffer, ALenum format, const void* data, ALsizei size, ALsizei freq) {}
-void alGenBuffers(ALsizei n, ALuint* buffers) {}
-void alDeleteBuffers(ALsizei n, const ALuint* buffers) {}
-void alSourcePause(ALuint source) {}
-void alSourcePlay(ALuint source) {}
-void alDeleteSources(ALsizei n, const ALuint* sources) {}
-ALenum alGetError() { return AL_NO_ERROR; }
-#endif
 
 #ifndef WITH_PHYSFS
 // Provide stub definitions when PhysFS is not available
-using PHYSFS_File = void;
 using PHYSFS_uint64 = unsigned long long;
-using PHYSFS_sint64 = long long;
 
-PHYSFS_File* PHYSFS_openRead(const char* filename) { return nullptr; }
-PHYSFS_uint64 PHYSFS_fileLength(PHYSFS_File* file) { return 0; }
-int PHYSFS_readBytes(PHYSFS_File* file, void* buffer, PHYSFS_uint64 len) { return 0; }
-int PHYSFS_close(PHYSFS_File* file) { return 0; }
+void* MyPHYSFS_openRead(const char* filename) { return nullptr; }
+PHYSFS_uint64 MyPHYSFS_fileLength(void* file) { return 0; }
+int MyPHYSFS_readBytes(void* file, void* buffer, PHYSFS_uint64 len) { return 0; }
+int MyPHYSFS_close(void* file) { return 0; }
 #else
 #include <physfs.h>  // Use lowercase physfs.h as convention
 #endif
 #include "Vector.h"
 
-// Type definitions
-struct SoundSample {
-    bool Loaded;
-    ALuint Buffer;
-    
-    SoundSample() : Loaded(false), Buffer(0) {}
-};
+namespace SoundImpl {
+    // Type definitions inside the namespace
+    struct SoundSample {
+        bool Loaded;
+        ALuint Buffer;
 
-struct TScriptSound {
-    std::string Name;
-    SoundSample Samp;
-};
+        SoundSample() : Loaded(false), Buffer(0) {}
+    };
 
-// Constants
-const int MAX_SOURCES = 256;
-const int RESERVED_SOURCES = 128;
-const int MAX_SAMPLES = 163;
-const int CHANNEL_WEATHER = 127;
+    struct TScriptSound {
+        std::string Name;
+        SoundSample Samp;
+    };
 
-// Function declarations
-bool InitSound();
-short SoundNameToID(const std::string& Name);
-SoundSample LoadSample(const char* Name, SoundSample samp);
-float ScaleVolumeSetting(uint8_t VolumeSetting);
-void LoadSounds(const std::string& ModDir);
-void CloseSound();
-void PlaySound(int SampleNum, float ListenerX, float ListenerY, float EmitterX, 
-               float EmitterY, int Chan); // FPlaySound in original
-void PlaySound(int Sample); // overload
-void PlaySound(int Sample, int Channel); // overload
-void PlaySound(int Sample, const TVector2& Emitter); // overload
-void PlaySound(int Sample, const TVector2& Emitter, int& Channel); // overload
-bool StopSound(int Channel);
-bool SetSoundPaused(int Channel, bool Paused);
-bool SetVolume(int Channel, float Volume);
+    // Constants
+    const int MAX_SOURCES = 256;
+    const int RESERVED_SOURCES = 128;
+    const int MAX_SAMPLES = 163;
+    const int CHANNEL_WEATHER = 127;
+
+    // Function declarations
+    bool InitSound();
+    short SoundNameToID(const std::string& Name);
+    SoundSample LoadSample(const char* Name, SoundSample samp);
+    float ScaleVolumeSetting(uint8_t VolumeSetting);
+    void LoadSounds(const std::string& ModDir);
+    void CloseSound();
+    void PlaySound(int SampleNum, float ListenerX, float ListenerY, float EmitterX,
+                   float EmitterY, int Chan); // FPlaySound in original
+    void PlaySound(int Sample); // overload
+    void PlaySound(int Sample, int Channel); // overload
+    void PlaySound(int Sample, const TVector2& Emitter); // overload
+    void PlaySound(int Sample, const TVector2& Emitter, int& Channel); // overload
+    bool StopSound(int Channel);
+    bool SetSoundPaused(int Channel, bool Paused);
+    bool SetVolume(int Channel, float Volume);
 
 #ifdef STEAM_CODE
-void PlayVoiceData(void* Data, uint16_t DataLength, uint8_t SpriteNum);
+    void PlayVoiceData(void* Data, uint16_t DataLength, uint8_t SpriteNum);
 #endif
 
-// Global variables
-extern SoundSample Samp[MAX_SAMPLES + 1];  // Pascal arrays start from 1
-extern std::vector<TScriptSound> ScriptSamp;
-extern float VolumeInternal;
-extern ALCdevice* ALDevice;
-extern ALCcontext* ALContext;
-extern ALuint Sources[MAX_SOURCES];
-extern int DefaultChannel;
+    // Global variables
+    extern SoundSample Samp[MAX_SAMPLES + 1];  // Pascal arrays start from 1
+    extern std::vector<TScriptSound> ScriptSamp;
+    extern float VolumeInternal;
+    extern ALCdevice* ALDevice;
+    extern ALCcontext* ALContext;
+    extern ALuint Sources[MAX_SOURCES];
+    extern int DefaultChannel;
 
-namespace SoundImpl {
     inline bool InitSound() {
         ALDevice = alcOpenDevice(nullptr);
         if (!ALDevice) {
@@ -233,16 +179,16 @@ namespace SoundImpl {
         }
 
         // Read file into memory using PhysFS
-        PHYSFS_File* file = PHYSFS_openRead(Name);
+        void* file = MyPHYSFS_openRead(Name);
         if (!file) {
             // File doesn't exist
             return result;
         }
 
-        PHYSFS_uint64 fileLength = PHYSFS_fileLength(file);
+        PHYSFS_uint64 fileLength = MyPHYSFS_fileLength(file);
         std::vector<char> fileBuffer(fileLength);
-        PHYSFS_readBytes(file, fileBuffer.data(), fileLength);
-        PHYSFS_close(file);
+        MyPHYSFS_readBytes(file, fileBuffer.data(), fileLength);
+        MyPHYSFS_close(file);
 
         // Create SDL_RWops from memory buffer
         SDL_RWops* rwOps = SDL_RWFromConstMem(fileBuffer.data(), static_cast<int>(fileLength));
@@ -689,25 +635,5 @@ using SoundImpl::ALDevice;
 using SoundImpl::ALContext;
 using SoundImpl::Sources;
 using SoundImpl::DefaultChannel;
-using SoundImpl::InitSound;
-using SoundImpl::SoundNameToID;
-using SoundImpl::LoadSample;
-using SoundImpl::ScaleVolumeSetting;
-using SoundImpl::LoadSounds;
-using SoundImpl::CloseSound;
-using SoundImpl::FPlaySound;
-using SoundImpl::PlaySound;
-using SoundImpl::StopSound;
-using SoundImpl::SetSoundPaused;
-using SoundImpl::SetVolume;
-
-// Global variable definitions
-extern SoundSample Samp[MAX_SAMPLES + 1];
-extern std::vector<TScriptSound> ScriptSamp;
-extern float VolumeInternal = 1.0f;
-extern ALCdevice* ALDevice = nullptr;
-extern ALCcontext* ALContext = nullptr;
-extern ALuint Sources[MAX_SOURCES];
-extern int DefaultChannel = -1;
 
 #endif // SOUND_H

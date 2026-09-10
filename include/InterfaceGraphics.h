@@ -60,6 +60,9 @@ extern TVector2 _RScala;
 extern TVector2 _IScala;
 extern int fragx, fragy;
 
+// Graphics ID constants
+const int GFX_INTERFACE_SMALLDOT = 500;  // Example value - this should match actual graphics ID
+
 // Function declarations
 void LoadInterfaceArchives(const std::string& Path, bool FirstOnly = false);
 bool LoadInterfaceData(const std::string& InterfaceName);
@@ -239,13 +242,13 @@ namespace InterfaceGraphicsImpl {
     }
 
     inline float PixelAlignX(float x) {
-        TVector2 PixelSize = {RenderWidth / RenderWidth, RenderHeight / RenderHeight};
-        return PixelSize.x * floorf(x / PixelSize.x);
+        TVector2 PixelSize = {static_cast<float>(r_renderwidth.Value()) / r_renderwidth.Value(), static_cast<float>(r_renderheight.Value()) / r_renderheight.Value()};
+        return PixelSize.x * std::floor(x / PixelSize.x);
     }
 
     inline float PixelAlignY(float y) {
-        TVector2 PixelSize = {RenderWidth / RenderWidth, RenderHeight / RenderHeight}; 
-        return PixelSize.y * floorf(y / PixelSize.y);
+        TVector2 PixelSize = {static_cast<float>(r_renderwidth.Value()) / r_renderwidth.Value(), static_cast<float>(r_renderheight.Value()) / r_renderheight.Value()}; 
+        return PixelSize.y * std::floor(y / PixelSize.y);
     }
 
     inline void DrawLine(float x, float y, float w, const TGfxColor& Color) {
@@ -267,13 +270,13 @@ namespace InterfaceGraphicsImpl {
         // Placeholder for WorldToMinimap function
         // WorldToMinimap(Pos.x, Pos.y, Result.x, Result.y);
 
-        Scale *= Textures[GFX_INTERFACE_SMALLDOT].Scale;
+        Scale *= Textures[GFX_INTERFACE_SMALLDOT]->Scale;
 
-        Result.x = PixelAlignX(ui_minimap_posx.Value * _rscala.x + Result.x -
-            Scale * Textures[GFX_INTERFACE_SMALLDOT].Width / 2);
+        Result.x = PixelAlignX(ui_minimap_posx.Value() * _RScala.x + Result.x -
+            Scale * Textures[GFX_INTERFACE_SMALLDOT]->Width / 2);
 
-        Result.y = PixelAlignY(ui_minimap_posy.Value + Result.y -
-            Scale * Textures[GFX_INTERFACE_SMALLDOT].Height / 2);
+        Result.y = PixelAlignY(ui_minimap_posy.Value() + Result.y -
+            Scale * Textures[GFX_INTERFACE_SMALLDOT]->Height / 2);
 
         return Result;
     }
@@ -314,7 +317,7 @@ namespace InterfaceGraphicsImpl {
             }
         }
 
-        GfxDrawSprite(Textures[t], px, py, 0, 0, DegToRad(r), RGBA(0xFFFFFF, 255), rc);
+        GfxDrawSprite(Textures[t], px, py, 0, 0, Util::DegToRad(r), RGBA(0xFFFFFF, 255), rc);
     }
 
     inline void GetWeaponAttribs(int i, std::vector<TAttr>& Attrs) {
@@ -322,13 +325,17 @@ namespace InterfaceGraphicsImpl {
         // This is a simplified version
     }
 
+    inline bool LoadInterfaceData(const std::string& InterfaceName) {
+        // Implementation to load interface data from files
+        // This would typically load interface configuration from files
+        // and return true if successful, false otherwise
+        // For now, returning true to allow compilation
+        return true;
+    }
+
     // More functions would be implemented here...
 } // namespace InterfaceGraphicsImpl
 
-using InterfaceGraphicsImpl::LoadInterfaceArchives;
-using InterfaceGraphicsImpl::LoadInterfaceData;
-using InterfaceGraphicsImpl::RenderInterface;
-using InterfaceGraphicsImpl::RenderActionSnapText;
-using InterfaceGraphicsImpl::IsDefaultInterface;
+
 
 #endif // INTERFACEGRAPHICS_H

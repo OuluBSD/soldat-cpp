@@ -2,11 +2,11 @@
 #define SERVER_HELPER_H
 
 //*******************************************************************************
-//                                                                              
-//       Server Helper Unit for SOLDAT                                            
-//                                                                              
-//       Copyright (c) 2012 Daniel Forssten             
-//                                                                              
+//
+//       Server Helper Unit for SOLDAT
+//
+//       Copyright (c) 2012 Daniel Forssten
+//
 //*******************************************************************************
 
 #include <string>
@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <random>
 #include <fstream>
+#include <unistd.h>
 #include "Vector.h"
 #include "Waypoints.h"
 #include "Util.h"
@@ -21,7 +22,7 @@
 #include "Server.h"
 #include "Cvar.h"
 #include "Game.h"
-#include "Net.h" 
+#include "Net.h"
 #include "Sprites.h"
 #include "Weapons.h"
 #include "TraceLog.h"
@@ -89,8 +90,8 @@ namespace ServerHelperImpl {
             result = "Server Admin";
             return result;
         }
-        if (ID > 0 && ID <= MAX_SPRITES && Sprite[ID].Active) {
-            result = std::string(Sprite[ID].Player.Name.begin(), Sprite[ID].Player.Name.end());
+        if (ID > 0 && ID <= MAX_SPRITES && Sprite[ID] && Sprite[ID]->Active) {
+            result = std::string(Sprite[ID]->Player.Name.begin(), Sprite[ID]->Player.Name.end());
         }
         return result;
     }
@@ -115,9 +116,11 @@ namespace ServerHelperImpl {
     inline int NameToID(const std::string& Name) {
         int result = 0;
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            std::string spriteName(Sprite[i].Player.Name.begin(), Sprite[i].Player.Name.end());
-            if (spriteName == Name) {
-                result = i;
+            if (Sprite[i]) {
+                std::string spriteName(Sprite[i]->Player.Name.begin(), Sprite[i]->Player.Name.end());
+                if (spriteName == Name) {
+                    result = i;
+                }
             }
         }
         return result;
@@ -126,10 +129,12 @@ namespace ServerHelperImpl {
     inline std::string NameToHW(const std::string& Name) {
         std::string result = "0";
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            std::string spriteName(Sprite[i].Player.Name.begin(), Sprite[i].Player.Name.end());
-            if (spriteName == Name) {
-                result = std::string(Sprite[i].Player.hwID.begin(), Sprite[i].Player.hwID.end()); // Assuming hwID field exists
-                break;
+            if (Sprite[i]) {
+                std::string spriteName(Sprite[i]->Player.Name.begin(), Sprite[i]->Player.Name.end());
+                if (spriteName == Name) {
+                    result = std::string(Sprite[i]->Player.hwID.begin(), Sprite[i]->Player.hwID.end()); // Assuming hwID field exists
+                    break;
+                }
             }
         }
         return result;
@@ -142,7 +147,7 @@ namespace ServerHelperImpl {
     inline int FindLowestTeam(const std::vector<int>& Arr) {
         int tmp = 1;
         int maxTeams = (sv_gamemode.Value() == GAMESTYLE_TEAMMATCH) ? 4 : 2;
-        
+
         for (int i = 1; i <= maxTeams && i < static_cast<int>(Arr.size()); i++) {
             if (Arr[tmp] > Arr[i]) {
                 tmp = i;
@@ -164,8 +169,8 @@ namespace ServerHelperImpl {
                 }
                 break;
             case GAMESTYLE_TEAMMATCH:
-                if ((Team != TEAM_ALPHA) && (Team != TEAM_BRAVO) && 
-                    (Team != TEAM_CHARLIE) && (Team != TEAM_DELTA) && 
+                if ((Team != TEAM_ALPHA) && (Team != TEAM_BRAVO) &&
+                    (Team != TEAM_CHARLIE) && (Team != TEAM_DELTA) &&
                     (Team != TEAM_SPECTATOR)) {
                     std::random_device rd;
                     std::mt19937 gen(rd());
@@ -173,10 +178,10 @@ namespace ServerHelperImpl {
                     result = static_cast<uint8_t>(dis(gen));
                 }
                 break;
-            case GAMESTYLE_CTF: 
-            case GAMESTYLE_INF: 
+            case GAMESTYLE_CTF:
+            case GAMESTYLE_INF:
             case GAMESTYLE_HTF:
-                if ((Team != TEAM_ALPHA) && (Team != TEAM_BRAVO) && 
+                if ((Team != TEAM_ALPHA) && (Team != TEAM_BRAVO) &&
                     (Team != TEAM_SPECTATOR)) {
                     std::random_device rd;
                     std::mt19937 gen(rd());
@@ -257,12 +262,12 @@ namespace ServerHelperImpl {
     inline void UpdateWaveRespawnTime() {
         float playersNumFloat = static_cast<float>(PlayersNum);
         WaveRespawnTime = static_cast<int>(std::round(playersNumFloat * WAVERESPAWN_TIME_MULITPLIER) * 60);
-        
+
         if (WaveRespawnTime > sv_respawntime_minwave.Value()) {
             WaveRespawnTime = sv_respawntime_maxwave.Value();
         }
         WaveRespawnTime = WaveRespawnTime - sv_respawntime_minwave.Value();
-        
+
         if (WaveRespawnTime < 1) {
             WaveRespawnTime = 1;
         }
@@ -270,33 +275,33 @@ namespace ServerHelperImpl {
 
     inline std::string RandomBot() {
         std::vector<std::string> botList;
-        
+
         // Find all bot files in the directory
         std::string botPattern = UserDirectory + "configs/bots/*.bot";
-        
+
         // For simplicity, using a predefined list of bots
         std::vector<std::string> defaultBots = {"Sniper", "Soldier", "Commander", "Stealth", "Assault", "Scout", "Medic", "Engineer"};
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, static_cast<int>(defaultBots.size() - 1));
-        
+
         std::string selectedBot = defaultBots[dis(gen)];
-        
+
         // Strip file paths and extensions
         size_t lastSlash = selectedBot.find_last_of("/");
         if (lastSlash != std::string::npos) {
             selectedBot = selectedBot.substr(lastSlash + 1);
         }
-        
+
         size_t lastDot = selectedBot.find_last_of(".");
         if (lastDot != std::string::npos) {
             selectedBot = selectedBot.substr(0, lastDot);
         }
-        
+
         if ((selectedBot == "Boogie Man") || (selectedBot == "Dummy")) {
             selectedBot = "Sniper";
         }
-        
+
         return selectedBot;
     }
 
@@ -304,18 +309,18 @@ namespace ServerHelperImpl {
         if (!sv_botbalance.Value()) {
             return;
         }
-        if ((sv_gamemode.Value() != GAMESTYLE_CTF) && 
-            (sv_gamemode.Value() != GAMESTYLE_HTF) && 
+        if ((sv_gamemode.Value() != GAMESTYLE_CTF) &&
+            (sv_gamemode.Value() != GAMESTYLE_HTF) &&
             (sv_gamemode.Value() != GAMESTYLE_INF)) {
             return;
         }
-        
+
         int Teams[5] = {0, 0, 0, 0, 0}; // Pascal arrays start from 1 (index 0 unused)
-        
+
         for (int i = 1; i <= MAX_SPRITES; i++) {
-            if (Sprite[i].Active && Sprite[i].IsNotSpectator()) {
-                if (Sprite[i].Player.Team >= 1 && Sprite[i].Player.Team <= 4) {
-                    Teams[Sprite[i].Player.Team]++;
+            if (Sprite[i] && Sprite[i]->Active && Sprite[i]->IsNotSpectator()) {
+                if (Sprite[i]->Player.Team >= 1 && Sprite[i]->Player.Team <= 4) {
+                    Teams[Sprite[i]->Player.Team]++;
                 }
             }
         }
@@ -323,12 +328,12 @@ namespace ServerHelperImpl {
         if (LeftGame == 1) {
             // Player Left Game
             for (int i = 1; i <= MAX_SPRITES; i++) {
-                if ((Sprite[i].Player.ControlMethod == BOT) && Sprite[i].Active) {
-                    if ((Teams[1] > Teams[2]) && (Sprite[i].Player.Team == TEAM_ALPHA)) {
+                if (Sprite[i] && (Sprite[i]->Player.ControlMethod == BOT) && Sprite[i]->Active) {
+                    if ((Teams[1] > Teams[2]) && (Sprite[i]->Player.Team == TEAM_ALPHA)) {
                         // KickPlayer(i, False, KICK_LEFTGAME, 0);  // Assuming this function exists
                         return;
                     }
-                    if ((Teams[2] > Teams[1]) && (Sprite[i].Player.Team == TEAM_BRAVO)) {
+                    if ((Teams[2] > Teams[1]) && (Sprite[i]->Player.Team == TEAM_BRAVO)) {
                         // KickPlayer(i, False, KICK_LEFTGAME, 0);  // Assuming this function exists
                         return;
                     }
@@ -337,18 +342,18 @@ namespace ServerHelperImpl {
         } else {
             // Player Joined Game
             for (int i = 1; i <= MAX_SPRITES; i++) {
-                if (Sprite[i].Active && (Sprite[i].Player.ControlMethod == BOT) && 
-                    (Sprite[i].Player.Team == NewTeam)) {
+                if (Sprite[i] && Sprite[i]->Active && (Sprite[i]->Player.ControlMethod == BOT) &&
+                    (Sprite[i]->Player.Team == NewTeam)) {
                     if (Teams[1] > Teams[2]) {
                         // KickPlayer(i, False, KICK_LEFTGAME, 0);  // Assuming this function exists
-                        if (Sprite[i].Player.Team == NewTeam) {
+                        if (Sprite[i]->Player.Team == NewTeam) {
                             DoBalanceBots(1, 2);
                         }
                         return;
                     }
                     if (Teams[2] > Teams[1]) {
                         // KickPlayer(i, False, KICK_LEFTGAME, 0);  // Assuming this function exists
-                        if (Sprite[i].Player.Team == NewTeam) {
+                        if (Sprite[i]->Player.Team == NewTeam) {
                             DoBalanceBots(1, 1);
                         }
                         return;
@@ -356,7 +361,7 @@ namespace ServerHelperImpl {
                 }
             }
         }
-        
+
         if (Teams[1] > Teams[2]) {
             std::string theBot = RandomBot();
             // ParseInput("addbot2 " + theBot, 1);  // Assuming this function exists
@@ -371,27 +376,6 @@ namespace ServerHelperImpl {
         }
     }
 }
-
-// Using declarations to bring functions into global namespace
-using ServerHelperImpl::CheckNextMap;
-using ServerHelperImpl::WriteLn;
-using ServerHelperImpl::IDToName;
-using ServerHelperImpl::TeamToName;
-using ServerHelperImpl::NameToID;
-using ServerHelperImpl::NameToHW;
-using ServerHelperImpl::FindLowestTeam;
-using ServerHelperImpl::SaveTxtLists;
-using ServerHelperImpl::SaveMapList;
-using ServerHelperImpl::RGB;
-using ServerHelperImpl::FixTeam;
-using ServerHelperImpl::WeaponNameByNum;
-using ServerHelperImpl::CheckFileSize;
-using ServerHelperImpl::WritePID;
-using ServerHelperImpl::GetPID;
-using ServerHelperImpl::WriteConsole;
-using ServerHelperImpl::UpdateWaveRespawnTime;
-using ServerHelperImpl::RandomBot;
-using ServerHelperImpl::DoBalanceBots;
 
 // Global variables
 extern std::vector<std::string> MapsList;

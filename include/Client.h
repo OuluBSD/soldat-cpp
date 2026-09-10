@@ -105,6 +105,8 @@ extern TIntCvar r_screenwidth;
 extern TIntCvar r_screenheight;
 extern TIntCvar r_renderwidth;
 extern TIntCvar r_renderheight;
+extern TIntCvar r_windowwidth;
+extern TIntCvar r_windowheight;
 extern TBooleanCvar r_forcebg;
 extern TColorCvar r_forcebg_color1;
 extern TColorCvar r_forcebg_color2;
